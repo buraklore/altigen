@@ -51,6 +51,27 @@ python sunucu.py                   # Windows: py sunucu.py
   Anahtar değişince tek yapılacak şey Vercel'deki değişkeni güncellemektir.
 
 
+
+## Otomatik güncelleme (kendi kendini yenileyen veri)
+Depoda `.github/workflows/guncelle.yml` her gün 06:00'da (TR) `scripts/guncelle.py`
+betiğini çalıştırır: TR1'in 6 liginden maçları toplar, kompları/istatistikleri
+yeniden hesaplar ve `veri/snap.json` dosyasını commit'ler. Vercel bu push'u
+görünce siteyi otomatik yeniden dağıtır; sayfa açılışta `veri/snap.json`'u
+okuyup en güncel veriyi gösterir.
+
+Kurulum (tek seferlik):
+1. GitHub deposu > **Settings > Secrets and variables > Actions > New repository secret**
+   - Name: `RIOT_API_KEY`  ·  Value: `RGAPI-...`
+2. **Actions** sekmesinde workflow'ları etkinleştirin. "Veri guncelle" >
+   **Run workflow** ile istediğiniz an elle de tetikleyebilirsiniz.
+
+Önemli gerçek: geliştirme anahtarı 24 saatte öldüğü için zamanlanmış çalıştırma
+ertesi gün 401 ile durur (log'da açıkça yazar). O güne kadar akış: sabah yeni
+anahtarı Secret'a yapıştır -> Run workflow. **Tam otomasyon için süresi dolmayan
+Personal API Key şart** — onaylandığında Secret'ı bir kez güncellersiniz ve
+sistem tamamen kendi kendine döner. Yeni set/yama çıktığında şampiyon-eşya
+kataloğunun (veri/oyun.json + görseller) yenilenmesi ayrı bir derlemedir.
+
 ## Sorun giderme (404 vb.)
 1. Tarayıcıda açın: `https://SITENIZ.vercel.app/api/riot`
    - `{"durum":"ok..."}` görüyorsanız fonksiyon yayında; `anahtar` alanı YOK
