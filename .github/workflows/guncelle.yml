@@ -1,0 +1,26 @@
+name: Veri guncelle
+on:
+  schedule:
+    - cron: '0 3 * * *'   # her gun 06:00 TR
+  workflow_dispatch:        # elle calistirma dugmesi
+permissions:
+  contents: write
+jobs:
+  guncelle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Veriyi topla ve analiz et
+        env:
+          RIOT_API_KEY: ${{ secrets.RIOT_API_KEY }}
+        run: python scripts/guncelle.py
+      - name: Degisiklikleri commit'le
+        run: |
+          git config user.name  "altigen-bot"
+          git config user.email "bot@altigen"
+          git add veri/snap.json
+          git diff --cached --quiet || git commit -m "Otomatik veri guncellemesi"
+          git push
