@@ -145,6 +145,13 @@ main{max-width:1160px;margin:0 auto;padding:26px 20px 60px}
 .mini2{cursor:pointer;text-align:center;width:78px;background:none;border:none;padding:0;color:inherit;font:inherit}
 .mini2 .port{margin:0 auto}
 .mini2 .cnm{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.2;word-break:break-word}
+.dist{display:flex;gap:5px;align-items:flex-end}
+.dcol{display:flex;flex-direction:column;align-items:center;gap:3px}
+.dcol span{font-size:10px;color:var(--muted)}
+.db{width:17px;border-radius:4px 4px 0 0;min-height:5px}
+.pu{text-align:center;width:72px}
+.pu .port{margin:0 auto}
+.pu .cnm{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.35}
 .cdet{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--edge,var(--gold));border-radius:16px;padding:18px 20px;margin:0 0 16px 74px}
 .trb{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--line);border-radius:7px;padding:2px 8px 2px 5px;font-size:12.5px}
 .trb b{color:var(--gold)}
@@ -237,6 +244,10 @@ function applySnap(s){
       for(const aid of (c.augs||[]))
         if(!(aid in best) || rank[c.tier] < rank[best[aid]]) best[aid] = c.tier;
     DATA.augments.forEach(a => { a.tier = best[a.id] || null; if(byId[a.id]) byId[a.id].tier = a.tier; });
+  }
+  if(!PSTATE.live){
+    PSTATE.pr = s.profile; PSTATE.matches = (s.matches||[]).map(m => ({...m}));
+    PSTATE.lob = null; PSTATE.open = -1;
   }
   render();
 }
@@ -597,24 +608,72 @@ function unitHTML(u, size){
   return `<span class="uwrap ${u.hl?"hl":""}" ${c?`data-open="${c.id}" tabindex="0" role="button" aria-label="${esc(c.name)}"`:""}>
     ${port}${star}${costb}${its?`<span class="uit">${its}</span>`:""}</span>`;
 }
-function matchRowHTML(m){
+let PSTATE = { pr: SNAP.profile, matches: (SNAP.matches||[]).map(m => ({...m})), lob: null, open: -1, live: false, puuid: null, cluster: "europe" };
+const NAME_CACHE = {};
+function distHTML(ms){
+  const cnt = Array(9).fill(0); ms.forEach(m => cnt[m.p]++);
+  const mx = Math.max(...cnt.slice(1), 1);
+  return `<div class="dist">` + Array.from({length:8}, (_,i) => {
+    const p = i+1, c = cnt[p], h = Math.round(6 + 48*c/mx);
+    const col = p===1?"var(--c5)":p<=4?"var(--c3)":"var(--c1)";
+    return `<div class="dcol"><div class="db" style="height:${h}px;background:${col}" title="#${p}: ${c} kez"></div><span>${p}</span></div>`;
+  }).join("") + `</div>`;
+}
+function overviewHTML(ms){
+  const n = ms.length; if(!n) return "";
+  const avg = (ms.reduce((s,m)=>s+m.p,0)/n).toFixed(2);
+  const t4 = Math.round(100*ms.filter(m=>m.p<=4).length/n);
+  const w = Math.round(100*ms.filter(m=>m.p===1).length/n);
+  const lvl = (ms.reduce((s,m)=>s+(m.lvl||0),0)/n).toFixed(1);
+  const dmg = Math.round(ms.reduce((s,m)=>s+(m.dmg||0),0)/n);
+  const uc = {}, up = {};
+  ms.forEach(m => { const seen = new Set(); (m.units||[]).forEach(u => {
+    if(byId[u.c] && !seen.has(u.c)){ seen.add(u.c); uc[u.c]=(uc[u.c]||0)+1; up[u.c]=(up[u.c]||0)+m.p; } }); });
+  const topU = Object.keys(uc).sort((a,b)=>uc[b]-uc[a]).slice(0,8);
+  const units = topU.map(id => `<div class="pu">${unitHTML({c:id,s:0,it:[]},40)}
+    <div class="cnm">${uc[id]} maç<br>ort ${(up[id]/uc[id]).toFixed(1)}</div></div>`).join("");
+  return `<div class="panel"><h3 style="margin-bottom:10px">Genel bakış <span class="sub">— son ${n} maç</span></h3>
+    <div class="rowline" style="align-items:flex-end;gap:24px">
+      ${distHTML(ms)}
+      <div class="metric"><b>${avg}</b><span>Ort. Sıra</span></div>
+      <div class="metric"><b>%${t4}</b><span>İlk 4</span></div>
+      <div class="metric"><b>%${w}</b><span>Galibiyet</span></div>
+      <div class="metric"><b>${lvl}</b><span>Ort. Seviye</span></div>
+      <div class="metric"><b>${dmg}</b><span>Ort. Hasar</span></div>
+    </div>
+    ${topU.length?`<div class="mlabel" style="margin-top:16px">En çok oynadığı birimler</div><div class="rowline" style="gap:16px;flex-wrap:wrap">${units}</div>`:""}
+  </div>`;
+}
+function lobbyHTML(mi){
+  const L = PSTATE.lob && PSTATE.lob[mi];
+  if(!L) return "";
+  return `<div class="panel" style="margin:-6px 0 14px 48px;background:var(--surface2)">` +
+    L.slice().sort((a,b)=>a.p-b.p).map(pp => {
+      const col = pp.p===1?"var(--c5)":pp.p<=4?"var(--c3)":"var(--c1)";
+      const nm = NAME_CACHE[pp.puuid] || "…";
+      const me = pp.puuid === PSTATE.puuid;
+      return `<div style="display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)">
+        <span class="place" style="background:${col};width:30px;height:30px;font-size:12px;flex:none">#${pp.p}</span>
+        <div style="flex:1;min-width:0"><b style="${me?"color:var(--gold)":""}">${esc(nm)}</b>
+          <span class="sub"> · Sv ${pp.lvl??"—"} · ${pp.dmg??0} hasar</span>
+          <div class="units" style="margin-top:6px;gap:6px;padding-bottom:6px">${(pp.units||[]).map(u => unitHTML(u,28)).join("")}</div>
+        </div></div>`;
+    }).join("") + `</div>`;
+}
+function matchRowHTML(m, i){
   const col = m.p === 1 ? "var(--c5)" : m.p <= 4 ? "var(--c3)" : "var(--c1)";
   const when = m.dt ? new Date(m.dt).toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "";
-  const augs = (m.augs||[]).map(a => {
-    const x = byId[a];
-    return x ? `<span class="recicon" data-open="${x.id}" tabindex="0" role="button" title="${esc(x.name)}">${sp(x.sx,20)}</span>`
-             : `<span class="tierpill">${esc(String(a).split("_").pop())}</span>`;
-  }).join("");
-  return `<div class="mrow">
+  const exp = PSTATE.live ? `<span class="sub" style="align-self:center;white-space:nowrap">${PSTATE.open===i?"▲ lobiyi kapat":"▼ lobiyi gör"}</span>` : "";
+  return `<div class="mrow" ${PSTATE.live?`data-mx="${i}" role="button" tabindex="0" style="cursor:pointer"`:""}>
     <div class="place" style="background:${col}">#${m.p}</div>
     <div style="flex:1;min-width:240px">
       <div class="units" style="margin-top:0">${(m.units||[]).map(u => unitHTML(u,42)).join("")}</div>
-      ${augs?`<div class="rowline" style="gap:6px;margin-top:12px"><span class="sub">Augmentler:</span>${augs}</div>`:""}
     </div>
     <div class="mmeta">${when?when+"<br>":""}Seviye <b>${m.lvl??"—"}</b> · Altın <b>${m.g??"—"}</b><br>Hasar <b>${m.dmg??"—"}</b></div>
-  </div>`;
+    ${exp}
+  </div>` + (PSTATE.open === i ? lobbyHTML(i) : "");
 }
-function profileHTML(pr, matches){
+function profileHTML(pr){
   const total = (pr.w||0)+(pr.l||0);
   const top4 = total ? Math.round(100*pr.w/total) : 0;
   return `
@@ -622,65 +681,107 @@ function profileHTML(pr, matches){
       <div class="rowline">
         ${portHTML(DATA.champs.filter(c=>c.cost===5)[0],64,70,"var(--gold)")}
         <div><h3>${esc(pr.name)} <span class="sub" style="display:inline;font-size:14px">#${esc(pr.tag)}</span></h3>
-        <div class="sub">Sıralamalı TFT</div></div>
+        <div class="sub">Sıralamalı TFT${pr.du?` · <span style="color:var(--c3)">Double Up: ${esc(pr.du)}</span>`:""}</div></div>
         <span style="flex:1"></span>
         <div class="metric"><b>${esc(pr.tier)}</b><span>Kademe</span></div>
         <div class="metric"><b>${pr.lp} LP</b><span>Puan</span></div>
         <div class="metric"><b>%${top4}</b><span>İlk 4 (${total} maç)</span></div>
       </div>
-    </div>
-    <div class="panel"><h3 style="margin-bottom:8px">Son maçlar</h3>${matches.map(matchRowHTML).join("")}</div>`;
+    </div>`;
+}
+function renderPlayerBody(){
+  const el = document.getElementById("pbody");
+  if(!el) return;
+  el.innerHTML = profileHTML(PSTATE.pr) + overviewHTML(PSTATE.matches) +
+    `<div class="panel"><h3 style="margin-bottom:8px">Son maçlar ${PSTATE.live?'<span class="sub">— satıra tıklayın, 8 kişilik lobi açılsın</span>':""}</h3>
+     ${PSTATE.matches.map((m,i) => matchRowHTML(m,i)).join("")}</div>`;
 }
 function playerHTML(){
   const info = LIVE
-    ? `Arama canlı — Riot ID yazın, örn. <b style="color:var(--text)">${esc(SNAP.profile.name)}#${esc(SNAP.profile.tag)}</b>`
-    : `Aşağıdaki profil TR1 1 numarasının ${SNAP.ts} anlık görüntüsü. Canlı arama için sunucu paketini çalıştırın.`;
+    ? `Arama canlı — Riot ID yazın, örn. <b style="color:var(--text)">${esc(SNAP.profile.name)}#${esc(SNAP.profile.tag)}</b>. Son 20 maç, dağılım grafiği, en çok oynanan birimler ve tıklanabilir lobiler.`
+    : `Aşağıdaki profil TR1 1 numarasının ${SNAP.ts} anlık görüntüsü. Canlı arama ve lobi detayı Vercel sürümünde.`;
   return livebar(info, ["account-v1","tft-league-v1/by-puuid","tft-match-v1"]) + `
     <div class="panel"><div class="rowline">
       <select id="preg" aria-label="Bölge" ${LIVE?"":"disabled"}>${Object.keys(PLATFORMS).map(p=>`<option>${p}</option>`).join("")}</select>
       <input class="pinput" id="pq" style="color:var(--text)" placeholder="OyuncuAdı#TAG" ${LIVE?"":"disabled"} aria-label="Oyuncu ara">
       <button class="gobtn on" id="pgo">ARA</button>
     </div><div class="sub" id="perr" style="margin-top:8px"></div></div>
-    <div id="pbody">${profileHTML(SNAP.profile, SNAP.matches)}</div>`;
+    <div id="pbody"></div>`;
 }
 async function searchPlayer(){
   const raw = document.getElementById("pq").value.trim();
   const err = document.getElementById("perr");
-  const body = document.getElementById("pbody");
   const [plat, cluster] = PLATFORMS[document.getElementById("preg").value];
   const i = raw.lastIndexOf("#");
   if(i < 1){ err.textContent = "Biçim: OyuncuAdı#TAG"; return; }
   const name = raw.slice(0,i), tag = raw.slice(i+1);
-  err.textContent = "Aranıyor…";
+  err.textContent = "Aranıyor… (son 20 maç çekiliyor, birkaç saniye sürebilir)";
   try{
     const acc = await riot(cluster, `riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`);
+    NAME_CACHE[acc.puuid] = acc.gameName + "#" + acc.tagLine;
     const [lgRes, ids] = await Promise.all([
       riot(plat, `tft/league/v1/by-puuid/${acc.puuid}`).catch(() => []),
-      riot(cluster, `tft/match/v1/matches/by-puuid/${acc.puuid}/ids?count=5`)
+      riot(cluster, `tft/match/v1/matches/by-puuid/${acc.puuid}/ids?count=20`)
     ]);
-    const entry = (lgRes||[]).find(x => x.queueType === "RANKED_TFT") || (lgRes||[])[0] || null;
-    const ms = await Promise.all(ids.map(id => riot(cluster, `tft/match/v1/matches/${id}`)));
-    const matches = ms.map(m => {
+    const entry = (lgRes||[]).find(x => x.queueType === "RANKED_TFT") || null;
+    const du = (lgRes||[]).find(x => x.queueType === "RANKED_TFT_DOUBLE_UP") || null;
+    const ms = [];
+    for(let ci = 0; ci < (ids||[]).length; ci += 10){
+      const wave = await Promise.all(ids.slice(ci, ci+10).map(id =>
+        riot(cluster, `tft/match/v1/matches/${id}`).catch(() => null)));
+      ms.push(...wave);
+      if(ci + 10 < ids.length) await new Promise(r => setTimeout(r, 1100));
+    }
+    const matches = [], lob = [];
+    for(const m of ms){
+      if(!m || !m.info) continue;
       const me = m.info.participants.find(x => x.puuid === acc.puuid);
-      return {p: me.placement, lvl: me.level, g: me.gold_left, dmg: me.total_damage_to_players,
-              dt: m.info.game_datetime, augs: me.augments || [],
-              units: (me.units||[]).map(u => ({c:u.character_id, s:u.tier, it:u.itemNames||[]}))};
-    });
-    const pr = {name: acc.gameName, tag: acc.tagLine,
-                tier: entry ? entry.tier[0]+entry.tier.slice(1).toLowerCase()+" "+(entry.rank||"") : "Derecesiz",
-                lp: entry ? entry.leaguePoints : 0, w: entry?entry.wins:0, l: entry?entry.losses:0};
-    body.innerHTML = profileHTML(pr, matches);
-    err.textContent = "";
+      if(!me) continue;
+      const trim = p => ({puuid: p.puuid, p: p.placement, lvl: p.level, dmg: p.total_damage_to_players,
+        units: (p.units||[]).map(u => ({c: u.character_id, s: u.tier, it: u.itemNames||[]}))});
+      matches.push({p: me.placement, lvl: me.level, g: me.gold_left, dmg: me.total_damage_to_players,
+                    dt: m.info.game_datetime, units: trim(me).units});
+      lob.push(m.info.participants.map(trim));
+    }
+    const cap = s => s ? s[0]+s.slice(1).toLowerCase() : "";
+    PSTATE = {
+      pr: {name: acc.gameName, tag: acc.tagLine,
+           tier: entry ? cap(entry.tier)+" "+(entry.rank||"") : "Derecesiz",
+           lp: entry ? entry.leaguePoints : 0, w: entry?entry.wins:0, l: entry?entry.losses:0,
+           du: du ? `${cap(du.tier)} ${du.rank||""} · ${du.leaguePoints} LP` : null},
+      matches, lob, open: -1, live: true, puuid: acc.puuid, cluster
+    };
+    err.textContent = matches.length ? "" : "Bu bölgede dereceli Set 17 maçı bulunamadı.";
+    renderPlayerBody();
   }catch(e){ err.textContent = "Bulunamadı ya da API hatası — " + e.message; }
 }
+async function toggleLobby(i){
+  PSTATE.open = PSTATE.open === i ? -1 : i;
+  renderPlayerBody();
+  if(PSTATE.open !== i || !PSTATE.lob) return;
+  const need = [...new Set(PSTATE.lob[i].map(p => p.puuid))].filter(pu => !NAME_CACHE[pu]);
+  if(!need.length) return;
+  await Promise.all(need.map(pu =>
+    riot(PSTATE.cluster, `riot/account/v1/accounts/by-puuid/${pu}`)
+      .then(a => { NAME_CACHE[pu] = a.gameName + "#" + a.tagLine; })
+      .catch(() => { NAME_CACHE[pu] = "Bilinmiyor"; })));
+  if(PSTATE.open === i) renderPlayerBody();
+}
 document.addEventListener("click", e => {
+  if(e.target.closest && e.target.closest("[data-open]")) return;
+  const mx = e.target.closest && e.target.closest("[data-mx]");
+  if(mx && PSTATE.live){ toggleLobby(+mx.dataset.mx); return; }
   if(e.target.id !== "pgo") return;
   if(LIVE){ searchPlayer(); return; }
   document.getElementById("perr").innerHTML =
-    'Canlı arama bu statik dosyada çalışamaz — tarayıcılar Riot API\'ye doğrudan çağrıyı engeller. ' +
-    '<b style="color:var(--text)">altigen-canli.zip</b> paketini çıkarıp <code style="font-family:var(--mono);color:var(--c3)">python sunucu.py</code> çalıştırın, sonra <b style="color:var(--text)">http://localhost:8017</b> adresini açın; arama orada canlıdır.';
+    'Canlı arama bu statik dosyada çalışamaz — tarayıcılar Riot API\'ye doğrudan çağrıyı engeller. Vercel sürümünde ya da <code style="font-family:var(--mono);color:var(--c3)">python sunucu.py</code> ile arama canlıdır.';
 });
-document.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.id === "pq" && LIVE) searchPlayer(); });
+document.addEventListener("keydown", e => {
+  if(e.key === "Enter" && e.target.id === "pq" && LIVE) searchPlayer();
+  if((e.key === "Enter" || e.key === " ") && e.target.dataset && e.target.dataset.mx !== undefined && PSTATE.live){
+    e.preventDefault(); toggleLobby(+e.target.dataset.mx);
+  }
+});
 function ladderRows(rows){
   const five = DATA.champs.filter(c => c.cost === 5);
   return rows.map((r,i) => `
@@ -797,7 +898,7 @@ function render(){
     }
     if(!n) html += `<div class="empty">"${esc(q.value)}" bu nadirlikte bulunamadı.</div>`;
   } else if(tab === "comps"){ view.innerHTML = compsHTML(f); return;
-  } else if(tab === "player"){ view.innerHTML = playerHTML(); return;
+  } else if(tab === "player"){ view.innerHTML = playerHTML(); renderPlayerBody(); return;
   } else if(tab === "ladder"){ view.innerHTML = ladderHTML(); return;
   } else { view.innerHTML = roadHTML(); return; }
 
