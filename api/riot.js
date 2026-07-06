@@ -1,3 +1,6 @@
+// Altıgen — Riot API vekili (Vercel Serverless Function, sabit yol: /api/riot)
+// Kullanım:  /api/riot?u=tr1/tft/league/v1/challenger
+// Sağlık:    /api/riot            -> { durum, anahtar } (tarayıcıdan açıp kontrol edin)
 const IZINLI_HOST = new Set(["tr1","euw1","eun1","na1","kr","europe","americas","asia"]);
 
 module.exports = async (req, res) => {
