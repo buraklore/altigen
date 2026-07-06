@@ -75,7 +75,7 @@ def analyze(boards):
         cand = [t for t in b['traits'] if 'Unique' not in t['n'] and t['n'] in trait_tr]
         cand.sort(key=lambda t: (-t['u'], -t['t']))
         return tuple(x['n'] for x in cand[:2]) if len(cand) >= 2 else None
-    mn = max(10, round(0.03 * len(boards)))
+    mn = max(8, round(0.02 * len(boards)))
     clusters = defaultdict(list)
     for b in boards:
         k = key_traits(b)
@@ -230,7 +230,7 @@ ladder = []
 for e in top[:10]:
     acc = riot('europe', f"riot/account/v1/accounts/by-puuid/{e['puuid']}") or {}
     ladder.append({"name": acc.get('gameName', '?'), "tag": acc.get('tagLine', 'TR1'),
-                   "lp": e['leaguePoints'], "w": e['wins'], "l": e['losses']})
+                   "lp": e['leaguePoints'], "w": e['wins'], "l": e['losses'], "pu": e['puuid']})
 matches = []
 if top:
     ids = riot('europe', f"tft/match/v1/matches/by-puuid/{top[0]['puuid']}/ids?count=5") or []
@@ -248,12 +248,30 @@ if top:
 # ---- eşya kullanım istatistikleri ----
 snap_yolu = os.path.join(KOK, 'veri', 'snap.json')
 snap = json.load(open(snap_yolu, encoding='utf-8')) if os.path.exists(snap_yolu) else {}
-istat = defaultdict(lambda: [0, 0])
-for b in allb:
+lb = [b for b in allb if (b.get('lvl') or 0) >= 6]
+base = defaultdict(lambda: [0, 0]); pair = defaultdict(lambda: defaultdict(lambda: [0, 0]))
+for b in lb:
+    seen = set()
     for u in b['units']:
-        for it in u['it']:
-            if it in item_ids: istat[it][0] += 1; istat[it][1] += b['pl']
-snap['itemStats'] = {k: {"n": n, "avg": round(s/n, 2)} for k, (n, s) in istat.items() if n >= 15}
+        c = u['c']
+        if c not in champ_by_id or c in seen: continue
+        seen.add(c)
+        base[c][0] += 1; base[c][1] += b['pl']
+        for it in set(u['it']):
+            if it in item_ids:
+                pair[it][c][0] += 1; pair[it][c][1] += b['pl']
+snap['itemStats'] = {}
+for it, per in pair.items():
+    num = den = tot = 0
+    for c, (n, s) in per.items():
+        if n < 8 or base[c][0] < 12: continue
+        d = s/n - base[c][1]/base[c][0]
+        num += n*d; den += n; tot += n
+    if den >= 25:
+        d = round(num/den, 2)
+        raw = sum(s for n, s in per.values())/sum(n for n, s in per.values())
+        t = "S" if d <= -0.35 else "A" if d <= -0.12 else "B" if d <= 0.08 else "C"
+        snap['itemStats'][it] = {"n": tot, "avg": round(raw, 2), "d": d, "t": t}
 
 snap['leagues'] = leagues
 snap['ladder'] = ladder
