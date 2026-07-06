@@ -50,6 +50,19 @@ python sunucu.py                   # Windows: py sunucu.py
   API Key** alın (bu sitenin kendisi başvuru için yeterli bir prototiptir).
   Anahtar değişince tek yapılacak şey Vercel'deki değişkeni güncellemektir.
 
+
+## Sorun giderme (404 vb.)
+1. Tarayıcıda açın: `https://SITENIZ.vercel.app/api/riot`
+   - `{"durum":"ok..."}` görüyorsanız fonksiyon yayında; `anahtar` alanı YOK
+     diyorsa ortam değişkenini ekleyip **Redeploy** yapın.
+   - **404 görüyorsanız `api/` klasörü deploya girmemiştir.** GitHub deposunda
+     kökte `api/riot.js` dosyasının göründüğünü doğrulayın (GitHub web
+     arayüzünden dosya sürüklerken klasörler sık atlanır — `git push` en
+     sağlamı) ve Vercel'de Deployments > son deploy > Build Logs içinde
+     "Serverless Functions" listesinde `api/riot` satırını kontrol edin.
+2. Ortam değişkeni eklendikten sonra **mutlaka Redeploy** gerekir.
+3. `401 Unknown apikey` → anahtarın 24 saatlik süresi dolmuş; yenileyin.
+
 ---
 Altıgen, Riot Games tarafından onaylanmamıştır ve Riot Games'in görüşlerini
 yansıtmaz. Riot Games ve ilgili tüm unvanlar Riot Games, Inc. ticari markalarıdır.

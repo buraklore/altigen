@@ -30,6 +30,13 @@ class Vekil(SimpleHTTPRequestHandler):
         yol = self.path
         if yol.startswith('/riot/'):          # eski yol da desteklenir
             yol = '/api' + yol
+        if yol.startswith('/api/riot?'):      # yeni sorgu bicimi: ?u=host/yol
+            from urllib.parse import urlparse, parse_qs, unquote
+            u = unquote(parse_qs(urlparse(yol).query).get('u', [''])[0])
+            yol = '/api/riot/' + u
+        if yol == '/api/riot':
+            self.send_response(200); self.send_header('Content-Type','application/json'); self.end_headers()
+            self.wfile.write(b'{"durum":"ok - yerel sunucu","anahtar":"tanimli"}'); return
         if not yol.startswith('/api/riot/'):
             return super().do_GET()
         parca = yol[len('/api/riot/'):].split('/', 1)

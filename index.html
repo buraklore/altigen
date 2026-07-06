@@ -394,7 +394,7 @@ function livebar(txt, eps){
 }
 const PLATFORMS = {"TR1":["tr1","europe"],"EUW1":["euw1","europe"],"EUNE1":["eun1","europe"],"NA1":["na1","americas"],"KR":["kr","asia"]};
 async function riot(host, path){
-  const r = await fetch(`/api/riot/${host}/${path}`);
+  const r = await fetch(`/api/riot?u=${encodeURIComponent(host + "/" + path)}`);
   if(!r.ok){ const t = await r.text(); throw new Error(r.status + ": " + t.slice(0,120)); }
   return r.json();
 }
