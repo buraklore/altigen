@@ -104,7 +104,8 @@ Bu proje internete açık bir uygulama olarak sertleştirilmiştir:
   Permissions-Policy.
 - **XSS savunması:** tüm dinamik metin `esc()` ile kaçışlanır; blog gövdesi ayrıca
   beyaz-liste tabanlı `sanitizeHTML()` temizleyiciden geçer. `eval`, `document.write`,
-  `dangerouslySetInnerHTML`, tarayıcı depolama (localStorage/sessionStorage) kullanılmaz.
+  `dangerouslySetInnerHTML` kullanılmaz. `localStorage` yalnızca kullanıcı tercihi
+  (dil seçimi) ve reklam ayarı önizlemesi için kullanılır — hassas veri saklanmaz.
 - **Girdi doğrulama:** oyuncu arama girdisi uzunluk ve karakter sınırlıdır; API'ye
   giden tüm parametreler `encodeURIComponent` ile kodlanır.
 - **Gizli veri yok:** depoda hiçbir anahtar, token veya parola bulunmaz
@@ -113,3 +114,39 @@ Bu proje internete açık bir uygulama olarak sertleştirilmiştir:
 
 Anahtar sızıntısı olursa: developer.riotgames.com üzerinden anahtarı iptal edip
 yenisini Vercel + GitHub Secret olarak güncelleyin.
+
+## Çoklu dil (TR/EN)
+
+Site otomatik dil algılar: tarayıcı dili Türkçe ise Türkçe, değilse İngilizce açılır.
+Kullanıcı sağ üstteki dil düğmesiyle (TR/EN) değiştirebilir; seçim `localStorage`'da
+tutulur. Arayüz, blog yazıları ve SEO meta etiketleri iki dillidir. Komp strateji
+metinleri (`veri/snap.json`) şu an yalnızca Türkçedir.
+
+## Reklamlar ve gizli yönetim paneli
+
+**Yönetim paneli:** `/y-kontrol-9f3a2b` adresinde, gizli ve hiçbir yerden linklenmemiş
+bir panel bulunur (robots.txt ile arama motorlarından da gizlenir). Giriş şifreyle
+korunur; şifrenin kendisi kodda saklanmaz, yalnızca **SHA-256 hash'i** tutulur.
+
+> Not: Statik site olduğundan panel kodu tarayıcıda çalışır — bu, güçlü şifreyle
+> sıradan ve orta düzey erişime karşı yeterli koruma sağlar, ancak "askeri düzey"
+> gizlilik değildir. Şifreyi değiştirmek için kodda `ADMIN_HASH` sabitini yeni
+> şifrenizin SHA-256 hash'iyle değiştirin.
+
+**Nasıl çalışır:** Panelde reklamları açar/kapatır, tür (Demo / Google AdSense /
+Sabit Banner) ve alan ayarlarını yaparsınız. İki kaydetme yolu vardır:
+
+- **Önizle:** ayarları tarayıcınızda saklar (`localStorage`), yalnızca siz test
+  amaçlı görürsünüz.
+- **reklam-ayar.json indir:** ayarları dosya olarak indirir. Bu dosyayı deponun
+  köküne (`reklam-ayar.json`) yükleyince değişiklik **tüm ziyaretçilerde kalıcı**
+  olur. Site açılışta bu dosyayı okur.
+
+**Reklam alanları:** üst banner (728×90), sağ kolon (300×250), içerik-arası (728×90)
+ve mobil yapışkan alt banner (320×50). Mobilde sağ kolon gizlenir, alt banner devreye
+girer. `vercel.json` CSP başlığı Google AdSense alan adlarına ve harici banner
+görsellerine izin verecek şekilde ayarlanmıştır.
+
+**AdSense kurulumu:** panele AdSense yayıncı kimliğinizi (`ca-pub-...`) ve her alan
+için reklam birimi slot kimliğini girin, türü "Google AdSense" seçin, kaydedip
+`reklam-ayar.json`'u yükleyin. Sabit banner için görsel URL'si ve tıklama linki girin.

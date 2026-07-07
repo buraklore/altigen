@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /y-
 Sitemap: https://tftradar.com/sitemap.xml

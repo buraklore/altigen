@@ -1,0 +1,19 @@
+{
+  "aktif": false,
+  "mod": "demo",
+  "adsense": {
+    "yayinciId": "",
+    "slotUst": "",
+    "slotYan": "",
+    "slotIci": "",
+    "slotMobil": ""
+  },
+  "banner": {
+    "ust": { "aktif": true, "gorsel": "", "link": "" },
+    "yan": { "aktif": true, "gorsel": "", "link": "" },
+    "ici": { "aktif": true, "gorsel": "", "link": "" },
+    "mobil": { "aktif": true, "gorsel": "", "link": "" }
+  },
+  "alanlar": { "ust": true, "yan": true, "ici": true, "mobil": true },
+  "seo": { "baslikEk": "", "aciklamaTR": "", "aciklamaEN": "", "anahtarlar": "" }
+}
