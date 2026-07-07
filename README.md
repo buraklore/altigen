@@ -87,3 +87,29 @@ kataloğunun (veri/oyun.json + görseller) yenilenmesi ayrı bir derlemedir.
 ---
 Altıgen, Riot Games tarafından onaylanmamıştır ve Riot Games'in görüşlerini
 yansıtmaz. Riot Games ve ilgili tüm unvanlar Riot Games, Inc. ticari markalarıdır.
+
+## Güvenlik
+
+Bu proje internete açık bir uygulama olarak sertleştirilmiştir:
+
+- **API anahtarı istemciye asla ulaşmaz.** Tüm Riot API çağrıları `api/riot.js`
+  serverless vekilinden geçer; anahtar yalnızca Vercel Environment Variables'ta
+  (`RIOT_API_KEY`) tutulur, `.gitignore` ile depo dışında bırakılır.
+- **Vekil sertleştirmesi:** yalnızca GET, yalnızca Riot'un resmi ana bilgisayarları,
+  yalnızca beyaz-listedeki TFT/hesap uç noktaları (regex ile). SSRF, yol kaçışı ve
+  kodlama hilelerine karşı korumalı. IP başına dakikada 40 istek hız sınırı.
+  Hata ve anahtar durumu istemciye sızdırılmaz.
+- **HTTP güvenlik başlıkları** `vercel.json` ile: Content-Security-Policy, HSTS,
+  X-Frame-Options: DENY (clickjacking), X-Content-Type-Options, Referrer-Policy,
+  Permissions-Policy.
+- **XSS savunması:** tüm dinamik metin `esc()` ile kaçışlanır; blog gövdesi ayrıca
+  beyaz-liste tabanlı `sanitizeHTML()` temizleyiciden geçer. `eval`, `document.write`,
+  `dangerouslySetInnerHTML`, tarayıcı depolama (localStorage/sessionStorage) kullanılmaz.
+- **Girdi doğrulama:** oyuncu arama girdisi uzunluk ve karakter sınırlıdır; API'ye
+  giden tüm parametreler `encodeURIComponent` ile kodlanır.
+- **Gizli veri yok:** depoda hiçbir anahtar, token veya parola bulunmaz
+  (`anahtar.ornek.txt` yalnızca yer tutucudur). Liderlikte gösterilen puuid'ler
+  Riot'un halka açık Challenger listesinden gelir.
+
+Anahtar sızıntısı olursa: developer.riotgames.com üzerinden anahtarı iptal edip
+yenisini Vercel + GitHub Secret olarak güncelleyin.
