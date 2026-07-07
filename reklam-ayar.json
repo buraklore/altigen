@@ -1,5 +1,5 @@
 {
-  "aktif": false,
+  "aktif": true,
   "mod": "demo",
   "adsense": {
     "yayinciId": "",
@@ -15,5 +15,12 @@
     "mobil": { "aktif": true, "gorsel": "", "link": "" }
   },
   "alanlar": { "ust": true, "yan": true, "ici": true, "mobil": true },
-  "seo": { "baslikEk": "", "aciklamaTR": "", "aciklamaEN": "", "anahtarlar": "" }
+  "seo": {
+    "aciklamaTR": "Set 17 komp tier listesi, meta komplar, eşya & augment rehberi. Gerçek TR1 verisiyle güncellenen Türkçe TFT rehberi — roll hesaplayıcı ve takım kurucu.",
+    "aciklamaEN": "Set 17 comp tier list, meta comps, item & augment guide. Turkish TFT guide updated with real TR1 data — roll calculator and team builder.",
+    "anahtarlar": "tft, tft rehber, tft komp, tft tier list, tft meta, tft set 17, teamfight tactics türkçe, taktik savaşları, tft eşya, tft augment, tft eklenti, tft nasıl oynanır, tft kompozisyon, tft build, tft sinerji, tft dükkan olasılık, tft roll hesaplayıcı, tft takım kurucu",
+    "ogGorsel": "",
+    "gaId": "",
+    "gscKod": ""
+  }
 }

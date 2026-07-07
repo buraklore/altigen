@@ -3,20 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TFTRadar — Türkçe TFT Rehberi · Set 17 Komplar, Eşyalar, Augmentler (Yama 17.6)</title>
-<meta name="description" content="Türkçe Teamfight Tactics rehberi: Set 17 komp tier listesi, AI komp önerileri, eşya ve augment tierları, canlı oyuncu arama, dükkân olasılıkları. TR1 verisiyle her gün güncellenir.">
+<title>TFTRadar — TFT Rehberi & Set 17 Komp Tier Listesi (Yama 17.6)</title>
+<meta name="description" content="Set 17 TFT komp tier listesi, meta komplar, eşya ve augment rehberi — gerçek TR1 verisiyle her gün güncellenen Türkçe TFT rehberi. Roll hesaplayıcı, takım kurucu ve dükkan olasılıkları.">
+<meta name="keywords" content="tft, tft rehber, tft komp, tft tier list, tft meta, tft set 17, teamfight tactics türkçe, taktik savaşları, tft eşya, tft augment, tft eklenti, tft nasıl oynanır, tft kompozisyon, tft build, tft sinerji, tft dükkan olasılık, tft roll hesaplayıcı, tft takım kurucu">
+<meta name="author" content="TFTRadar">
 <meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="theme-color" content="#0A1628">
 <link rel="canonical" href="https://tftradar.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="TFTRadar">
-<meta property="og:title" content="TFTRadar — Türkçe TFT Rehberi · Set 17">
-<meta property="og:description" content="Set 17 komp tier listesi, AI önerileri, eşya/augment tierları ve canlı oyuncu arama — gerçek TR1 verisiyle.">
+<meta property="og:title" content="TFTRadar — TFT Rehberi & Set 17 Meta Komplar">
+<meta property="og:description" content="Set 17 komp tier listesi, eşya & augment tierları, canlı oyuncu arama ve daha fazlası — gerçek TR1 verisiyle, Türkçe.">
 <meta property="og:url" content="https://tftradar.com/">
 <meta property="og:locale" content="tr_TR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="TFTRadar — Türkçe TFT Rehberi">
-<meta name="twitter:description" content="Set 17 komplar, eşyalar, augmentler — gerçek veriyle, Türkçe.">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"TFTRadar","url":"https://tftradar.com/","inLanguage":"tr-TR","description":"Türkçe Teamfight Tactics Set 17 rehberi: komplar, eşyalar, augmentler, oyuncu istatistikleri."}</script>
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:image" content="https://tftradar.com/og-gorsel.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="TFTRadar — TFT Rehberi & Set 17 Meta Komplar">
+<meta name="twitter:description" content="Set 17 komp tier listesi, eşya & augment tierları, canlı oyuncu arama — gerçek TR1 verisiyle, Türkçe.">
+<meta name="twitter:image" content="https://tftradar.com/og-gorsel.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://tftradar.com/#website","name":"TFTRadar","alternateName":"TFT Radar","url":"https://tftradar.com/","inLanguage":"tr-TR","description":"Türkçe Teamfight Tactics Set 17 rehberi: komp tier listesi, meta komplar, eşyalar, augmentler, oyuncu istatistikleri ve roll hesaplayıcı."},{"@type":"Organization","@id":"https://tftradar.com/#org","name":"TFTRadar","url":"https://tftradar.com/","description":"Gerçek maç verisine dayalı Türkçe TFT rehberi ve tier listesi."}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -732,7 +740,7 @@ function applyStaticI18n(){
 // Varsayılan reklam ayarları. Admin panelinden değiştirilir, reklam-ayar.json'a
 // aktarılır ve GitHub'a yüklenir. Site açılışta bu dosyayı okumayı dener.
 const REKLAM_VARSAYILAN = {
-  aktif: false,                    // Ana anahtar: reklamlar tümden açık/kapalı
+  aktif: true,                     // Ana anahtar: reklamlar tümden açık/kapalı (demo görünür)
   mod: "demo",                     // "demo" (yer tutucu) | "adsense" | "banner"
   adsense: {
     yayinciId: "",                 // ca-pub-XXXXXXXXXXXXXXXX
@@ -746,7 +754,10 @@ const REKLAM_VARSAYILAN = {
   },
   alanlar: { ust:true, yan:true, ici:true, mobil:true },  // Hangi alanlar açık
   seo: {
-    baslikEk: "", aciklamaTR: "", aciklamaEN: "", anahtarlar: ""
+    aciklamaTR: "Set 17 komp tier listesi, meta komplar, eşya & augment rehberi. Gerçek TR1 verisiyle güncellenen Türkçe TFT rehberi — roll hesaplayıcı ve takım kurucu.",
+    aciklamaEN: "Set 17 comp tier list, meta comps, item & augment guide. Turkish TFT guide updated with real TR1 data — roll calculator and team builder.",
+    anahtarlar: "tft, tft rehber, tft komp, tft tier list, tft meta, tft set 17, teamfight tactics türkçe, taktik savaşları, tft eşya, tft augment, tft eklenti, tft nasıl oynanır, tft kompozisyon, tft build, tft sinerji, tft dükkan olasılık, tft roll hesaplayıcı, tft takım kurucu",
+    ogGorsel: "", gaId: "", gscKod: ""
   }
 };
 let REKLAM = JSON.parse(JSON.stringify(REKLAM_VARSAYILAN));
@@ -852,6 +863,7 @@ function reklamlariGoster(){
 // Şifre koda DÜZ yazılmaz; sadece SHA-256 hash'i tutulur. Girişte kullanıcının
 // yazdığı şifre tarayıcıda hash'lenip bununla karşılaştırılır.
 const ADMIN_HASH = "751b056252d721a4b502803373ade9228e97d28d3daae14ea5a44a5ba25976cf";
+let adminSifre = "";  // Girişte tutulur; "Kaydet ve Yayınla" için sunucuya gönderilir (bellekte, sayfa yenilenince silinir)
 
 async function sha256(metin){
   const veri = new TextEncoder().encode(metin);
@@ -891,6 +903,7 @@ function adminPaneliAc(){
     try {
       const h = await sha256(girilen);
       if(h === ADMIN_HASH){
+        adminSifre = girilen;  // kaydetme çağrısı için sakla (yalnızca bellekte)
         document.getElementById("admin-login").style.display = "none";
         const p = document.getElementById("admin-panel");
         p.style.display = "block";
@@ -991,30 +1004,56 @@ function adminPanelIcerik(kap){
     <!-- SEO -->
     <div ${kart}>
       <h2 ${h2}>SEO Ayarları</h2>
-      <p style="color:#9AA3C0;font-size:13px">Başlık eki ve açıklama site meta etiketlerine eklenir.</p>
-      <label ${lbl}>Başlık Eki</label>
-      <input id="a-seo-baslik" ${inp()} value="${esc(A.seo.baslikEk||"")}" placeholder="örn. #1 TFT Rehberi">
-      <label ${lbl}>Açıklama (Türkçe)</label>
-      <input id="a-seo-tr" ${inp()} value="${esc(A.seo.aciklamaTR||"")}" placeholder="Ana sayfa açıklaması (TR)">
-      <label ${lbl}>Açıklama (İngilizce)</label>
-      <input id="a-seo-en" ${inp()} value="${esc(A.seo.aciklamaEN||"")}" placeholder="Homepage description (EN)">
-      <label ${lbl}>Anahtar Kelimeler (virgülle)</label>
-      <input id="a-seo-kw" ${inp()} value="${esc(A.seo.anahtarlar||"")}" placeholder="tft, set 17, tier list">
+      <p style="color:#9AA3C0;font-size:13px;line-height:1.5">Ana sayfa meta etiketleri. Türkiye organik trafiği için önceden dolduruldu — istersen düzenle. Değişiklik ana sayfa başlık/açıklamasına ve arama sonuçlarına yansır.</p>
+
+      <label ${lbl}>Ana Sayfa Açıklaması (Türkçe) <span style="color:#5a6488;text-transform:none;letter-spacing:0">— arama sonucunda görünen metin, ideal 150-160 karakter</span></label>
+      <textarea id="a-seo-tr" ${inp()} rows="2" style="width:100%;background:#1D2440;border:1px solid #2A3352;color:#E9ECF8;padding:9px 12px;font-size:13px;font-family:inherit;margin-top:4px;resize:vertical">${esc(A.seo.aciklamaTR||"")}</textarea>
+
+      <label ${lbl}>Ana Sayfa Açıklaması (İngilizce)</label>
+      <textarea id="a-seo-en" ${inp()} rows="2" style="width:100%;background:#1D2440;border:1px solid #2A3352;color:#E9ECF8;padding:9px 12px;font-size:13px;font-family:inherit;margin-top:4px;resize:vertical">${esc(A.seo.aciklamaEN||"")}</textarea>
+
+      <label ${lbl}>Anahtar Kelimeler (virgülle ayır)</label>
+      <textarea id="a-seo-kw" ${inp()} rows="2" style="width:100%;background:#1D2440;border:1px solid #2A3352;color:#E9ECF8;padding:9px 12px;font-size:13px;font-family:inherit;margin-top:4px;resize:vertical">${esc(A.seo.anahtarlar||"")}</textarea>
+
+      <label ${lbl}>Sosyal Paylaşım Görseli (og:image URL) <span style="color:#5a6488;text-transform:none;letter-spacing:0">— Discord/Twitter paylaşımında görünen 1200×630 görsel</span></label>
+      <input id="a-seo-og" ${inp()} value="${esc(A.seo.ogGorsel||"")}" placeholder="https://tftradar.com/og-gorsel.png">
+
+      <label ${lbl}>Google Analytics 4 Kimliği <span style="color:#5a6488;text-transform:none;letter-spacing:0">— ölçüm için, analytics.google.com'dan G-XXXXXXX</span></label>
+      <input id="a-seo-ga" ${inp()} value="${esc(A.seo.gaId||"")}" placeholder="G-XXXXXXXXXX">
+
+      <label ${lbl}>Google Search Console Doğrulama <span style="color:#5a6488;text-transform:none;letter-spacing:0">— site sahipliği için meta etiket kodu</span></label>
+      <input id="a-seo-gsc" ${inp()} value="${esc(A.seo.gscKod||"")}" placeholder="doğrulama kodu (content değeri)">
+
+      <p style="color:#5a6488;font-size:11.5px;line-height:1.6;margin-top:12px;border-top:1px solid #1D2440;padding-top:10px">
+        <b style="color:#9AA3C0">İpucu:</b> Sosyal görsel, GA4 ve Search Console kodları hesabına özeldir — kendi değerlerini gir.
+        Açıklama ve anahtar kelimeler zaten optimize edildi. Search Console doğrulaması için en güvenilir yol,
+        siteyi ekledikten sonra <code style="background:#1D2440;padding:1px 5px">sitemap.xml</code>'i göndermektir.
+      </p>
     </div>
 
-    <!-- KAYDET / DIŞA AKTAR -->
+    <!-- KAYDET / YAYINLA -->
     <div ${kart}>
       <h2 ${h2}>Kaydet & Yayınla</h2>
-      <p style="color:#9AA3C0;font-size:13px;line-height:1.6">
-        <b style="color:#F0E6D2">Önizle:</b> ayarları tarayıcında kaydeder — sadece sen görürsün, test için.<br>
-        <b style="color:#F0E6D2">Yayınla:</b> <code style="background:#1D2440;padding:2px 6px;font-size:12px">reklam-ayar.json</code> dosyasını indirir. Bu dosyayı GitHub deposunun köküne yükle → değişiklik tüm ziyaretçilerde kalıcı olur.
+      <p style="color:#9AA3C0;font-size:13px;line-height:1.7">
+        <b style="color:#F0E6D2">Kaydet ve Yayınla:</b> değişikliği doğrudan siteye uygular — GitHub'a otomatik yazılır,
+        ~1 dakika içinde tüm ziyaretçilerde geçerli olur. Dosya indirmene gerek yok.<br>
+        <b style="color:#F0E6D2">Önizle:</b> sadece bu tarayıcıda test amaçlı kaydeder (yayınlamaz).
       </p>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
-        <button id="a-onizle" style="background:transparent;color:#C8AA6E;border:1px solid #C8AA6E;padding:11px 20px;font-family:'Exo 2',sans-serif;font-weight:700;font-size:13px;cursor:pointer">Önizle (tarayıcıda kaydet)</button>
-        <button id="a-yayinla" ${btnG}>reklam-ayar.json indir</button>
-        <button id="a-sifirla" style="background:transparent;color:#ef4444;border:1px solid rgba(239,68,68,.4);padding:11px 20px;font-family:inherit;font-size:13px;cursor:pointer">Önizlemeyi temizle</button>
+        <button id="a-yayinla" ${btnG}>Kaydet ve Yayınla</button>
+        <button id="a-onizle" style="background:transparent;color:#C8AA6E;border:1px solid #C8AA6E;padding:11px 20px;font-family:'Exo 2',sans-serif;font-weight:700;font-size:13px;cursor:pointer">Önizle (bu tarayıcıda)</button>
+        <button id="a-sifirla" style="background:transparent;color:#9AA3C0;border:1px solid #2A3352;padding:11px 20px;font-family:inherit;font-size:13px;cursor:pointer">Önizlemeyi temizle</button>
       </div>
-      <div id="a-mesaj" style="color:#2EAD6B;font-size:13px;margin-top:12px;min-height:18px"></div>
+      <div id="a-mesaj" style="color:#2EAD6B;font-size:13px;margin-top:14px;min-height:18px;line-height:1.5"></div>
+      <details style="margin-top:14px">
+        <summary style="color:#5a6488;font-size:12px;cursor:pointer">Otomatik kaydetme çalışmıyorsa (elle yükleme)</summary>
+        <p style="color:#5a6488;font-size:12px;line-height:1.6;margin-top:8px">
+          Otomatik kaydetme için Vercel'de <code style="background:#1D2440;padding:1px 5px">GITHUB_TOKEN</code> ortam
+          değişkeni gerekir (bir kez kurulur). Kurulu değilse, aşağıdaki düğmeyle
+          <code style="background:#1D2440;padding:1px 5px">reklam-ayar.json</code>'u indirip GitHub deposunun köküne elle yükleyebilirsin.
+        </p>
+        <button id="a-indir" style="background:transparent;color:#9AA3C0;border:1px solid #2A3352;padding:9px 16px;font-family:inherit;font-size:12px;cursor:pointer;margin-top:6px">reklam-ayar.json indir</button>
+      </details>
     </div>
   `;
 
@@ -1033,7 +1072,11 @@ function adminPanelIcerik(kap){
         mobil:{aktif:true,gorsel:g("a-ban-mobil-img").trim(),link:g("a-ban-mobil-link").trim()}
       },
       alanlar: { ust:c("a-alan-ust"), yan:c("a-alan-yan"), ici:c("a-alan-ici"), mobil:c("a-alan-mobil") },
-      seo: { baslikEk:g("a-seo-baslik").trim(), aciklamaTR:g("a-seo-tr").trim(), aciklamaEN:g("a-seo-en").trim(), anahtarlar:g("a-seo-kw").trim() }
+      seo: {
+        aciklamaTR:g("a-seo-tr").trim(), aciklamaEN:g("a-seo-en").trim(),
+        anahtarlar:g("a-seo-kw").trim(), ogGorsel:g("a-seo-og").trim(),
+        gaId:g("a-seo-ga").trim(), gscKod:g("a-seo-gsc").trim()
+      }
     };
   }
 
@@ -1062,16 +1105,56 @@ function adminPanelIcerik(kap){
     if(sl) sl.style.background = aktifChk.checked?"#C8AA6E":"#2A3352";
   });
 
-  const mesaj = (t,renk) => { const m=document.getElementById("a-mesaj"); m.textContent=t; m.style.color=renk||"#2EAD6B"; setTimeout(()=>{if(m.textContent===t)m.textContent="";},4000); };
+  const mesaj = (t,renk) => { const m=document.getElementById("a-mesaj"); m.textContent=t; m.style.color=renk||"#2EAD6B"; };
 
-  // ---- Önizle (localStorage) ----
+  // ---- Kaydet ve Yayınla (serverless → GitHub → canlı) ----
+  document.getElementById("a-yayinla").addEventListener("click", async () => {
+    const ayar = topla();
+    const btn = document.getElementById("a-yayinla");
+    const eski = btn.textContent; btn.textContent = "Yayınlanıyor…"; btn.disabled = true;
+    mesaj("Yayınlanıyor…", "#C8AA6E");
+    try {
+      const r = await fetch("/api/reklam-kaydet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sifre: adminSifre, ayar })
+      });
+      const j = await r.json().catch(() => ({}));
+      if(r.ok && j.ok){
+        // Anında yansıması için yerel önizlemeyi de eşitle
+        try { localStorage.setItem("tftradar_reklam", JSON.stringify(ayar)); } catch(e){}
+        mesaj("✓ Yayınlandı! Değişiklik ~1 dakika içinde tüm ziyaretçilerde geçerli olur (Vercel yeniden yayınlıyor).");
+      } else if(r.status === 401){
+        mesaj("Yetki hatası. Çıkıp yeniden giriş yapıp deneyin.", "#ef4444");
+      } else if(r.status === 503){
+        mesaj("Otomatik kaydetme kurulu değil (Vercel GITHUB_TOKEN eksik). Aşağıdaki 'elle yükleme' bölümünü kullanın.", "#ef4444");
+      } else if(r.status === 429){
+        mesaj("Çok fazla deneme. Bir dakika bekleyip tekrar deneyin.", "#ef4444");
+      } else {
+        mesaj((j && j.hata ? j.hata : "Kaydedilemedi") + ". Aşağıdaki 'elle yükleme' bölümünü kullanabilirsiniz.", "#ef4444");
+      }
+    } catch(e){
+      mesaj("Bağlantı hatası. Canlı sitede (Vercel) deneyin ya da aşağıdan elle yükleyin.", "#ef4444");
+    } finally {
+      btn.textContent = eski; btn.disabled = false;
+    }
+  });
+
+  // ---- Önizle (localStorage — sadece bu tarayıcı) ----
   document.getElementById("a-onizle").addEventListener("click", () => {
-    try { localStorage.setItem("tftradar_reklam", JSON.stringify(topla())); mesaj("Kaydedildi. Siteyi açtığında reklamları böyle göreceksin (sadece bu tarayıcıda)."); }
+    try { localStorage.setItem("tftradar_reklam", JSON.stringify(topla())); mesaj("Önizleme kaydedildi. Siteyi açtığında reklam/SEO'yu böyle görürsün (sadece bu tarayıcıda, yayınlanmaz)."); }
     catch(e){ mesaj("Kaydedilemedi: "+e.message, "#ef4444"); }
   });
 
-  // ---- Yayınla (JSON indir) ----
-  document.getElementById("a-yayinla").addEventListener("click", () => {
+  // ---- Sıfırla (önizlemeyi temizle) ----
+  document.getElementById("a-sifirla").addEventListener("click", () => {
+    try { localStorage.removeItem("tftradar_reklam"); mesaj("Önizleme temizlendi. Site artık yayındaki reklam-ayar.json'u kullanır."); }
+    catch(e){}
+  });
+
+  // ---- Elle indir (yedek) ----
+  const indirBtn = document.getElementById("a-indir");
+  if(indirBtn) indirBtn.addEventListener("click", () => {
     const veri = JSON.stringify(topla(), null, 2);
     const blob = new Blob([veri], {type:"application/json"});
     const url = URL.createObjectURL(blob);
@@ -1079,12 +1162,6 @@ function adminPanelIcerik(kap){
     a.href = url; a.download = "reklam-ayar.json"; a.click();
     URL.revokeObjectURL(url);
     mesaj("İndirildi. Bu dosyayı GitHub deposunun köküne yükle (mevcut reklam-ayar.json'un üzerine).");
-  });
-
-  // ---- Sıfırla ----
-  document.getElementById("a-sifirla").addEventListener("click", () => {
-    try { localStorage.removeItem("tftradar_reklam"); mesaj("Önizleme temizlendi. Site artık yayındaki reklam-ayar.json'u kullanır."); }
-    catch(e){}
   });
 }
 
@@ -2283,8 +2360,39 @@ function urlFor(t, postSlug){
   if(t === "blog" && postSlug) return "/blog/" + postSlug;
   return r.path;
 }
+// Panelden gelen SEO ek ayarlarını uygula (anahtar kelime, OG görsel, GA4, Search Console)
+let gaYuklendi = false, gscYuklendi = false;
+function uygulaSeoEk(){
+  const s = (REKLAM && REKLAM.seo) || {};
+  if(s.anahtarlar){
+    let mk = document.querySelector('meta[name="keywords"]');
+    if(!mk){ mk = document.createElement("meta"); mk.setAttribute("name","keywords"); document.head.appendChild(mk); }
+    mk.setAttribute("content", s.anahtarlar);
+  }
+  if(s.ogGorsel){
+    ['meta[property="og:image"]','meta[name="twitter:image"]'].forEach(sel => {
+      const m = document.querySelector(sel); if(m) m.setAttribute("content", s.ogGorsel);
+    });
+  }
+  if(s.gaId && !gaYuklendi && /^G-[A-Z0-9]+$/i.test(s.gaId)){
+    gaYuklendi = true;
+    const g1 = document.createElement("script");
+    g1.async = true; g1.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(s.gaId);
+    document.head.appendChild(g1);
+    const g2 = document.createElement("script");
+    g2.textContent = "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','" + s.gaId.replace(/[^A-Za-z0-9-]/g,"") + "');";
+    document.head.appendChild(g2);
+  }
+  if(s.gscKod && !gscYuklendi){
+    gscYuklendi = true;
+    let m = document.querySelector('meta[name="google-site-verification"]');
+    if(!m){ m = document.createElement("meta"); m.setAttribute("name","google-site-verification"); document.head.appendChild(m); }
+    m.setAttribute("content", s.gscKod);
+  }
+}
 function setMeta(t, postSlug){
   const r = ROUTES[t] || ROUTES.comps;
+  const seo = (REKLAM && REKLAM.seo) || {};
   let title, desc = routeDesc(r);
   if(t === "blog" && postSlug !== undefined && postSlug !== null){
     const p = BLOG.find(b => b.slug === postSlug);
@@ -2292,6 +2400,11 @@ function setMeta(t, postSlug){
     else title = routeAd(r) + " · " + baseTitle();
   } else {
     title = routeAd(r) + " · " + baseTitle();
+    // Ana sayfada (komplar) panelden gelen açıklama varsa onu kullan
+    if(t === "comps"){
+      const ov = LANG === "en" ? seo.aciklamaEN : seo.aciklamaTR;
+      if(ov) desc = ov;
+    }
   }
   document.title = title;
   let md = document.querySelector('meta[name="description"]');
@@ -2300,8 +2413,15 @@ function setMeta(t, postSlug){
   if(ln) ln.setAttribute("href", "https://tftradar.com" + urlFor(t, postSlug));
   let ot = document.querySelector('meta[property="og:title"]');
   if(ot) ot.setAttribute("content", title);
+  let od = document.querySelector('meta[property="og:description"]');
+  if(od) od.setAttribute("content", desc);
+  let td = document.querySelector('meta[name="twitter:description"]');
+  if(td) td.setAttribute("content", desc);
+  let tt = document.querySelector('meta[name="twitter:title"]');
+  if(tt) tt.setAttribute("content", title);
   let ou = document.querySelector('meta[property="og:url"]');
   if(ou) ou.setAttribute("content", "https://tftradar.com" + urlFor(t, postSlug));
+  uygulaSeoEk();
 }
 function applyRoute(push){
   const r = ROUTES[tab] || ROUTES.comps;

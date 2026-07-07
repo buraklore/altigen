@@ -134,19 +134,54 @@ korunur; şifrenin kendisi kodda saklanmaz, yalnızca **SHA-256 hash'i** tutulur
 > şifrenizin SHA-256 hash'iyle değiştirin.
 
 **Nasıl çalışır:** Panelde reklamları açar/kapatır, tür (Demo / Google AdSense /
-Sabit Banner) ve alan ayarlarını yaparsınız. İki kaydetme yolu vardır:
+Sabit Banner) ve alan ayarlarını yaparsınız. Ayrıca **SEO ayarları** (ana sayfa
+açıklaması TR/EN, anahtar kelimeler, sosyal paylaşım görseli, Google Analytics 4
+kimliği, Search Console doğrulama kodu) buradan yönetilir — açıklama ve anahtar
+kelimeler Türkiye organik trafiği için önceden dolduruldu.
 
-- **Önizle:** ayarları tarayıcınızda saklar (`localStorage`), yalnızca siz test
-  amaçlı görürsünüz.
-- **reklam-ayar.json indir:** ayarları dosya olarak indirir. Bu dosyayı deponun
-  köküne (`reklam-ayar.json`) yükleyince değişiklik **tüm ziyaretçilerde kalıcı**
-  olur. Site açılışta bu dosyayı okur.
+Üç kaydetme yolu vardır:
+
+- **Kaydet ve Yayınla (önerilen):** değişikliği doğrudan siteye uygular. Panel,
+  ayarı `/api/reklam-kaydet` serverless fonksiyonuna gönderir; fonksiyon şifreyi
+  sunucuda doğrulayıp `reklam-ayar.json`'u **GitHub'a otomatik commit'ler**. Commit,
+  Vercel'in yeniden yayınını tetikler → değişiklik ~1 dakika içinde tüm ziyaretçilerde
+  geçerli olur. **Dosya indirip yüklemenize gerek kalmaz.**
+- **Önizle:** ayarları yalnızca tarayıcınızda saklar (`localStorage`), test amaçlı.
+- **reklam-ayar.json indir (yedek):** otomatik kaydetme kurulu değilse, dosyayı indirip
+  deponun köküne elle yükleyebilirsiniz.
+
+### Otomatik kaydetme kurulumu (GITHUB_TOKEN) — bir kez yapılır
+
+"Kaydet ve Yayınla" özelliğinin çalışması için Vercel'e bir GitHub erişim jetonu
+eklemeniz gerekir (tıpkı `RIOT_API_KEY` gibi, bir kez):
+
+1. GitHub → Settings → Developer settings → **Fine-grained personal access tokens** →
+   *Generate new token*.
+2. **Repository access:** yalnızca bu depoyu seçin (`buraklore/altigen`).
+3. **Permissions → Repository permissions → Contents:** **Read and write**. (Başka izin
+   gerekmez.)
+4. Jetonu oluşturup kopyalayın.
+5. Vercel → Proje → Settings → **Environment Variables** → ekleyin:
+   - Name: `GITHUB_TOKEN`  ·  Value: *(kopyaladığınız jeton)*  · (Production + Preview)
+   - (İsteğe bağlı) `GITHUB_REPO` = `buraklore/altigen`, `GITHUB_BRANCH` = `main` —
+     varsayılanlar zaten bunlar.
+6. Yeniden dağıtın (redeploy).
+
+> **Güvenlik:** Jeton yalnızca Vercel ortam değişkeninde tutulur; tarayıcıya veya
+> depoya asla yazılmaz. Fonksiyon şifreyi sunucu tarafında SHA-256 ile doğrular ve
+> gelen ayarı beyaz-liste ile temizleyip yalnızca `reklam-ayar.json`'a yazar (arbitrary
+> içerik/yol enjeksiyonu imkânsız). Endpoint IP başına dakikada 15 istekle sınırlıdır.
+
+> **Not:** "Kaydet ve Yayınla" yalnızca canlı Vercel sitesinde çalışır (serverless
+> fonksiyon orada koşar). Yerelde `file://` açıldığında çalışmaz — o durumda "Önizle"
+> ile test edip yayına canlı siteden alın.
 
 **Reklam alanları:** üst banner (728×90), sağ kolon (300×250), içerik-arası (728×90)
-ve mobil yapışkan alt banner (320×50). Mobilde sağ kolon gizlenir, alt banner devreye
-girer. `vercel.json` CSP başlığı Google AdSense alan adlarına ve harici banner
-görsellerine izin verecek şekilde ayarlanmıştır.
+ve mobil yapışkan alt banner (320×50). Varsayılan olarak **demo reklamlar açıktır**
+(yer tutucu kutular). Mobilde sağ kolon gizlenir, alt banner devreye girer.
+`vercel.json` CSP başlığı Google AdSense alan adlarına ve harici banner görsellerine
+izin verecek şekilde ayarlanmıştır.
 
 **AdSense kurulumu:** panele AdSense yayıncı kimliğinizi (`ca-pub-...`) ve her alan
-için reklam birimi slot kimliğini girin, türü "Google AdSense" seçin, kaydedip
-`reklam-ayar.json`'u yükleyin. Sabit banner için görsel URL'si ve tıklama linki girin.
+için reklam birimi slot kimliğini girin, türü "Google AdSense" seçin, **Kaydet ve
+Yayınla**'ya basın. Sabit banner için görsel URL'si ve tıklama linki girin.
