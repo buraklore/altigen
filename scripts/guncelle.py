@@ -281,5 +281,13 @@ if ladder:
 if matches: snap['matches'] = matches
 snap['ts'] = datetime.now(timezone(timedelta(hours=3))).strftime('%d.%m.%Y %H:%M')
 snap['sampleAll'] = {"b": len(allb)}
+
+# --- Veri kalitesi koruması: cok az tahta toplandiysa ESKI veriyi KORU, hata ver ---
+# Boylece bir daha "sessizce basarili ama bos" durumu olusmaz; Actions kirmizi yanar.
+ESIK = 200
+if len(allb) < ESIK:
+    sys.exit(f"HATA: yalnizca {len(allb)} tahta toplandi (esik {ESIK}). "
+             f"Riot API kismi/bos donmus olabilir. snap.json DEGISTIRILMEDI, eski veri korundu.")
+
 json.dump(snap, open(snap_yolu, 'w', encoding='utf-8'), ensure_ascii=False)
 print(f"snap.json yazıldı — {snap['ts']} · toplam {len(allb)} tahta")
