@@ -40,11 +40,11 @@ function temizle(a){
     mod,
     adsense: {
       yayinciId: s(ads.yayinciId, 60),
-      slotUst: s(ads.slotUst, 40), slotYan: s(ads.slotYan, 40),
+      slotUst: s(ads.slotUst, 40), slotSol: s(ads.slotSol, 40), slotYan: s(ads.slotYan, 40),
       slotIci: s(ads.slotIci, 40), slotMobil: s(ads.slotMobil, 40)
     },
-    banner: { ust: bx("ust"), yan: bx("yan"), ici: bx("ici"), mobil: bx("mobil") },
-    alanlar: { ust: !!al.ust, yan: !!al.yan, ici: !!al.ici, mobil: !!al.mobil },
+    banner: { ust: bx("ust"), sol: bx("sol"), yan: bx("yan"), ici: bx("ici"), mobil: bx("mobil") },
+    alanlar: { ust: !!al.ust, sol: !!al.sol, yan: !!al.yan, ici: !!al.ici, mobil: !!al.mobil },
     seo: {
       aciklamaTR: s(seo.aciklamaTR, 400), aciklamaEN: s(seo.aciklamaEN, 400),
       anahtarlar: s(seo.anahtarlar, 600), ogGorsel: s(seo.ogGorsel, 500),

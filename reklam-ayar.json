@@ -4,17 +4,19 @@
   "adsense": {
     "yayinciId": "",
     "slotUst": "",
+    "slotSol": "",
     "slotYan": "",
     "slotIci": "",
     "slotMobil": ""
   },
   "banner": {
     "ust": { "aktif": true, "gorsel": "", "link": "" },
+    "sol": { "aktif": true, "gorsel": "", "link": "" },
     "yan": { "aktif": true, "gorsel": "", "link": "" },
     "ici": { "aktif": true, "gorsel": "", "link": "" },
     "mobil": { "aktif": true, "gorsel": "", "link": "" }
   },
-  "alanlar": { "ust": true, "yan": true, "ici": true, "mobil": true },
+  "alanlar": { "ust": true, "sol": true, "yan": true, "ici": true, "mobil": true },
   "seo": {
     "aciklamaTR": "Set 17 komp tier listesi, meta komplar, eşya & augment rehberi. Gerçek TR1 verisiyle güncellenen Türkçe TFT rehberi — roll hesaplayıcı ve takım kurucu.",
     "aciklamaEN": "Set 17 comp tier list, meta comps, item & augment guide. Turkish TFT guide updated with real TR1 data — roll calculator and team builder.",
