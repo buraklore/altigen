@@ -1944,22 +1944,19 @@ function compIcon(c, idx, f){
     <div class="cnm" ${hl?'style="color:var(--gold)"':""}>${esc(dl(ch,"name")||dl(c,"name"))}</div></button>`;
 }
 function boardHTML(c){
-  const rows = [[],[],[],[]];                 // TFT tahtası: 4 sıra × 7 kare = 28 hücre
+  const rows = [[],[],[],[]];
   const us = c.units.map(u => ({...u, ch: byId[u.c]})).filter(u => u.ch && u.ch.stats);
   const rng = u => parseFloat(u.ch.stats.rng) || 1;
-  const tanky = u => (parseInt(u.ch.stats.hp)||0) + 5*((parseInt(u.ch.stats.ar)||0) + (parseInt(u.ch.stats.mr)||0));
-  // Merkezli yayma: birimleri sıraya ortadan simetrik, kenarlara doğru dağıt (kümelenme değil)
-  const SPREAD = {0:[], 1:[3], 2:[2,4], 3:[1,3,5], 4:[0,2,4,6], 5:[0,1,3,5,6], 6:[0,1,2,4,5,6], 7:[0,1,2,3,4,5,6]};
-  const place = (row, list) => { const cols = SPREAD[Math.min(list.length,7)] || []; list.forEach((u,i) => { if(cols[i] !== undefined) rows[row][cols[i]] = u; }); };
-  // Melee (yakın dövüş) ön iki sıraya, menzilliler arka iki sıraya; taşıyıcı en arkada.
-  const melee  = us.filter(u => rng(u) <= 1).sort((a,b) => tanky(b) - tanky(a));   // en etli öne
-  const ranged = us.filter(u => rng(u) >= 2).sort((a,b) => (rng(a) - rng(b)) || ((a.c===c.carry?1:0) - (b.c===c.carry?1:0)));
-  const m0 = Math.min(melee.length, 4);                       // ön hat: en fazla 4 (duvar)
-  place(0, melee.slice(0, m0));                                // ön hat (en etli tanklar)
-  place(1, melee.slice(m0));                                   // ikinci hat (kalan yakın dövüş)
-  const r3 = Math.ceil(ranged.length / 2);
-  place(2, ranged.slice(0, ranged.length - r3));              // orta hat (kısa menzilliler)
-  place(3, ranged.slice(ranged.length - r3));                 // arka hat (uzun menzilliler + taşıyıcı)
+  const tanky = u => (parseInt(u.ch.stats.hp)||0) + 4*(parseInt(u.ch.stats.ar)||0);
+  const front = us.filter(u => rng(u) <= 1).sort((a,b) => tanky(b)-tanky(a));
+  const mid   = us.filter(u => rng(u) === 2);
+  let back    = us.filter(u => rng(u) > 2);
+  const order = [3,2,4,1,5,0,6];
+  const ci = back.findIndex(u => u.c === c.carry);
+  if(ci >= 0){ rows[3][6] = back[ci]; back = back.filter((_,i) => i !== ci); }
+  front.slice(0,7).forEach((u,i) => rows[0][order[i]] = u);
+  mid.slice(0,7).forEach((u,i) => rows[2][order[i]] = u);
+  back.forEach(u => { for(const col of [5,4,3,2,1,0,6]){ if(rows[3][col] === undefined){ rows[3][col] = u; return; } } });
   return `<div class="box" style="margin-top:14px"><h4>${t("final_board")} <span style="text-transform:none;letter-spacing:0">${t("board_auto")}</span></h4>
     <div class="board">` + rows.map((r,ri) => `<div class="brow">` +
       Array.from({length:7}, (_,i) => r[i]
