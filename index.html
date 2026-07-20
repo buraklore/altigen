@@ -653,11 +653,7 @@ function applySnap(s){
 if(LIVE){
   fetch("veri/snap.json", {cache: "no-store"})
     .then(r => r.ok ? r.json() : null)
-    .then(s => { if(s && s.ts && s.ts !== SNAP.ts) applySnap(s); })
-    .catch(() => {});
-  fetch("veri/ai.json", {cache: "no-store"})
-    .then(r => r.ok ? r.json() : null)
-    .then(a => { if(a && a.ts && a.ts !== AIDATA.ts){ AIDATA = a; bilingualizeAI(a); if(tab === "ai") render(); } })
+    .then(s => { if(s && s.ts && s.ts !== SNAP.ts){ applySnap(s); AIDATA = uretAIData(); bilingualizeAI(AIDATA); if(tab === "ai") render(); } })
     .catch(() => {});
 }
 const COSTS = {1:"var(--c1)",2:"var(--c2)",3:"var(--c3)",4:"var(--c4)",5:"var(--c5)"};
@@ -937,6 +933,7 @@ function setLang(l){
   try { localStorage.setItem("tftradar_lang", l); } catch(e){}
   document.documentElement.lang = l;
   applyStaticI18n();
+  try { AIDATA = uretAIData(); bilingualizeAI(AIDATA); } catch(e){}  // AI Kompları'nı yeni dile göre yeniden üret
   if(typeof render === "function") render();
 }
 // Statik HTML öğelerini (nav, header) çevir
@@ -2712,6 +2709,66 @@ function blogHTML(){
       </div>
     </button>`).join("")}</div>`;
 }
+// AI Kompları'nı CANLI snap.json'dan üret — ayrı ai.json dosyasına gerek kalmadan,
+// komplar her güncellendiğinde AI Kompları da otomatik güncellenir.
+function uretAIData(){
+  const lg = (typeof SNAP !== "undefined" && SNAP.leagues) || {};
+  const traitAdOf = id => { const tr = (DATA.traits||[]).find(x => x.id === id); return tr ? dl(tr,"name") : ""; };
+  // Kompları ligler arası aynı isimle topla (ağırlıklı ortalama)
+  const harita = {};
+  for(const k of Object.keys(lg)){
+    for(const c of (lg[k].comps || [])){
+      if(!c || !c.name) continue;
+      const key = c.name;
+      if(!harita[key]) harita[key] = {c, n:0, avgW:0, top4W:0, winW:0, ligler:0};
+      const h = harita[key], cn = c.n || 0;
+      h.n += cn; h.avgW += (c.avg||0)*cn; h.top4W += (c.top4||0)*cn; h.winW += (c.win||0)*cn;
+      h.ligler++;
+      if((c.units||[]).length >= (h.c.units||[]).length) h.c = c;  // en dolgun örneği tut
+    }
+  }
+  const rows = Object.values(harita).filter(h => h.n >= 3).map(h => {
+    const c = h.c, n = h.n;
+    const avg  = n ? +(h.avgW/n).toFixed(2) : (c.avg || 4.5);
+    const top4 = n ? Math.round(h.top4W/n) : (c.top4 || 0);
+    const win  = n ? Math.round(h.winW/n)  : (c.win  || 0);
+    const tier = avg <= 3.85 ? "S" : avg <= 4.15 ? "A" : avg <= 4.45 ? "B" : "C";
+    const mainTrait = (c.traits && c.traits[0]) ? traitAdOf(c.traits[0][0]) : "";
+    const carryN = byId[c.carry] ? dl(byId[c.carry],"name") : c.name;
+    const carryUnit = (c.units||[]).find(u => u.c === c.carry) || {it:[]};
+    const carryItems = (carryUnit.it||[]).map(id => byId[id] ? dl(byId[id],"name") : "").filter(Boolean);
+    const coreItem = carryItems[0] || "";
+    const coreId = (carryUnit.it||[])[0];
+    const coreD = (coreId && SNAP.itemStats && SNAP.itemStats[coreId]) ? SNAP.itemStats[coreId].d : null;
+    const s3 = (c.units||[]).filter(u => u.s3).map(u => byId[u.c] ? dl(byId[u.c],"name") : "").filter(Boolean);
+    const earlyN = (c.early||[]).map(id => byId[id] ? dl(byId[id],"name") : "").filter(Boolean);
+    const sonBirim = (() => { const a = (c.units||[]).map(u=>byId[u.c]).filter(Boolean).sort((x,y)=>(y.cost||0)-(x.cost||0)); return a[0] ? dl(a[0],"name") : ""; })();
+    const hizli = /Hızlı/.test(c.style || "");
+    // Augment önerisi (mevcut recommendAugments mantığı)
+    let augs = [], augNot = "";
+    try {
+      const rec = recommendAugments(c);
+      const rel = [...(rec["Altın"]||[]), ...(rec["Prizmatik"]||[]), ...(rec["Gümüş"]||[])].filter(x => x.rel);
+      augs = rel.map(x => x.aug.id).slice(0, 2);
+      augNot = rel.length
+        ? `Öncelik ${dl(rel[0].aug,"name")}${rel[1] ? "; sunulmazsa " + dl(rel[1].aug,"name") : ""}. Hiçbiri gelmezse ekonomi (altın/deneyim) augmentini savaş augmentine tercih et.`
+        : "Bu kompun özelliğe bağlı augmenti yok: ilk seçimde ekonomi, ikinci seçimde taşıyıcıyı büyüten savaş augmenti, üçüncüde esnek kal.";
+    } catch(e){}
+    const dStr = (coreD !== null && coreD !== undefined) ? ` (Δ${coreD>=0?"+":""}${coreD})` : "";
+    const neden = `${mainTrait ? mainTrait + " ekseninde kurulu bu komp" : "Bu komp"}, ${carryN} taşıyıcısıyla tahtayı taşıyor.${coreItem ? ` Eşya çekirdeği ${coreItem}${dStr}.` : ""}${s3.length ? ` 3★ hedefi: ${s3.join(", ")}.` : ""} ${h.ligler} ligde ${n} tahta, ağırlıklı ort. ${avg}.`;
+    const rollAdvice = hizli
+      ? "Erken roll yok: faiz eşiklerini koru, tempoyu ekonomiye çevir; hedef seviye 8-9'a hızlı ulaşmak."
+      : `Kayıp serisinde bile altını 50'nin üstünde tut; ${carryN} kopyalarını topla ama seviye atlamak için acele etme.`;
+    const erken = `Aşama 2 açılışı: ${earlyN.slice(0,3).join(", ")} ile tahtayı kur${mainTrait ? `, ${mainTrait} sinerjisini erkenden aktif et` : ""}. ${rollAdvice}${carryItems.length ? ` Taşıyıcı eşya önceliği: ${carryItems.join(" → ")}.` : ""}`;
+    const gec = hizli
+      ? `Tavan seviye 9: ${sonBirim} gibi 5 maliyetliler girince tahta kapanır. ${carryN} 2★'ı tamamlamadan 9 sonrası roll'a girme; kalan altın HP alım gücüdür.`
+      : `Güç sivrilmesi Aşama 4 başı, 3★'lar kapandığında. Sonra seviye 8'e çıkıp ${sonBirim} gibi yüksek maliyetlilerle tahtayı güçlendir; ${carryN} konumunu her tur rakip açılarına göre ayarla.`;
+    return {ad:c.name, tier, carry:c.carry, units:c.units, style:c.style, early:c.early||[],
+            aug: augs[0] || null, augs, augNot, neden, erken, gec, avg, top4, win, n};
+  }).sort((a,b) => "SABC".indexOf(a.tier) - "SABC".indexOf(b.tier) || a.avg - b.avg);
+  const ozet = `Canlı TR1 verisinden türetilen AI değerlendirmesi — ${rows.length} komp. Tier ve analiz, ligler arası ağırlıklı ortalama sıralamaya göre hesaplanır; komplar her güncellendiğinde bu sayfa da güncellenir.`;
+  return {patch: SNAP.patch, ts: SNAP.ts, model: "AI değerlendirmesi", ozet, rows};
+}
 function aiHTML(){
   const A = AIDATA || {rows:[]};
   const rows = (A.rows||[]).map((r,i) => ({...r, _i:i}));
@@ -3205,9 +3262,10 @@ document.querySelectorAll(".langseg").forEach(b => b.addEventListener("click", (
 applyStaticI18n();
 
 bilingualizeSnap(SNAP);
-bilingualizeAI(AIDATA);
 applyItemStats(SNAP.itemStats);
 applyAugTiers(SNAP);
+AIDATA = uretAIData();          // AI Kompları'nı canlı SNAP'ten üret (ayrı dosya gerekmez)
+bilingualizeAI(AIDATA);
 // Önizleme ayarını ilk render'dan ÖNCE senkron yükle (localStorage varsa)
 reklamYukleYerel();
 // Sosyal bağlantılar — URL girilen platformlar footer'da görünür (boşsa gizli)
