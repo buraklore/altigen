@@ -11,6 +11,25 @@ KEY = os.environ.get('RIOT_API_KEY', '').strip()
 if not KEY.startswith('RGAPI-'):
     sys.exit('RIOT_API_KEY tanımlı değil (GitHub > Settings > Secrets and variables > Actions).')
 
+def guncel_yama_cek():
+    """Riot'un resmi TFT yama notlari sayfasindan guncel yamayi OTOMATIK ayiklar.
+    Set 18 gelince 18.1'i secer. Basarisiz olursa None -> YAMA env / mevcut deger kullanilir."""
+    try:
+        _ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36'
+        req = urllib.request.Request(
+            'https://teamfighttactics.leagueoflegends.com/en-us/news/game-updates/',
+            headers={'User-Agent': _ua})
+        with urllib.request.urlopen(req, timeout=25) as r:
+            html = r.read().decode('utf-8', 'ignore')
+        nums = re.findall(r'[Pp]atch[-\s]?(\d{1,2})\.(\d{1,2})', html)
+        if not nums:
+            return None
+        best = max((int(a), int(b)) for a, b in nums)
+        return f'{best[0]}.{best[1]}'
+    except Exception as e:
+        print(f'Yama cekme basarisiz ({e}); yedege dusuluyor.', flush=True)
+        return None
+
 window = []
 def riot(host, path, tries=4):
     for t in range(tries):
@@ -282,8 +301,8 @@ if matches: snap['matches'] = matches
 snap['ts'] = datetime.now(timezone(timedelta(hours=3))).strftime('%d.%m.%Y %H:%M')
 snap['sampleAll'] = {"b": len(allb)}
 # Yama etiketi: GitHub repo degiskeni YAMA'dan (yoksa mevcut/varsayilan). Boylece snap.json donmaz.
-snap['patch'] = os.environ.get('YAMA', snap.get('patch') or '17.7')
-snap['set'] = 17
+snap['patch'] = guncel_yama_cek() or os.environ.get('YAMA') or snap.get('patch') or '17.7'
+snap['set'] = int(snap['patch'].split('.')[0])  # yamadan turet (17.7 -> 17, 18.1 -> 18)
 
 # --- Veri kalitesi koruması: cok az tahta toplandiysa ESKI veriyi KORU, hata ver ---
 # Boylece bir daha "sessizce basarili ama bos" durumu olusmaz; Actions kirmizi yanar.
