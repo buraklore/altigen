@@ -1944,19 +1944,26 @@ function compIcon(c, idx, f){
     <div class="cnm" ${hl?'style="color:var(--gold)"':""}>${esc(dl(ch,"name")||dl(c,"name"))}</div></button>`;
 }
 function boardHTML(c){
-  const rows = [[],[],[],[]];
+    const rows = [[],[],[],[]];
   const us = c.units.map(u => ({...u, ch: byId[u.c]})).filter(u => u.ch && u.ch.stats);
   const rng = u => parseFloat(u.ch.stats.rng) || 1;
-  const tanky = u => (parseInt(u.ch.stats.hp)||0) + 4*(parseInt(u.ch.stats.ar)||0);
-  const front = us.filter(u => rng(u) <= 1).sort((a,b) => tanky(b)-tanky(a));
-  const mid   = us.filter(u => rng(u) === 2);
-  let back    = us.filter(u => rng(u) > 2);
-  const order = [3,2,4,1,5,0,6];
-  const ci = back.findIndex(u => u.c === c.carry);
-  if(ci >= 0){ rows[3][6] = back[ci]; back = back.filter((_,i) => i !== ci); }
-  front.slice(0,7).forEach((u,i) => rows[0][order[i]] = u);
-  mid.slice(0,7).forEach((u,i) => rows[2][order[i]] = u);
-  back.forEach(u => { for(const col of [5,4,3,2,1,0,6]){ if(rows[3][col] === undefined){ rows[3][col] = u; return; } } });
+  const tanky = u => (parseInt(u.ch.stats.hp)||0) + 5*((parseInt(u.ch.stats.ar)||0)+(parseInt(u.ch.stats.mr)||0));
+  const hasItems = u => !!(u.it && u.it.length);
+  const isCarry = u => u.c === c.carry;
+  const fill = (slots, list) => { let k=0; for(const u of list){ while(k<slots.length && rows[slots[k][0]][slots[k][1]]!==undefined) k++; if(k>=slots.length) break; rows[slots[k][0]][slots[k][1]]=u; k++; } };
+  const carryU = us.find(isCarry);
+  const carryRanged = carryU && rng(carryU) >= 2;
+  const secondary = us.filter(u => !isCarry(u) && rng(u) >= 2 && hasItems(u)).sort((a,b) => rng(b)-rng(a))[0];
+  const tanks = us.filter(u => rng(u) <= 1 && !isCarry(u)).sort((a,b) => tanky(b)-tanky(a));
+  const backline = us.filter(u => rng(u) >= 2 && !isCarry(u) && u !== secondary).sort((a,b) => rng(a)-rng(b));
+  // Ana tasiyici koseye: menzilli -> arka kose, yakin dovus -> on kose
+  if(carryU){ if(carryRanged) rows[3][6] = carryU; else rows[0][6] = carryU; }
+  // Ikincil tasiyici karsi arka koseye (iki tehdidi ayir)
+  if(secondary) rows[3][0] = secondary;
+  // Tanklar on hatta (ortadan kenarlara duvar)
+  fill([[0,3],[0,2],[0,4],[0,1],[0,5],[0,0],[0,6]], tanks);
+  // Kalan menzilliler: arka hat ortadan, sonra orta hat, sonra 2. sira
+  fill([[3,5],[3,4],[3,3],[3,2],[3,1],[2,3],[2,4],[2,2],[2,5],[2,1],[2,6],[2,0],[1,3],[1,2],[1,4]], backline);
   return `<div class="box" style="margin-top:14px"><h4>${t("final_board")} <span style="text-transform:none;letter-spacing:0">${t("board_auto")}</span></h4>
     <div class="board">` + rows.map((r,ri) => `<div class="brow">` +
       Array.from({length:7}, (_,i) => r[i]
