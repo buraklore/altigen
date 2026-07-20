@@ -16,6 +16,7 @@ jobs:
       - name: Veriyi topla ve analiz et
         env:
           RIOT_API_KEY: ${{ secrets.RIOT_API_KEY }}
+          YAMA: ${{ vars.YAMA }}
         run: python scripts/guncelle.py
       - name: Degisiklikleri commit'le
         run: |
