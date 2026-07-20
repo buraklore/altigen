@@ -58,6 +58,22 @@ trait_tr = {t['id']: t['name'] for t in oyun['traits']}
 tr_to_traitid = {t['name']: t['id'] for t in oyun['traits']}
 champ_traits = {c['id']: set(c['traits']) for c in oyun['champs']}
 item_ids = {i['id'] for i in oyun['items']}
+# --- Esya sinifi: bilesenlerine gore saldiri / tank ayrimi (tasiyici tespiti icin) ---
+_OFF_COMP = {'TFT_Item_BFSword', 'TFT_Item_NeedlesslyLargeRod', 'TFT_Item_RecurveBow', 'TFT_Item_SparringGloves'}
+_DEF_COMP = {'TFT_Item_ChainVest', 'TFT_Item_NegatronCloak', 'TFT_Item_GiantsBelt', 'TFT_Item_FryingPan'}
+_item_rec = {i['id']: (i.get('rec') or []) for i in oyun['items']}
+def hasar_esyasi_mi(it):
+    """True=saldiri, False=tank, None=notr (bilesenlere gore)."""
+    r = _item_rec.get(it, [])
+    if not r:
+        return None
+    o = sum(1 for c in r if c in _OFF_COMP)
+    d = sum(1 for c in r if c in _DEF_COMP)
+    if o >= 1 and o >= d:
+        return True
+    if d >= 1 and d > o:
+        return False
+    return None
 pool12 = [c for c in oyun['champs'] if c['cost'] <= 2]
 def cost(cid): return champ_by_id[cid]['cost'] if cid in champ_by_id else 0
 
@@ -118,7 +134,14 @@ def analyze(boards):
         core = [c for c, _ in uf.most_common(10) if uf[c] >= 0.25*n][:8]
         if len(core) < 5: continue
         core.sort(key=lambda c: (cost(c), -uf[c]))
-        cr = sorted(core, key=lambda c: -(sum(itemcnt[c])/len(itemcnt[c]) if itemcnt[c] else 0))
+        # Tasiyici = en cok SALDIRI esyasi tasiyan birim (tanklar tasiyici sayilmasin)
+        def _saldiri_skoru(c):
+            return sum(cnt for it, cnt in items_per[c].items() if hasar_esyasi_mi(it) is True)
+        def _ort_esya(c):
+            return sum(itemcnt[c]) / len(itemcnt[c]) if itemcnt[c] else 0
+        cr = sorted(core, key=lambda c: (-_saldiri_skoru(c), -_ort_esya(c)))
+        if _saldiri_skoru(cr[0]) == 0:  # hic saldiri esyasi yoksa eski mantik
+            cr = sorted(core, key=lambda c: -_ort_esya(c))
         carry = cr[0]; carryish = cr[:2]
         unit_objs = [{"c": c, "it": [i for i, _ in items_per[c].most_common(3)] if c in carryish else [],
                       "s3": star3[c] >= 0.25*uf[c]} for c in core]
