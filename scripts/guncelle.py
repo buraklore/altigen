@@ -281,6 +281,9 @@ if ladder:
 if matches: snap['matches'] = matches
 snap['ts'] = datetime.now(timezone(timedelta(hours=3))).strftime('%d.%m.%Y %H:%M')
 snap['sampleAll'] = {"b": len(allb)}
+# Yama etiketi: GitHub repo degiskeni YAMA'dan (yoksa mevcut/varsayilan). Boylece snap.json donmaz.
+snap['patch'] = os.environ.get('YAMA', snap.get('patch') or '17.7')
+snap['set'] = 17
 
 # --- Veri kalitesi koruması: cok az tahta toplandiysa ESKI veriyi KORU, hata ver ---
 # Boylece bir daha "sessizce basarili ama bos" durumu olusmaz; Actions kirmizi yanar.
