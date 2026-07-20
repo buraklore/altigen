@@ -1095,7 +1095,7 @@ function reklamlariGoster(){
 // ============ GİZLİ ADMIN PANELİ ============
 // Şifre koda DÜZ yazılmaz; sadece SHA-256 hash'i tutulur. Girişte kullanıcının
 // yazdığı şifre tarayıcıda hash'lenip bununla karşılaştırılır.
-const ADMIN_HASH = "751b056252d721a4b502803373ade9228e97d28d3daae14ea5a44a5ba25976cf";
+const ADMIN_HASH = "fbe0895bc886090ef519ebc96a3f459e94b329c2cd3aa2f8eeb7351682052530";
 let adminSifre = "";  // Girişte tutulur; "Kaydet ve Yayınla" için sunucuya gönderilir (bellekte, sayfa yenilenince silinir)
 
 async function sha256(metin){
@@ -1418,6 +1418,43 @@ function adminPanelIcerik(kap){
   });
 
   // ---- Veriyi Şimdi Güncelle (serverless → GitHub Actions → crawler çalışır) ----
+  // Crawler durumunu GitHub Actions API'sinden izle (repo herkese açık)
+  function izleVeriDurumu(mDiv){
+    const baslangic = Date.now();
+    const url = "https://api.github.com/repos/buraklore/altigen/actions/workflows/guncelle.yml/runs?per_page=1";
+    async function tik(){
+      if(Date.now() - baslangic > 4 * 60 * 1000){
+        mDiv.style.color = "#C8AA6E";
+        mDiv.textContent = "⏱ Hâlâ çalışıyor olabilir — GitHub → Actions'tan kontrol edebilirsin. (Bu ekrandan çıkabilirsin.)";
+        return;
+      }
+      try {
+        const r = await fetch(url, { headers: { "Accept": "application/vnd.github+json" }, cache: "no-store" });
+        if(r.ok){
+          const j = await r.json();
+          const run = j.workflow_runs && j.workflow_runs[0];
+          if(run){
+            if(run.status === "completed"){
+              if(run.conclusion === "success"){
+                mDiv.style.color = "#2EAD6B";
+                mDiv.innerHTML = "✓ Tamamlandı! Veri güncellendi. <a href='/' style='color:#C8AA6E;text-decoration:underline'>Siteyi yenile</a> ve komplara bak.";
+              } else {
+                mDiv.style.color = "#ef4444";
+                mDiv.textContent = "✗ Çalışma başarısız oldu (" + (run.conclusion || "?") + "). GitHub → Actions'ta detaya bak — genelde Riot API anahtarı sorunudur.";
+              }
+              return;
+            }
+            mDiv.style.color = "#C8AA6E";
+            mDiv.textContent = run.status === "queued"
+              ? "⏳ Sırada bekliyor… (bu ekrandan çıkabilirsin, arka planda devam eder)"
+              : "⏳ Çalışıyor… (bu ekrandan çıkabilirsin, arka planda devam eder)";
+          }
+        }
+      } catch(e){ /* rate-limit vb. — sessizce tekrar dene */ }
+      setTimeout(tik, 10000);
+    }
+    setTimeout(tik, 4000);
+  }
   const vgBtn = document.getElementById("a-veri-guncelle");
   if(vgBtn) vgBtn.addEventListener("click", async () => {
     const mDiv = document.getElementById("a-veri-mesaj");
@@ -1432,7 +1469,8 @@ function adminPanelIcerik(kap){
       const j = await r.json().catch(() => ({}));
       if(r.ok && j.ok){
         mDiv.style.color = "#2EAD6B";
-        mDiv.textContent = "✓ Başlatıldı! Veri 1-2 dakika içinde güncellenecek. İlerlemeyi GitHub → Actions sekmesinden görebilirsin.";
+        mDiv.textContent = "✓ Başlatıldı! Durum izleniyor…";
+        izleVeriDurumu(mDiv);
       } else if(r.status === 401){
         mDiv.style.color = "#ef4444"; mDiv.textContent = "Yetki hatası. Çıkıp yeniden giriş yapın.";
       } else if(r.status === 503){
