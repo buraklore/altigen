@@ -469,7 +469,7 @@ footer p{color:var(--muted);font-size:12px;line-height:1.6;max-width:820px}
 .hbtn-main{background:linear-gradient(180deg,#F8CE6E,#E8A428);color:#181000;border-color:var(--gold)}
 .hero-trust{margin-top:16px;font-size:11.5px;color:var(--cyan);text-transform:uppercase;letter-spacing:.09em;position:relative;z-index:2}
 .landing-h2, .home-h2{font-family:var(--disp);font-weight:800;font-size:20px;text-align:center;margin:34px 0 16px;color:var(--text)}
-.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:26px}
+.feat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:26px}@media(max-width:920px){.feat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:540px){.feat-grid{grid-template-columns:1fr}}
 .feat{display:flex;flex-direction:column;align-items:center;text-align:center;gap:9px;background:linear-gradient(180deg,color-mix(in srgb,var(--fc) 10%,var(--surface2)),var(--surface2));border:1px solid var(--line);border-top:3px solid var(--fc);border-radius:16px;padding:24px 16px 20px;cursor:pointer;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
 .feat:hover{transform:translateY(-5px);box-shadow:0 12px 32px color-mix(in srgb,var(--fc) 32%,transparent);border-color:var(--fc)}
 .feat-vis{width:98px;height:98px;display:grid;place-items:center;filter:drop-shadow(0 8px 16px color-mix(in srgb,var(--fc) 40%,rgba(0,0,0,.4)))}
@@ -685,11 +685,11 @@ const I18N = {
     home_cta_comps:"Meta Komplara Bak", home_cta_player:"Oyuncu Ara",
     home_trust:"6 ligden gerçek dereceli maç verisi · düzenli güncellenir", home_feats_h:"Neler var?",
     home_f_player_h:"Oyuncu Arama", home_f_player_d:"Riot ID ile son 20 maç, sıralama dağılımı, en çok oynanan birimler ve 8 kişilik lobiler.",
-    home_f_ai_h:"AI Komp Analizi", home_f_ai_d:"Yapay zekâ değerlendirmesiyle her kompun güçlü yönleri, erken ve geç oyun planı.",
-    home_f_comps_h:"Lig-Bazlı Tier List", home_f_comps_d:"Challenger'dan Platin'e 6 ayrı ligin gerçek verisinden meta komp tier listesi.",
+    home_f_ai_h:"AI Kompları", home_f_ai_d:"Yapay zekâ değerlendirmesiyle her kompun güçlü yönleri, erken ve geç oyun planı.",
+    home_f_comps_h:"Meta Komplar", home_f_comps_d:"Challenger'dan Platin'e 6 ayrı ligin gerçek verisinden meta komp tier listesi.",
     home_f_roll_h:"Roll Hesaplayıcı", home_f_roll_d:"Seviyene ve havuza göre aradığın birimi yuvarlamada bulma ihtimalini hesapla.",
     home_f_builder_h:"Takım Kurucu", home_f_builder_d:"Şampiyon ekleyerek canlı sinerji eşiklerini gör, kompunu planla.",
-    home_f_items_h:"Eşya & Augment", home_f_items_d:"Birleşik eşyalar, ışıltılılar, artefaktlar ve tüm augmentler — tier ve performans.",
+    home_f_bilgi_h:"Özel Bilgiler", home_f_bilgi_d:"TFT mekanikleri, köken ipuçları ve set rehberi tek yerde.", home_f_blog_h:"Blog", home_f_blog_d:"Meta güncellemeleri, komp rehberleri ve strateji yazıları.", home_f_items_h:"Eşya & Augment", home_f_items_d:"Birleşik eşyalar, ışıltılılar, artefaktlar ve tüm augmentler — tier ve performans.",
     home_why_h:"Neden TFTRadar?", home_why_1_h:"Gerçek veri", home_why_1_d:"Algoritma değil; top oyuncuların gerçek maçlarından toplanan canlı meta.",
     home_why_2_h:"Türkçe", home_why_2_d:"Tüm oyun verisi ve arayüz Türkçe — TR sunucusuna özel.",
     home_why_3_h:"Ücretsiz", home_why_3_d:"Tüm araçlar herkese açık ve tamamen ücretsiz.",
@@ -818,11 +818,11 @@ const I18N = {
     home_cta_comps:"Browse Meta Comps", home_cta_player:"Search a Player",
     home_trust:"Real ranked match data from 6 leagues · updated regularly", home_feats_h:"What's inside?",
     home_f_player_h:"Player Search", home_f_player_d:"Last 20 matches, rank distribution, most-played units and 8-player lobbies by Riot ID.",
-    home_f_ai_h:"AI Comp Analysis", home_f_ai_d:"AI evaluation of each comp's strengths with early and late game plans.",
-    home_f_comps_h:"League-Based Tier List", home_f_comps_d:"Meta comp tier list from the real data of 6 leagues, Challenger to Platinum.",
+    home_f_ai_h:"AI Comps", home_f_ai_d:"AI evaluation of each comp's strengths with early and late game plans.",
+    home_f_comps_h:"Meta Comps", home_f_comps_d:"Meta comp tier list from the real data of 6 leagues, Challenger to Platinum.",
     home_f_roll_h:"Roll Calculator", home_f_roll_d:"Compute your chance to hit a unit on a roll-down based on level and pool.",
     home_f_builder_h:"Team Builder", home_f_builder_d:"Add champions to see live synergy thresholds and plan your comp.",
-    home_f_items_h:"Items & Augments", home_f_items_d:"Combined items, radiants, artifacts and every augment — tiers and performance.",
+    home_f_bilgi_h:"TFT Guide", home_f_bilgi_d:"TFT mechanics, trait tips and the set guide in one place.", home_f_blog_h:"Blog", home_f_blog_d:"Meta updates, comp guides and strategy articles.", home_f_items_h:"Items & Augments", home_f_items_d:"Combined items, radiants, artifacts and every augment — tiers and performance.",
     home_why_h:"Why TFTRadar?", home_why_1_h:"Real data", home_why_1_d:"Not an algorithm's guess; a live meta aggregated from top players' real matches.",
     home_why_2_h:"Turkish", home_why_2_d:"All game data and UI in Turkish — built for the TR server.",
     home_why_3_h:"Free", home_why_3_d:"Every tool is open to everyone and completely free.",
@@ -2839,14 +2839,16 @@ function homeHTML(){
   const feats = [
     {t:"player", col:"#38ADF5", vis: cardCh(0), h:t("home_f_player_h"),  d:t("home_f_player_d")},
     {t:"comps",  col:"#FFC23D", vis: cardCh(1), h:t("home_f_comps_h"),   d:t("home_f_comps_d")},
-    {t:"ai",     col:"#C560FF", vis: cardCh(2), h:t("home_f_ai_h"),      d:t("home_f_ai_d")},
+    {t:"ai",     col:"#C560FF", vis: cardCh(2), h:t("home_f_ai_h"),      d:t("home_f_ai_d"), star:true},
     {t:"roll",   col:"#19E3D0", vis: cardCh(3), h:t("home_f_roll_h"),    d:t("home_f_roll_d")},
     {t:"kurucu", col:"#2ED67C", vis: cardCh(4), h:t("home_f_builder_h"), d:t("home_f_builder_d")},
-    {t:"items",  col:"#FF7B9C", item: bigItem,  h:t("home_f_items_h"),   d:t("home_f_items_d")}
+    {t:"items",  col:"#FF7B9C", item: bigItem,  h:t("home_f_items_h"),   d:t("home_f_items_d")},
+    {t:"bilgi", col:"#9B7EDE", vis: cardCh(5), h:t("home_f_bilgi_h"), d:t("home_f_bilgi_d")},
+    {t:"blog",  col:"#E8A13C", vis: cardCh(6), h:t("home_f_blog_h"),  d:t("home_f_blog_d")}
   ];
   const cards = feats.map(f => `<button class="feat" data-goto="${f.t}" style="--fc:${f.col}">
     <span class="feat-vis">${f.item ? `<span class="feat-item">${sp(f.item.sx, 60)}</span>` : (f.vis ? portHTML(f.vis, 74, 80, f.col) : "")}</span>
-    <b class="feat-h">${f.h}</b>
+    <b class="feat-h">${f.h}${f.star ? ' <span style="color:#FFC23D">★</span>' : ''}</b>
     <span class="feat-d">${f.d}</span></button>`).join("");
   return `<div class="landing">
     <section class="hero">
