@@ -805,7 +805,7 @@ const I18N = {
     blog_all:"← TÜM YAZILAR", blog_read:"OKU →", blog_reading:"dk okuma",
     blog_sources:"Resmî kaynaklar",
     // Genel arama placeholder
-    ph_items:"Eşya ara", ph_augments:"Augment ara", nav_augrehber:"Augment Rehberi", augr_ph:"Augment ara", augr_loading:"Yükleniyor…", augr_badge:"AUGMENT", augr_h:"Augment Rehberi", augr_desc:"Elindeki augment'e göre en çok oynanan komplar ve build'ler", augr_interim:"Geçici veri gösteriliyor — bir sonraki güncellemede gerçek augment-özel istatistikler gelecek.", augr_pick:"Augment'ini seç, o augment'le en iyi oynanan kompları görelim:", augr_nolist:"Augment bulunamadı.", augr_back:"Augment değiştir", augr_none:"Bu augment için yeterli veri yok.", augr_games:"oyun", augr_avg:"ort.", ph_set:"Şampiyon ya da özellik ara",
+    ph_items:"Eşya ara", ph_augments:"Augment ara", nav_augrehber:"Augment Rehberi", augr_ph:"Augment ara", augr_loading:"Yükleniyor…", augr_badge:"AUGMENT", augr_h:"Augment Rehberi", augr_desc:"Elindeki augment'e göre en çok oynanan komplar ve build'ler", augr_interim:"Geçici veri gösteriliyor — bir sonraki güncellemede gerçek augment-özel istatistikler gelecek.", augr_pick:"Augment'ini seç, o augment'le en iyi oynanan kompları görelim:", augr_nolist:"Augment bulunamadı.", augr_nodata:"Augment verisi henüz hazır değil. Bir sonraki güncellemeden sonra burada görünecek (veri/augments.json).", augr_back:"Augment değiştir", augr_none:"Bu augment için yeterli veri yok.", augr_games:"oyun", augr_avg:"ort.", ph_set:"Şampiyon ya da özellik ara",
     ph_comps:"Komp, taşıyıcı ya da özellik ara", ph_kurucu:"Eklemek için şampiyon ara",
     empty_search:"ile eşleşen bir şey yok. Yazımı kontrol edin ya da aramayı temizleyin.",
     not_found_rarity:"bu nadirlikte bulunamadı."
@@ -927,7 +927,7 @@ const I18N = {
     max_row:" · max", raises:"raises it", need_more:"more units",
     blog_all:"← ALL POSTS", blog_read:"READ →", blog_reading:"min read",
     blog_sources:"Official sources",
-    ph_items:"Search item", ph_augments:"Search augment", nav_augrehber:"Augment Guide", augr_ph:"Search augment", augr_loading:"Loading…", augr_badge:"AUGMENT", augr_h:"Augment Guide", augr_desc:"Most-played comps and builds for the augment you have", augr_interim:"Showing interim data — real augment-specific stats will arrive on the next update.", augr_pick:"Pick your augment and we'll show the best comps played with it:", augr_nolist:"No augment found.", augr_back:"Change augment", augr_none:"Not enough data for this augment.", augr_games:"games", augr_avg:"avg", ph_set:"Search champion or trait",
+    ph_items:"Search item", ph_augments:"Search augment", nav_augrehber:"Augment Guide", augr_ph:"Search augment", augr_loading:"Loading…", augr_badge:"AUGMENT", augr_h:"Augment Guide", augr_desc:"Most-played comps and builds for the augment you have", augr_interim:"Showing interim data — real augment-specific stats will arrive on the next update.", augr_pick:"Pick your augment and we'll show the best comps played with it:", augr_nolist:"No augment found.", augr_nodata:"Augment data isn't ready yet. It will appear after the next update (veri/augments.json).", augr_back:"Change augment", augr_none:"Not enough data for this augment.", augr_games:"games", augr_avg:"avg", ph_set:"Search champion or trait",
     ph_comps:"Search comp, carry or trait", ph_kurucu:"Search champion to add",
     empty_search:"— nothing matches. Check spelling or clear the search.",
     not_found_rarity:"not found in this rarity."
@@ -2807,7 +2807,7 @@ let AUGIDX = null, augLoading = false, selAug = "", augOpen = -1;
 function loadAugIdx(){
   if(AUGIDX || augLoading) return;
   augLoading = true;
-  fetch("veri/augments.json").then(r => r.ok ? r.json() : null).then(d => {
+  fetch("veri/augments.json", {cache: "no-store"}).then(r => r.ok ? r.json() : null).then(d => {
     AUGIDX = d || {byAug:{}, augList:[], mode:"none"}; augLoading = false;
     if(tab === "augrehber") render();
   }).catch(() => { AUGIDX = {byAug:{}, augList:[], mode:"none"}; augLoading = false; if(tab === "augrehber") render(); });
@@ -2822,7 +2822,9 @@ function augRehberHTML(f){
   let html = `<div class="draftbar" style="border-color:var(--gold);border-style:solid"><span class="draftbadge" style="background:var(--gold)">${t("augr_badge")}</span><span><b>${t("augr_h")}</b> \u00b7 ${t("augr_desc")}</span></div>`;
   if(AUGIDX.mode === "interim") html += `<div class="note" style="border-left-color:var(--gold)">${t("augr_interim")}</div>`;
   if(!selAug){
-    const filt = (AUGIDX.augList||[]).filter(a => abi[a.id] && (!f || norm(dl(abi[a.id],"name")||a.id).includes(f)));
+    const all = AUGIDX.augList || [];
+    if(!all.length){ html += `<div class="empty">${t("augr_nodata")}</div>`; return html; }
+    const filt = all.filter(a => abi[a.id] && (!f || norm(dl(abi[a.id],"name")||a.id).includes(f)));
     html += `<div class="augr-hint">${t("augr_pick")}</div><div class="augr-grid">` + filt.map(a => `<button class="augr-chip" onclick="augPick('${a.id}')" title="${nmeOf(a.id)}">${sp(abi[a.id].sx, 32)}<span>${nmeOf(a.id)}</span></button>`).join("") + `</div>`;
     if(!filt.length) html += `<div class="empty">${t("augr_nolist")}</div>`;
   } else {
@@ -3149,6 +3151,7 @@ document.addEventListener("dragend", () => { dragSrc = null; document.querySelec
 
 // ============ URL YÖNLENDİRME (SEO için gerçek path'ler) ============
 const ROUTES = {
+  augrehber: {path: "/augment-rehberi", ad: "Augment Rehberi", ad_en:"Augment Guide", desc: "Elindeki augment'e göre en çok oynanan Set 17 TFT kompları ve build önerileri, gerçek TR1 verisiyle.", desc_en:"Most-played Set 17 TFT comps and build suggestions for the augment you have, from real TR1 data."},
   home:     {path: "/",            ad: "Ana Sayfa",              ad_en:"Home",                   desc: "Gerçek TR1 verisiyle Set 17 TFT rehberi: meta komp tier listesi, oyuncu arama, AI komplar, roll hesaplayıcı ve takım kurucu — Türkçe.", desc_en:"Set 17 TFT guide with real TR1 data: meta comp tier list, player search, AI comps, roll calculator and team builder."},
   comps:    {path: "/komplar",     ad: "Komp Tier Listesi",        ad_en:"Comp Tier List",          desc: "Set 17 komp tier listesi — S/A/B/C kademesinde en güçlü TFT kompları, gerçek TR1 verisiyle her gün güncellenir.", desc_en:"Set 17 comp tier list — the strongest TFT comps in S/A/B/C tiers, updated daily with real TR1 data."},
   ai:       {path: "/ai-komplari", ad: "AI Kompları",              ad_en:"AI Comps",                desc: "Yapay zekâ değerlendirmesiyle Set 17'nin en güçlü kompları: kadro, eşya ve augment öncelikleri, erken ve geç oyun planları.", desc_en:"Set 17's strongest comps with AI evaluation: roster, item and augment priorities, early and late game plans."},
