@@ -279,8 +279,18 @@ try:
     import sys, os
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import augment_index
-    _aug_idx = augment_index.build(leagues, oyun,
-                 datetime.now(timezone(timedelta(hours=3))).strftime('%d.%m.%Y %H:%M'))
+    _ts = datetime.now(timezone(timedelta(hours=3))).strftime('%d.%m.%Y %H:%M')
+    # GERCEK veri: kompun `_aug` (augment-ozel sayaclar) alanindan.
+    _aug_idx = augment_index.build(leagues, oyun, _ts)
+    # ONEMLI: Riot, augment'leri match-history API'sinden KALDIRDI (stats-scraping onlemi,
+    # Set 13 ~Kasim 2024; hala yururlukte). Bu yuzden participant['augments'] BOS gelir ->
+    # her kompun `_aug`'u bos -> build() {} doner (mode yine "real" damgalanir, yaniltici).
+    # Cozum: gercek veri bos ise, kompun trait-tabanli heuristik `augs` listesinden
+    # (satir ~272'de augs_for ile hesaplanan) interim indeks kur. Boylece augments.json
+    # asla bos kalmaz ve durum "interim" olarak DURUSTCE etiketlenir.
+    if not _aug_idx.get('byAug'):
+        _aug_idx = augment_index.build_interim({'leagues': leagues}, oyun, _ts)
+        print("augment: API augment vermiyor (Riot kaldirdi) -> heuristik interim indekse dusuldu", flush=True)
     json.dump(_aug_idx, open(os.path.join(KOK, 'veri', 'augments.json'), 'w', encoding='utf-8'), ensure_ascii=False)
     print(f"augments.json ({len(_aug_idx.get('byAug', {}))} augment, mod={_aug_idx.get('mode')})", flush=True)
 except Exception as _e:
