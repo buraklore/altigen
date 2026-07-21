@@ -532,16 +532,16 @@ footer p{color:var(--muted);font-size:12px;line-height:1.6;max-width:820px}
     <button class="tab" role="tab" aria-selected="false" data-t="player" data-i18n="nav_player">Oyuncu</button>
     <button class="tab" role="tab" aria-selected="true" data-t="comps" data-i18n="nav_comps">Komplar</button>
     <button class="tab tab-star" role="tab" aria-selected="false" data-t="ai" data-i18n="nav_ai">AI Kompları</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="items" data-i18n="nav_items">Eşyalar</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="augments" data-i18n="nav_augments">Augmentler</button>
-    <button class="tab" role="tab" aria-selected="false" data-t="kurucu" data-i18n="nav_kurucu">Takım Kurucu</button>
     <div class="tooldd" id="tooldd">
-      <button class="tab tooldd-btn" id="tooldd-btn" aria-haspopup="true" aria-expanded="false" data-i18n="nav_tools">Araçlar ▾</button>
+      <button class="tab tooldd-btn tab-star" id="tooldd-btn" aria-haspopup="true" aria-expanded="false" data-i18n="nav_tools">Araçlar ▾</button>
       <div class="tooldd-menu" id="tooldd-menu">
         <button class="tab" role="tab" aria-selected="false" data-t="bilgi" data-i18n="nav_bilgi">TFT Bilgi</button>
         <button class="tab" role="tab" aria-selected="false" data-t="roll" data-i18n="nav_roll">Roll Hesaplayıcı</button>
       </div>
     </div>
+    <button class="tab" role="tab" aria-selected="false" data-t="items" data-i18n="nav_items">Eşyalar</button>
+    <button class="tab" role="tab" aria-selected="false" data-t="augments" data-i18n="nav_augments">Augmentler</button>
+    <button class="tab" role="tab" aria-selected="false" data-t="kurucu" data-i18n="nav_kurucu">Takım Kurucu</button>
     <button class="tab" role="tab" aria-selected="false" data-t="set" data-i18n="nav_set">Set Rehberi</button>
     <button class="tab" role="tab" aria-selected="false" data-t="blog" data-i18n="nav_blog">Blog</button>
   </nav>
@@ -1978,7 +1978,7 @@ function compDetail(c){
   const iprio = carryItems.map((id,i) => {
     const it = byId[id];
     return it ? (i?'<span class="arr">›</span>':'') +
-      `<span class="recicon" data-open="${id}" tabindex="0" role="button" title="${esc(dl(it,"name"))}">${sp(it.sx,42)}</span>` : "";
+      `<span class="recicon" data-open="${id}" tabindex="0" role="button" title="${esc(dl(it,"name"))}">${sp(it.sx,48)}</span>` : "";
   }).join("");
   const alts = c.alts.map(([a,b]) => `
       <div class="tiprow" style="padding:5px 0">
@@ -2002,7 +2002,7 @@ function compDetail(c){
     </div>
     <div class="units" style="margin-top:16px">${units}</div>
     <div class="boxes">
-      <div class="box"><h4>${t("early_game")}</h4><div class="units" style="margin:0;padding-bottom:8px">${early}</div></div>
+      <div class="box"><h4>${t("early_game")}</h4><div class="units" style="margin:0;padding-bottom:8px">${early}</div><div class="sub" style="color:var(--text)">${esc((dl(c,"stages")||c.stages||[])[0]||"")}</div></div>
       <div class="box"><h4>${t("item_priority")} — ${esc(ch?dl(ch,"name"):"")}</h4><div class="iprio">${iprio||'<span class="sub">'+t("data_scarce")+'</span>'}</div></div>
       ${augRecBox(c)}
     </div>
@@ -2347,11 +2347,12 @@ function aiIcon(r, idx){
 }
 function aiDetail(r){
   const ch = byId[r.carry] || {};
-  const units = (r.units||[]).map(u => unitHTML({c:u.c, s:u.s3?3:0, it:u.it||[]}, 64)).join("");
-  const early = (r.early||[]).map(id => unitHTML({c:id, s:0, it:[]}, 44)).join("");
+  const units = (r.units||[]).map(u => unitHTML({c:u.c, s:u.s3?3:0, it:u.it||[]}, 64, true)).join("");
+  const early = (r.early||[]).map(id => unitHTML({c:id, s:0, it:[]}, 44, true)).join("");
   const carryIt = ((r.units||[]).find(u => u.c === r.carry) || {}).it || [];
-  const iprio = carryIt.map(id => byId[id]).filter(Boolean).map(x =>
-    `<span class="recicon" data-open="${x.id}" tabindex="0" role="button" title="${esc(dl(x,"name"))}">${sp(x.sx,30)}</span><span class="recnames" style="margin-right:10px">${esc(dl(x,"name"))}</span>`).join("");
+  const alts = (r.alts||[]).map(([a,b]) => `<div class="tiprow" style="padding:5px 0"><span class="mi" data-open="${a}" tabindex="0" role="button">${sp((byId[a]||{}).sx||["itempack",0,0],22)}</span><span>${esc((byId[a]||{}).name||"")}</span><span class="arr">›</span><span class="mi" data-open="${b}" tabindex="0" role="button">${sp((byId[b]||{}).sx||["itempack",0,0],22)}</span><b>${esc((byId[b]||{}).name||"")}</b></div>`).join("");
+  const iprio = carryIt.map(id => byId[id]).filter(Boolean).map((x,i) =>
+    (i?'<span class="arr">›</span>':'') + `<span class="recicon" data-open="${x.id}" tabindex="0" role="button" title="${esc(dl(x,"name"))}">${sp(x.sx,48)}</span>`).join("");
   const augIds = (r.augs||[]).filter(id => byId[id]);
   const augRow = augIds.map((id, k) => `<button class="mini2" style="width:86px" data-open="${id}" aria-label="${esc(dl(byId[id],"name"))}">
       ${portHTML(byId[id], 44, 50, k===0 ? "var(--gold)" : "var(--cyan)")}
@@ -2381,6 +2382,7 @@ function aiDetail(r){
         <div class="sub" style="color:var(--text)">${esc(r.augNot||"")}</div></div>
       <div class="box"><h4 style="color:var(--cyan)">${t("ai_late")}</h4>
         <div class="sub" style="color:var(--text)">${esc(r.gec||"")}</div></div>
+      <div class="box"><h4 style="color:var(--cyan)">${t("alternatives")}</h4><div class="combolist">${alts||'<span class="sub">'+t("data_scarce")+'</span>'}</div></div>
     </div>
     <div class="mlabel" style="margin-top:16px">${t("final_board")}</div>
     ${boardHTML({units: r.units, carry: r.carry})}
@@ -2758,7 +2760,7 @@ function uretAIData(){
     try {
       const rec = recommendAugments(c);
       const rel = [...(rec["Altın"]||[]), ...(rec["Prizmatik"]||[]), ...(rec["Gümüş"]||[])].filter(x => x.rel);
-      augs = rel.map(x => x.aug.id).slice(0, 2);
+      augs = [...new Set([...(c.augs||[]), ...rel.map(x => x.aug.id)])].slice(0, 5);
       augNot = rel.length
         ? `Öncelik ${dl(rel[0].aug,"name")}${rel[1] ? "; sunulmazsa " + dl(rel[1].aug,"name") : ""}. Hiçbiri gelmezse ekonomi (altın/deneyim) augmentini savaş augmentine tercih et.`
         : "Bu kompun özelliğe bağlı augmenti yok: ilk seçimde ekonomi, ikinci seçimde taşıyıcıyı büyüten savaş augmenti, üçüncüde esnek kal.";
@@ -2770,10 +2772,10 @@ function uretAIData(){
       : `Kayıp serisinde bile altını 50'nin üstünde tut; ${carryN} kopyalarını topla ama seviye atlamak için acele etme.`;
     const erken = `Aşama 2 açılışı: ${earlyN.slice(0,3).join(", ")} ile tahtayı kur${mainTrait ? `, ${mainTrait} sinerjisini erkenden aktif et` : ""}. ${rollAdvice}${carryItems.length ? ` Taşıyıcı eşya önceliği: ${carryItems.join(" → ")}.` : ""}`;
     const gec = hizli
-      ? `Tavan seviye 9: ${sonBirim} gibi 5 maliyetliler girince tahta kapanır. ${carryN} 2★'ı tamamlamadan 9 sonrası roll'a girme; kalan altın HP alım gücüdür.`
-      : `Güç sivrilmesi Aşama 4 başı, 3★'lar kapandığında. Sonra seviye 8'e çıkıp ${sonBirim} gibi yüksek maliyetlilerle tahtayı güçlendir; ${carryN} konumunu her tur rakip açılarına göre ayarla.`;
+      ? `Güç sivrilmesi seviye 8-9'da gelir: ${carryN} 2★ ve ${coreItem||"çekirdek eşya"} tamamlandığında tahta zirveye ulaşır. ${sonBirim} gibi 5 maliyetliler girince komp kapanır — bu noktadan sonra kalan altın doğrudan HP alım gücüdür, gereksiz roll yapma. Geç oyunda ${carryN}'ı arka köşede tut ve önüne en etli tankı koy; rakipte suikastçı veya sıçrama varsa köşeyi değiştirerek odaklanmayı kır. Öncelik sırası: taşıyıcı 2★ → çekirdek eşya → ön hat 2★ → 5 maliyetli takviye.`
+      : `Güç sivrilmesi Aşama 4 başında, 3★'lar tamamlandığında başlar; asıl tavan seviye 8-9'da ${sonBirim} gibi yüksek maliyetliler eklendiğinde açılır. ${carryN}'ın eşya çekirdeği (${coreItem||"ana eşya"}) bitmeden agresif roll'a girme. Geç oyunda tahtayı yüksek maliyetlilerle doldur; menzilli taşıyıcıyı arka köşede, yakın dövüş taşıyıcıyı korunaklı ön köşede konumla ve her tur pozisyonu rakip açılarına göre ayarla. Kalan altını önce ön hat dayanıklılığına, sonra kadro yükseltmelerine harca.`;
     return {ad:c.name, tier, carry:c.carry, units:c.units, style:c.style, early:c.early||[],
-            aug: augs[0] || null, augs, augNot, neden, erken, gec, avg, top4, win, n};
+            aug: augs[0] || null, augs, augNot, neden, erken, gec, avg, top4, win, n, alts: c.alts || []};
   }).sort((a,b) => "SABC".indexOf(a.tier) - "SABC".indexOf(b.tier) || a.avg - b.avg);
   const ozet = `Canlı TR1 verisinden türetilen AI değerlendirmesi — ${rows.length} komp. Tier ve analiz, ligler arası ağırlıklı ortalama sıralamaya göre hesaplanır; komplar her güncellendiğinde bu sayfa da güncellenir.`;
   return {patch: SNAP.patch, ts: SNAP.ts, model: "AI değerlendirmesi", ozet, rows};
