@@ -2804,13 +2804,29 @@ function uretAIData(){
 }
 /* ---------- Augment Rehberi: secilen augment -> en cok oynanan komplar ---------- */
 let AUGIDX = null, augLoading = false, selAug = "", augOpen = -1, augrRar = "Gümüş";
+function augIndexClient(){
+  const RARS = ["Gümüş","Altın","Prizmatik"];
+  const byAug = {};
+  for(const [lg, L] of Object.entries(SNAP.leagues||{})){
+    (L.comps||[]).forEach((c, ci) => {
+      let rec; try { rec = recommendAugments(c); } catch(e){ rec = {}; }
+      const seen = {};
+      for(const rar of RARS) for(const o of (rec[rar]||[])){ if(o && o.aug) seen[o.aug.id] = o.rel ? 2 : 1; }
+      (c.augs||[]).forEach(a => { seen[a] = 2; });
+      for(const aid in seen){ (byAug[aid] = byAug[aid] || []).push({lg, ci, name: c.name, carry: c.carry, tier: c.tier, n: c.n, avg: c.avg, top4: c.top4, _w: seen[aid]}); }
+    });
+  }
+  for(const aid in byAug){ byAug[aid].sort((a,b)=>(b._w-a._w)||(b.n-a.n)||(a.avg-b.avg)); byAug[aid] = byAug[aid].slice(0,12); }
+  const augList = Object.keys(byAug).map(id => ({id, n: byAug[id].reduce((s,x)=>s+x.n,0)}));
+  return {byAug, mode: "recommend", augList};
+}
 function loadAugIdx(){
   if(AUGIDX || augLoading) return;
   augLoading = true;
   fetch("veri/augments.json", {cache: "no-store"}).then(r => r.ok ? r.json() : null).then(d => {
-    AUGIDX = d || {byAug:{}, augList:[], mode:"none"}; augLoading = false;
+    AUGIDX = (d && d.mode === "real" && d.byAug && Object.keys(d.byAug).length) ? d : augIndexClient(); augLoading = false;
     if(tab === "augrehber") render();
-  }).catch(() => { AUGIDX = {byAug:{}, augList:[], mode:"none"}; augLoading = false; if(tab === "augrehber") render(); });
+  }).catch(() => { AUGIDX = augIndexClient(); augLoading = false; if(tab === "augrehber") render(); });
 }
 function augPick(id){ selAug = id; augOpen = -1; if(typeof q !== "undefined" && q) q.value = ""; render(); try{ window.scrollTo(0,0); }catch(e){} }
 function augClear(){ selAug = ""; augOpen = -1; render(); }
@@ -2821,8 +2837,7 @@ function augRehberHTML(f){
   const abi = {}; (DATA.augments||[]).forEach(a => abi[a.id] = a);
   const nmeOf = id => esc(dl(abi[id]||{}, "name") || id);
   let html = `<div class="draftbar" style="border-color:var(--gold);border-style:solid"><span class="draftbadge" style="background:var(--gold)">${t("augr_badge")}</span><span><b>${t("augr_h")}</b> \u00b7 ${t("augr_desc")}</span></div>`;
-  if(AUGIDX.mode === "interim") html += `<div class="note" style="border-left-color:var(--gold)">${t("augr_interim")}</div>`;
-  else if(!AUGIDX.byAug || !Object.keys(AUGIDX.byAug).length) html += `<div class="note" style="border-left-color:var(--gold)">${t("augr_nodata")}</div>`;
+  if(AUGIDX.mode !== "real") html += `<div class="note" style="border-left-color:var(--gold)">${t("augr_interim")}</div>`;
   if(!selAug){
     const RARS = ["Gümüş","Altın","Prizmatik"];
     const pills = RARS.map(r => `<button class="pbtn" onclick="augrSetRar('${r}')" aria-selected="${r===augrRar}">${rarLabel(r)} <span style="opacity:.55">${(DATA.augments||[]).filter(x=>x.rar===r).length}</span></button>`).join("");
@@ -2835,8 +2850,9 @@ function augRehberHTML(f){
     html += `<div class="augr-sel"><button class="augr-back" onclick="augClear()">\u2190 ${t("augr_back")}</button><span class="augr-selname">${sp(ag.sx, 40)} <b>${nmeOf(selAug)}</b></span></div>`;
     let cards = "";
     comps.forEach((e, i) => {
-      const c = ((SNAP.leagues[e.lg] || {}).comps || [])[e.ci];
-      if(!c || c.name !== e.name) return;
+      let c = ((SNAP.leagues[e.lg] || {}).comps || [])[e.ci];
+      if(!c || c.name !== e.name){ c = null; for(const L of Object.values(SNAP.leagues||{})){ const ff = (L.comps||[]).find(x => x.name === e.name); if(ff){ c = ff; break; } } }
+      if(!c) return;
       const ch = byId[c.carry] || {};
       cards += `<div class="augr-card ${augOpen===i?"on":""}"><button class="augr-cardh" onclick="augToggle(${i})">${portHTML(ch, 44, 48, TIERCOL[c.tier])}<span class="augr-cinfo"><b>${esc(dl(c,"name")||c.name)}</b> ${tierBadge(c.tier)}<br><span class="sub">${e.n} ${t("augr_games")} \u00b7 Top4 %${e.top4} \u00b7 ${t("augr_avg")} ${e.avg}</span></span><span class="augr-exp">${augOpen===i?"\u25be":"\u25b8"}</span></button>${augOpen===i?compDetail(c):""}</div>`;
     });
