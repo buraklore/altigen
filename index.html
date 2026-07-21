@@ -805,7 +805,7 @@ const I18N = {
     blog_all:"← TÜM YAZILAR", blog_read:"OKU →", blog_reading:"dk okuma",
     blog_sources:"Resmî kaynaklar",
     // Genel arama placeholder
-    ph_items:"Eşya ara", ph_augments:"Augment ara", nav_augrehber:"Augment Rehberi", augr_ph:"Augment ara", augr_loading:"Yükleniyor…", augr_badge:"AUGMENT", augr_h:"Augment Rehberi", augr_desc:"Elindeki augment'e göre en çok oynanan komplar ve build'ler", augr_interim:"Geçici veri gösteriliyor — bir sonraki güncellemede gerçek augment-özel istatistikler gelecek.", augr_pick:"Augment'ini seç, o augment'le en iyi oynanan kompları görelim:", augr_nolist:"Augment bulunamadı.", augr_nodata:"Augment verisi henüz hazır değil. Bir sonraki güncellemeden sonra burada görünecek (veri/augments.json).", augr_back:"Augment değiştir", augr_none:"Bu augment için yeterli veri yok.", augr_games:"oyun", augr_avg:"ort.", ph_set:"Şampiyon ya da özellik ara",
+    ph_items:"Eşya ara", ph_augments:"Augment ara", nav_augrehber:"Augment Rehberi", augr_ph:"Augment ara", augr_loading:"Yükleniyor…", augr_badge:"AUGMENT", augr_h:"Augment Rehberi", augr_desc:"Elindeki augment'e göre en çok oynanan komplar ve build'ler", augr_interim:"Geçici veri gösteriliyor — bir sonraki güncellemede gerçek augment-özel istatistikler gelecek.", augr_pick:"Augment'ini seç, o augment'le en iyi oynanan kompları görelim:", augr_nolist:"Augment bulunamadı.", augr_nodata:"Augment verisi henüz hazır değil. Bir sonraki güncellemeden sonra burada görünecek (veri/augments.json).", augr_back:"Augment değiştir", augr_none:"Bu augment için yeterli veri yok.", augr_general:"Bu augment belirli bir kompa özel değil — aşağıdaki en güçlü komplardan birine ekleyebilirsin:", augr_games:"oyun", augr_avg:"ort.", ph_set:"Şampiyon ya da özellik ara",
     ph_comps:"Komp, taşıyıcı ya da özellik ara", ph_kurucu:"Eklemek için şampiyon ara",
     empty_search:"ile eşleşen bir şey yok. Yazımı kontrol edin ya da aramayı temizleyin.",
     not_found_rarity:"bu nadirlikte bulunamadı."
@@ -927,7 +927,7 @@ const I18N = {
     max_row:" · max", raises:"raises it", need_more:"more units",
     blog_all:"← ALL POSTS", blog_read:"READ →", blog_reading:"min read",
     blog_sources:"Official sources",
-    ph_items:"Search item", ph_augments:"Search augment", nav_augrehber:"Augment Guide", augr_ph:"Search augment", augr_loading:"Loading…", augr_badge:"AUGMENT", augr_h:"Augment Guide", augr_desc:"Most-played comps and builds for the augment you have", augr_interim:"Showing interim data — real augment-specific stats will arrive on the next update.", augr_pick:"Pick your augment and we'll show the best comps played with it:", augr_nolist:"No augment found.", augr_nodata:"Augment data isn't ready yet. It will appear after the next update (veri/augments.json).", augr_back:"Change augment", augr_none:"Not enough data for this augment.", augr_games:"games", augr_avg:"avg", ph_set:"Search champion or trait",
+    ph_items:"Search item", ph_augments:"Search augment", nav_augrehber:"Augment Guide", augr_ph:"Search augment", augr_loading:"Loading…", augr_badge:"AUGMENT", augr_h:"Augment Guide", augr_desc:"Most-played comps and builds for the augment you have", augr_interim:"Showing interim data — real augment-specific stats will arrive on the next update.", augr_pick:"Pick your augment and we'll show the best comps played with it:", augr_nolist:"No augment found.", augr_nodata:"Augment data isn't ready yet. It will appear after the next update (veri/augments.json).", augr_back:"Change augment", augr_none:"Not enough data for this augment.", augr_general:"This augment isn't tied to a specific comp — you can slot it into one of the strongest comps below:", augr_games:"games", augr_avg:"avg", ph_set:"Search champion or trait",
     ph_comps:"Search comp, carry or trait", ph_kurucu:"Search champion to add",
     empty_search:"— nothing matches. Check spelling or clear the search.",
     not_found_rarity:"not found in this rarity."
@@ -1733,6 +1733,8 @@ function augRecBox(comp){
 
 function augPrio2(comp, hs){
   const rec = recommendAugments(comp);
+  const _ka = keyAugOf(comp); const _ex = [...(comp.augs||[]), ...(_ka ? [_ka.id] : [])];
+  _ex.forEach(aid => { const a = byId[aid]; if(!a || !a.rar || !rec[a.rar]) return; const arr = rec[a.rar], _i = arr.findIndex(o => o.aug && o.aug.id === aid); if(_i >= 0){ const it = arr.splice(_i, 1)[0]; it.rel = true; arr.unshift(it); } else { arr.unshift({aug: a, rel: true}); } });
   const rarCol = {"Gümüş":"#C6CDDB", "Altın":"var(--c5)", "Prizmatik":"#7FE3F0"};
   const tiles = [];
   for(const rar of ["Gümüş", "Altın", "Prizmatik"]){
@@ -2804,8 +2806,17 @@ function uretAIData(){
 }
 /* ---------- Augment Rehberi: secilen augment -> en cok oynanan komplar ---------- */
 let AUGIDX = null, augLoading = false, selAug = "", augOpen = -1, augrRar = "Gümüş";
+function augAllComps(){
+  const TR = {S:0,A:1,B:2,C:3};
+  const byName = {};
+  for(const [lg, L] of Object.entries(SNAP.leagues||{})) (L.comps||[]).forEach((c, ci) => {
+    const rank = (TR[c.tier]!=null?TR[c.tier]:9), cur = byName[c.name];
+    if(!cur || rank < cur._r || (rank===cur._r && c.avg < cur.avg)) byName[c.name] = {lg, ci, name: c.name, carry: c.carry, tier: c.tier, n: c.n, avg: c.avg, top4: c.top4, _r: rank};
+  });
+  return Object.values(byName).sort((a,b)=>(a._r-b._r)||(a.avg-b.avg)).slice(0, 12);
+}
 function augIndexClient(){
-  const RARS = ["Gümüş","Altın","Prizmatik"];
+  const RARS = ["Gümüş","Altın","Prizmatik"], TR = {S:0,A:1,B:2,C:3};
   const byAug = {};
   for(const [lg, L] of Object.entries(SNAP.leagues||{})){
     (L.comps||[]).forEach((c, ci) => {
@@ -2813,12 +2824,18 @@ function augIndexClient(){
       const seen = {};
       for(const rar of RARS) for(const o of (rec[rar]||[])){ if(o && o.aug) seen[o.aug.id] = o.rel ? 2 : 1; }
       (c.augs||[]).forEach(a => { seen[a] = 2; });
-      for(const aid in seen){ (byAug[aid] = byAug[aid] || []).push({lg, ci, name: c.name, carry: c.carry, tier: c.tier, n: c.n, avg: c.avg, top4: c.top4, _w: seen[aid]}); }
+      const ka = keyAugOf(c); if(ka) seen[ka.id] = 2;
+      const rank = (TR[c.tier]!=null?TR[c.tier]:9);
+      for(const aid in seen){
+        const m = (byAug[aid] = byAug[aid] || {}), cur = m[c.name];
+        if(!cur || rank < cur._r || (rank===cur._r && c.avg < cur.avg)) m[c.name] = {lg, ci, name: c.name, carry: c.carry, tier: c.tier, n: c.n, avg: c.avg, top4: c.top4, _r: rank};
+      }
     });
   }
-  for(const aid in byAug){ byAug[aid].sort((a,b)=>(b._w-a._w)||(b.n-a.n)||(a.avg-b.avg)); byAug[aid] = byAug[aid].slice(0,12); }
-  const augList = Object.keys(byAug).map(id => ({id, n: byAug[id].reduce((s,x)=>s+x.n,0)}));
-  return {byAug, mode: "recommend", augList};
+  const out = {};
+  for(const aid in byAug) out[aid] = Object.values(byAug[aid]).sort((a,b)=>(a._r-b._r)||(a.avg-b.avg)).slice(0, 12);
+  const augList = Object.keys(out).map(id => ({id, n: out[id].length}));
+  return {byAug: out, mode: "recommend", augList};
 }
 function loadAugIdx(){
   if(AUGIDX || augLoading) return;
@@ -2846,8 +2863,11 @@ function augRehberHTML(f){
     html += `<div class="augr-grid">` + rows.map(x => { const has = !!(AUGIDX.byAug && AUGIDX.byAug[x.id] && AUGIDX.byAug[x.id].length); return `<button class="augr-chip${has?"":" nodata"}" onclick="augPick('${x.id}')" title="${esc(dl(x,"name"))}">${sp(x.sx, 32)}<span>${esc(dl(x,"name"))}</span></button>`; }).join("") + `</div>`;
     if(!rows.length) html += `<div class="empty">${t("augr_nolist")}</div>`;
   } else {
-    const ag = abi[selAug] || {}, comps = (AUGIDX.byAug[selAug] || []);
+    const ag = abi[selAug] || {};
+    let comps = (AUGIDX.byAug[selAug] || []), genel = false;
+    if(!comps.length){ comps = augAllComps(); genel = true; }
     html += `<div class="augr-sel"><button class="augr-back" onclick="augClear()">\u2190 ${t("augr_back")}</button><span class="augr-selname">${sp(ag.sx, 40)} <b>${nmeOf(selAug)}</b></span></div>`;
+    if(genel) html += `<div class="note" style="border-left-color:var(--gold)">${t("augr_general")}</div>`;
     let cards = "";
     comps.forEach((e, i) => {
       let c = ((SNAP.leagues[e.lg] || {}).comps || [])[e.ci];
