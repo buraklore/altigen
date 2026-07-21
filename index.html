@@ -1730,6 +1730,22 @@ function augRecBox(comp){
     <div class="augrec-legend">${legend}</div></div>`;
 }
 
+function augPrio2(comp, hs){
+  const rec = recommendAugments(comp);
+  const rarCol = {"Gümüş":"#C6CDDB", "Altın":"var(--c5)", "Prizmatik":"#7FE3F0"};
+  const tiles = [];
+  for(const rar of ["Gümüş", "Altın", "Prizmatik"]){
+    for(const {aug, rel} of (rec[rar]||[]).slice(0, 2)){
+      tiles.push(`<button class="augrec-tile${rel?" rel":""}" data-open="${aug.id}" tabindex="0" role="button" style="--rc:${rarCol[rar]}" aria-label="${esc(dl(aug,"name"))}" title="${esc(dl(aug,"name"))} · ${rarLabel(rar)}${rel?" · "+t("aug_for_comp"):""}">
+        ${portHTML(aug, 34, 38, rel?"var(--gold)":rarCol[rar])}${rel?'<span class="augrec-star">★</span>':""}<div class="cnm">${esc(dl(aug,"name"))}</div></button>`);
+    }
+  }
+  const legend = ["Gümüş","Altın","Prizmatik"].map(r => `<span class="augrec-leg" style="--c:${rarCol[r]}">${rarLabel(r)}</span>`).join("");
+  return `<div class="box augrec-box"><h4${hs||""}>${t("aug_priority")}</h4>
+    <div class="augrec-tiles">${tiles.join("")}</div>
+    <div class="augrec-legend">${legend}</div></div>`;
+}
+
 function sp(sx, size, extra){
   const [sh,x,y] = sx, d = SHEETS[sh], k = size/d.c;
   return `<div class="sp ${sh} ${extra||''}" style="width:${size}px;height:${size}px;background-size:${Math.round(d.w*k)}px ${Math.round(d.h*k)}px;background-position:${-Math.round(x*k)}px ${-Math.round(y*k)}px" aria-hidden="true"></div>`;
@@ -1975,6 +1991,12 @@ function compDetail(c){
   const units = c.units.map(u => unitHTML({c:u.c, s:u.s3?3:0, it:u.it}, 56, true)).join("");
   const early = c.early.map(id => unitHTML({c:id, s:0, it:[]}, 44, true)).join("");
   const carryItems = (c.units.find(u => u.c === c.carry) || {it:[]}).it;
+  const augIds0 = [...(c.augs||[])];
+  let augRel = [];
+  try { const rec = recommendAugments(c); augRel = [...(rec["Altın"]||[]),...(rec["Prizmatik"]||[]),...(rec["Gümüş"]||[])].filter(x=>x.rel).map(x=>x.aug.id); } catch(e){}
+  const augIds = [...new Set([...augIds0, ...augRel])].filter(id => byId[id]).slice(0,5);
+  const augRow = augIds.map((id, k) => `<button class="mini2" style="width:86px" data-open="${id}" aria-label="${esc(dl(byId[id],"name"))}">${portHTML(byId[id], 44, 50, k===0 ? "var(--gold)" : "var(--cyan)")}<div class="cnm" style="${k===0?"color:var(--gold);font-weight:700":""}">${k===0?t("ai_priority"):t("ai_backup")}<br>${esc(dl(byId[id],"name"))}</div></button>`).join("");
+  const augNote = augIds.length ? (LANG==="tr" ? `Öncelik ${dl(byId[augIds[0]],"name")}${augIds[1]?"; sunulmazsa "+dl(byId[augIds[1]],"name"):""}. Hiçbiri gelmezse ekonomi (altın/deneyim) augmentini savaş augmentine tercih et.` : `Priority ${dl(byId[augIds[0]],"name")}${augIds[1]?"; if unavailable "+dl(byId[augIds[1]],"name"):""}. If none appear, prefer an economy augment over a combat one.`) : (LANG==="tr" ? "Bu komp için özel augment yok: ilk seçimde ekonomi, sonra taşıyıcıyı büyüten savaş augmenti tercih et." : "No comp-specific augment: take economy first, then a combat augment that scales your carry.");
   const iprio = carryItems.map((id,i) => {
     const it = byId[id];
     return it ? (i?'<span class="arr">›</span>':'') +
@@ -2004,13 +2026,13 @@ function compDetail(c){
     <div class="boxes">
       <div class="box"><h4>${t("early_game")}</h4><div class="units" style="margin:0;padding-bottom:8px">${early}</div><div class="sub" style="color:var(--text)">${esc((dl(c,"stages")||c.stages||[])[0]||"")}</div></div>
       <div class="box"><h4>${t("item_priority")} — ${esc(ch?dl(ch,"name"):"")}</h4><div class="iprio">${iprio||'<span class="sub">'+t("data_scarce")+'</span>'}</div></div>
-      ${augRecBox(c)}
+      ${augPrio2(c, "")}
+      <div class="box"><h4>${t("ai_late")}</h4><div class="sub" style="color:var(--text)">${esc((dl(c,"stages")||c.stages||[]).slice(1).join(" "))}</div></div>
     </div>
     <div class="board-alts">
       <div class="board-wrap">${boardHTML(c)}</div>
       <div class="box alts-box"><h4>${t("alternatives")}</h4><div class="combolist">${alts||'<span class="sub">'+t("data_scarce")+'</span>'}</div></div>
     </div>
-    <div class="stgrid">${stages}</div>
   </div>`;
 }
 function compsHTML(f){
@@ -2377,15 +2399,14 @@ function aiDetail(r){
         <div class="sub" style="color:var(--text)">${esc(r.erken||"")}</div></div>
       <div class="box"><h4 style="color:var(--cyan)">${t("item_priority")} — ${esc(ch?dl(ch,"name"):"")}</h4>
         <div class="iprio">${iprio||'<span class="sub">'+t("ai_flex")+'</span>'}</div></div>
-      <div class="box"><h4 style="color:var(--cyan)">${t("aug_priority")}</h4>
-        ${augRow?`<div class="rowline" style="gap:10px;margin:2px 0 10px;flex-wrap:wrap">${augRow}</div>`:""}
-        <div class="sub" style="color:var(--text)">${esc(r.augNot||"")}</div></div>
+      ${augPrio2(r, ' style="color:var(--cyan)"')}
       <div class="box"><h4 style="color:var(--cyan)">${t("ai_late")}</h4>
         <div class="sub" style="color:var(--text)">${esc(r.gec||"")}</div></div>
-      <div class="box"><h4 style="color:var(--cyan)">${t("alternatives")}</h4><div class="combolist">${alts||'<span class="sub">'+t("data_scarce")+'</span>'}</div></div>
     </div>
-    <div class="mlabel" style="margin-top:16px">${t("final_board")}</div>
-    ${boardHTML({units: r.units, carry: r.carry})}
+    <div class="board-alts">
+      <div class="board-wrap">${boardHTML({units: r.units, carry: r.carry})}</div>
+      <div class="box alts-box"><h4>${t("alternatives")}</h4><div class="combolist">${alts||'<span class="sub">'+t("data_scarce")+'</span>'}</div></div>
+    </div>
   </div>`;
 }
 // ===== Roll-down state =====
@@ -2775,7 +2796,7 @@ function uretAIData(){
       ? `Güç sivrilmesi seviye 8-9'da gelir: ${carryN} 2★ ve ${coreItem||"çekirdek eşya"} tamamlandığında tahta zirveye ulaşır. ${sonBirim} gibi 5 maliyetliler girince komp kapanır — bu noktadan sonra kalan altın doğrudan HP alım gücüdür, gereksiz roll yapma. Geç oyunda ${carryN}'ı arka köşede tut ve önüne en etli tankı koy; rakipte suikastçı veya sıçrama varsa köşeyi değiştirerek odaklanmayı kır. Öncelik sırası: taşıyıcı 2★ → çekirdek eşya → ön hat 2★ → 5 maliyetli takviye.`
       : `Güç sivrilmesi Aşama 4 başında, 3★'lar tamamlandığında başlar; asıl tavan seviye 8-9'da ${sonBirim} gibi yüksek maliyetliler eklendiğinde açılır. ${carryN}'ın eşya çekirdeği (${coreItem||"ana eşya"}) bitmeden agresif roll'a girme. Geç oyunda tahtayı yüksek maliyetlilerle doldur; menzilli taşıyıcıyı arka köşede, yakın dövüş taşıyıcıyı korunaklı ön köşede konumla ve her tur pozisyonu rakip açılarına göre ayarla. Kalan altını önce ön hat dayanıklılığına, sonra kadro yükseltmelerine harca.`;
     return {ad:c.name, tier, carry:c.carry, units:c.units, style:c.style, early:c.early||[],
-            aug: augs[0] || null, augs, augNot, neden, erken, gec, avg, top4, win, n, alts: c.alts || []};
+            aug: augs[0] || null, augs, augNot, neden, erken, gec, avg, top4, win, n, alts: c.alts || [], traits: c.traits || []};
   }).sort((a,b) => "SABC".indexOf(a.tier) - "SABC".indexOf(b.tier) || a.avg - b.avg);
   const ozet = `Canlı TR1 verisinden türetilen AI değerlendirmesi — ${rows.length} komp. Tier ve analiz, ligler arası ağırlıklı ortalama sıralamaya göre hesaplanır; komplar her güncellendiğinde bu sayfa da güncellenir.`;
   return {patch: SNAP.patch, ts: SNAP.ts, model: "AI değerlendirmesi", ozet, rows};
