@@ -2817,15 +2817,36 @@ function augAllComps(){
 }
 function augIndexClient(){
   const RARS = ["Gümüş","Altın","Prizmatik"], TR = {S:0,A:1,B:2,C:3};
+  const nrm = s => norm(s || "");
+  // Augmentin isim/aciklamasinda gecen sinif(trait) ve sampiyon adlari (bir kez hesapla)
+  const traitList = (DATA.traits||[]).map(t => ({name: t.name, n: nrm(t.name)})).filter(t => t.n.length >= 3);
+  const champList = (DATA.champs||[]).map(c => ({id: c.id, n: nrm(c.name)})).filter(c => c.n.length >= 3);
+  const augRef = {};
+  (DATA.augments||[]).forEach(a => {
+    const hn = nrm(a.name), ha = hn + " " + nrm(a.d);
+    const ts = [], cs = [];
+    traitList.forEach(t => { if(ha.includes(t.n)) ts.push(t.name); });
+    champList.forEach(c => { if(hn.includes(c.n)) cs.push(c.id); });
+    if(ts.length || cs.length) augRef[a.id] = {t: ts, c: cs};
+  });
+  const traitById = {}; (DATA.traits||[]).forEach(tt => { if(tt && tt.id) traitById[tt.id] = tt.name; });
   const byAug = {};
   for(const [lg, L] of Object.entries(SNAP.leagues||{})){
     (L.comps||[]).forEach((c, ci) => {
-      let rec; try { rec = recommendAugments(c); } catch(e){ rec = {}; }
+      const rank = (TR[c.tier]!=null?TR[c.tier]:9);
       const seen = {};
-      for(const rar of RARS) for(const o of (rec[rar]||[])){ if(o && o.aug) seen[o.aug.id] = o.rel ? 2 : 1; }
+      let rrec; try { rrec = recommendAugments(c); } catch(e){ rrec = {}; }
+      for(const rar of RARS) for(const o of (rrec[rar]||[])){ if(o && o.aug) seen[o.aug.id] = o.rel ? 2 : 1; }
       (c.augs||[]).forEach(a => { seen[a] = 2; });
       const ka = keyAugOf(c); if(ka) seen[ka.id] = 2;
-      const rank = (TR[c.tier]!=null?TR[c.tier]:9);
+      const compTraits = new Set((c.traits||[]).map(tb => traitById[tb[0]]).filter(Boolean));
+      const compUnits = new Set((c.units||[]).map(u => u.c));
+      for(const aid in augRef){
+        if(aid in seen) continue;
+        const ref = augRef[aid];
+        let hit = ref.t.some(tn => compTraits.has(tn)) || ref.c.some(cid => compUnits.has(cid));
+        if(hit) seen[aid] = 2;
+      }
       for(const aid in seen){
         const m = (byAug[aid] = byAug[aid] || {}), cur = m[c.name];
         if(!cur || rank < cur._r || (rank===cur._r && c.avg < cur.avg)) m[c.name] = {lg, ci, name: c.name, carry: c.carry, tier: c.tier, n: c.n, avg: c.avg, top4: c.top4, _r: rank};
