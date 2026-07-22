@@ -218,13 +218,7 @@ def analyze(boards):
             stages = [f"({earlyN}) ile sağlam açılış yap, eşyaları erken bas.",
                       f"Seviye 8'e hızlı çık, {cname} 2★ için agresif roll yap.",
                       f"Kalan altınla tahtayı {champ_by_id[hi]['name']} gibi yüksek maliyetlilerle güçlendir."]
-        astat = defaultdict(lambda: [0, 0, 0])
-        for b in bs:
-            for a in (b.get('augs') or []):
-                _r = astat[a]; _r[0] += 1; _r[1] += b['pl']
-                if b['pl'] <= 4: _r[2] += 1
         out.append({"name": " + ".join(trait_tr[t] for t in k), "tier": tier, "style": style, "n": n,
-                    "_aug": {a: v for a, v in astat.items() if v[0] >= 2},
                     "avg": round(avg, 2), "top4": round(100*sum(1 for b in bs if b['pl'] <= 4)/n),
                     "win": round(100*sum(1 for b in bs if b['pl'] == 1)/n),
                     "carry": carry, "traits": tbadges, "units": unit_objs,
@@ -274,30 +268,6 @@ for tier, pu, per, cap in plans:
     print(f"{tier:12s} {kept:3d} maç, {len(boards):4d} tahta, {len(comps):2d} komp", flush=True)
 
 # ---- liderlik + örnek profil ----
-# ---- augment -> komp indeksi (ayri dosyaya; snap.json sismesin diye _aug sonra silinir) ----
-try:
-    import sys, os
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    import augment_index
-    _ts = datetime.now(timezone(timedelta(hours=3))).strftime('%d.%m.%Y %H:%M')
-    # GERCEK veri: kompun `_aug` (augment-ozel sayaclar) alanindan.
-    _aug_idx = augment_index.build(leagues, oyun, _ts)
-    # ONEMLI: Riot, augment'leri match-history API'sinden KALDIRDI (stats-scraping onlemi,
-    # Set 13 ~Kasim 2024; hala yururlukte). Bu yuzden participant['augments'] BOS gelir ->
-    # her kompun `_aug`'u bos -> build() {} doner (mode yine "real" damgalanir, yaniltici).
-    # Cozum: gercek veri bos ise, kompun trait-tabanli heuristik `augs` listesinden
-    # (satir ~272'de augs_for ile hesaplanan) interim indeks kur. Boylece augments.json
-    # asla bos kalmaz ve durum "interim" olarak DURUSTCE etiketlenir.
-    if not _aug_idx.get('byAug'):
-        _aug_idx = augment_index.build_interim({'leagues': leagues}, oyun, _ts)
-        print("augment: API augment vermiyor (Riot kaldirdi) -> heuristik interim indekse dusuldu", flush=True)
-    json.dump(_aug_idx, open(os.path.join(KOK, 'veri', 'augments.json'), 'w', encoding='utf-8'), ensure_ascii=False)
-    print(f"augments.json ({len(_aug_idx.get('byAug', {}))} augment, mod={_aug_idx.get('mode')})", flush=True)
-except Exception as _e:
-    print("augment indeksi atlandi:", _e, flush=True)
-for _lg in leagues.values():
-    for _c in _lg.get('comps', []):
-        _c.pop('_aug', None)
 
 ladder = []
 for e in top[:10]:
