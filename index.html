@@ -2449,9 +2449,9 @@ function rollHTML(){
         <div class="hcell"><b>${kalan}</b><span>${t("roll_remaining")}</span><small>${poolTotal} ${t("roll_total")} − ${rollOwned+rollContested} ${t("roll_taken")}</small></div>
         <div class="hcell"><b>${distinct}</b><span>${t("roll_distinct")}</span><small>${t("roll_pool_shared").replace("{n}", distinct)}</small></div>
       </div>
-      ${kalan === 0 ? '<div class="callout" style="--acc:#E0565B;margin-top:16px">${t("roll_empty")}</div>'
-        : enAz1 < 0.4 ? '<div class="callout" style="--acc:var(--c5);margin-top:16px">${t("roll_low")}</div>'
-        : '<div class="callout" style="--acc:var(--c2);margin-top:16px">${t("roll_ok")}</div>'}
+      ${kalan === 0 ? `<div class="callout" style="--acc:#E0565B;margin-top:16px">${t("roll_empty")}</div>`
+        : enAz1 < 0.4 ? `<div class="callout" style="--acc:var(--c5);margin-top:16px">${t("roll_low")}</div>`
+        : `<div class="callout" style="--acc:var(--c2);margin-top:16px">${t("roll_ok")}</div>`}
     </div>
     <div class="sub" style="margin-top:14px">${t("roll_note")}</div>
   </div>`;
