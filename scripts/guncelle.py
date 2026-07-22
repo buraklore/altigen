@@ -11,6 +11,24 @@ KEY = os.environ.get('RIOT_API_KEY', '').strip()
 if not KEY.startswith('RGAPI-'):
     sys.exit('RIOT_API_KEY tanımlı değil (GitHub > Settings > Secrets and variables > Actions).')
 
+# ---- BOLGELER ----
+# TFT match-v1 bolgesel yonlendirme (resmi dokumantasyon):
+#   AMERICAS -> NA, BR, LAN, LAS | ASIA -> KR, JP
+#   EUROPE   -> EUNE, EUW, TR, ME1, RU | SEA -> OCE, SG2, TW2, VN2
+# Lig cagrilari platform host'una (tr1, euw1...), mac cagrilari rota host'una gider.
+ROTA = {'na1': 'americas', 'br1': 'americas', 'la1': 'americas', 'la2': 'americas',
+        'kr': 'asia', 'jp1': 'asia',
+        'eun1': 'europe', 'euw1': 'europe', 'tr1': 'europe', 'me1': 'europe', 'ru': 'europe',
+        'oc1': 'sea', 'sg2': 'sea', 'tw2': 'sea', 'vn2': 'sea'}
+# GitHub > Settings > Secrets and variables > Actions > Variables > BOLGELER ile degistirilebilir.
+# Ornek: "tr1"  ya da  "tr1,euw1,na1,kr"
+BOLGELER = [b.strip().lower() for b in os.environ.get('BOLGELER', 'tr1,euw1,na1,kr').split(',') if b.strip()]
+_gecersiz = [b for b in BOLGELER if b not in ROTA]
+if _gecersiz:
+    print(f"UYARI: taninmayan bolge atlandi: {', '.join(_gecersiz)}", flush=True)
+BOLGELER = [b for b in BOLGELER if b in ROTA] or ['tr1']
+print(f"Bolgeler: {', '.join(b.upper() for b in BOLGELER)}", flush=True)
+
 def guncel_yama_cek():
     """Riot'un resmi TFT yama notlari sayfasindan guncel yamayi OTOMATIK ayiklar.
     Set 18 gelince 18.1'i secer. Basarisiz olursa None -> YAMA env / mevcut deger kullanilir."""
@@ -30,13 +48,18 @@ def guncel_yama_cek():
         print(f'Yama cekme basarisiz ({e}); yedege dusuluyor.', flush=True)
         return None
 
-window = []
+# Riot'un app rate limit'i BOLGE BASINA uygulanir (developer.riotgames.com/docs/portal).
+# Bu yuzden sayaci host bazinda tutuyoruz: tr1, euw1, na1, kr, europe, americas, asia...
+# hepsi AYRI kova. Boylece bolge eklemek TR'nin hizini yavaslatmaz.
+windows = defaultdict(list)
 def riot(host, path, tries=4):
+    w = windows[host]
     for t in range(tries):
         now = time.time()
-        while len([x for x in window if now-x < 120]) >= 88 or len([x for x in window if now-x < 1]) >= 15:
+        while len([x for x in w if now-x < 120]) >= 88 or len([x for x in w if now-x < 1]) >= 15:
             time.sleep(0.35); now = time.time()
-        window.append(now)
+        w[:] = [x for x in w if now-x < 120]   # kova sisimesin
+        w.append(now)
         req = urllib.request.Request(f'https://{host}.api.riotgames.com/{path}',
                                      headers={'X-Riot-Token': KEY, 'User-Agent': 'Altigen-guncelleyici/1.0'})
         try:
@@ -89,16 +112,16 @@ def board_of(m):
             for p in info.get('participants', [])]
 
 CACHE = {}
-def collect(puuids, per, cap):
+def collect(puuids, per, cap, rota='europe'):
     ids = []
     for p in puuids:
-        r = riot('europe', f'tft/match/v1/matches/by-puuid/{p}/ids?count={per}')
+        r = riot(rota, f'tft/match/v1/matches/by-puuid/{p}/ids?count={per}')
         if isinstance(r, list): ids += r
     boards, kept, scanned = [], 0, 0
     for mid in dict.fromkeys(ids):
         if kept >= cap or scanned >= 90: break
         scanned += 1
-        m = CACHE.get(mid) or riot('europe', f'tft/match/v1/matches/{mid}')
+        m = CACHE.get(mid) or riot(rota, f'tft/match/v1/matches/{mid}')
         if not m: continue
         CACHE[mid] = m
         b = board_of(m)
@@ -241,44 +264,83 @@ def augs_for(trait_ids):
     hits.sort(key=lambda x: (-x[0], x[1]))
     return [h[1] for h in hits[:8]]
 
-# ---- toplama planı ----
-chall = riot('tr1', 'tft/league/v1/challenger') or {'entries': []}
-top = sorted(chall['entries'], key=lambda x: -x['leaguePoints'])
+# ---- toplama planı (çok bölgeli) ----
 HIZLI = os.environ.get('ALTIGEN_HIZLI') == '1'
-def K(x): return max(6, x//4) if HIZLI else x
-plans = [('CHALLENGER', [e['puuid'] for e in top[:(6 if HIZLI else 20)]], 8, K(100))]
-for tier, ep in (('GRANDMASTER', 'tft/league/v1/grandmaster'), ('MASTER', 'tft/league/v1/master')):
-    d = riot('tr1', ep) or {}
-    es = sorted(d.get('entries', []), key=lambda x: -x.get('leaguePoints', 0))[:10]
-    plans.append((tier, [e['puuid'] for e in es[:(4 if HIZLI else 10)]], 6, K(40)))
-for tier in ('DIAMOND', 'EMERALD', 'PLATINUM'):
-    d = riot('tr1', f'tft/league/v1/entries/{tier}/I') or []
-    es = sorted([e for e in (d if isinstance(d, list) else []) if e.get('puuid')],
-                key=lambda e: -(e.get('wins', 0)+e.get('losses', 0)))[:12]
-    plans.append((tier, [e['puuid'] for e in es[:(4 if HIZLI else 12)]], 20, K(28)))
+NB = len(BOLGELER)
+def K(x):
+    x = max(6, x//4) if HIZLI else x
+    # Bolge sayisi artinca bolge basina orneklem kucultulur ki toplam sure patlamasin;
+    # karekok ile: 1 bolge -> tam, 4 bolge -> yarim (toplam yine ~2 kat veri).
+    return max(8, round(x / (NB ** 0.5)))
 
+tier_boards = defaultdict(list)     # tier -> tum bolgelerden tahtalar
+tier_kept = defaultdict(int)        # tier -> islenen mac sayisi
+bolge_ozet = {}                     # bolge -> tahta sayisi
+en_iyi = []                         # tum bolgelerin challenger girdileri (ladder icin)
+SIRA = ('CHALLENGER', 'GRANDMASTER', 'MASTER', 'DIAMOND', 'EMERALD', 'PLATINUM')
+
+for bolge in BOLGELER:
+    rota = ROTA[bolge]
+    chall = riot(bolge, 'tft/league/v1/challenger') or {'entries': []}
+    btop = sorted(chall.get('entries', []), key=lambda x: -x.get('leaguePoints', 0))
+    for e in btop[:10]:
+        e['_bolge'] = bolge
+    en_iyi += btop[:10]
+    plans = [('CHALLENGER', [e['puuid'] for e in btop[:(6 if HIZLI else 20)]], 8, K(100))]
+    for tier, ep in (('GRANDMASTER', 'tft/league/v1/grandmaster'), ('MASTER', 'tft/league/v1/master')):
+        d = riot(bolge, ep) or {}
+        es = sorted(d.get('entries', []), key=lambda x: -x.get('leaguePoints', 0))[:10]
+        plans.append((tier, [e['puuid'] for e in es[:(4 if HIZLI else 10)]], 6, K(40)))
+    for tier in ('DIAMOND', 'EMERALD', 'PLATINUM'):
+        d = riot(bolge, f'tft/league/v1/entries/{tier}/I') or []
+        es = sorted([e for e in (d if isinstance(d, list) else []) if e.get('puuid')],
+                    key=lambda e: -(e.get('wins', 0)+e.get('losses', 0)))[:12]
+        plans.append((tier, [e['puuid'] for e in es[:(4 if HIZLI else 12)]], 20, K(28)))
+
+    btoplam = 0
+    for tier, pu, per, cap in plans:
+        if not pu:
+            print(f"  {bolge.upper():5s} {tier:12s} atlandi (oyuncu yok)", flush=True)
+            continue
+        boards, kept = collect(pu, per, cap, rota)
+        for b in boards:
+            b['rg'] = bolge                      # tahtanin geldigi bolge
+        tier_boards[tier] += boards
+        tier_kept[tier] += kept
+        btoplam += len(boards)
+        print(f"  {bolge.upper():5s} {tier:12s} {kept:3d} maç, {len(boards):4d} tahta", flush=True)
+    bolge_ozet[bolge] = btoplam
+    print(f"{bolge.upper()} toplam: {btoplam} tahta", flush=True)
+
+# ---- birlesik analiz: ayni tier tum bolgelerden birlikte degerlendirilir ----
 leagues, allb = {}, []
-for tier, pu, per, cap in plans:
-    boards, kept = collect(pu, per, cap)
+for tier in SIRA:
+    boards = tier_boards.get(tier, [])
+    if not boards: continue
     allb += boards
     comps = analyze(boards)
     for c in comps:
         c['augs'] = augs_for(c.pop('kt') + [t for t, _ in c['traits'][:3]])
-    leagues[tier] = {"comps": comps, "sample": {"m": kept, "b": len(boards)}}
-    print(f"{tier:12s} {kept:3d} maç, {len(boards):4d} tahta, {len(comps):2d} komp", flush=True)
+    leagues[tier] = {"comps": comps, "sample": {"m": tier_kept[tier], "b": len(boards)}}
+    print(f"{tier:12s} {tier_kept[tier]:4d} maç, {len(boards):5d} tahta, {len(comps):2d} komp", flush=True)
+
+top = sorted(en_iyi, key=lambda x: -x.get('leaguePoints', 0))
 
 # ---- liderlik + örnek profil ----
 
 ladder = []
 for e in top[:10]:
-    acc = riot('europe', f"riot/account/v1/accounts/by-puuid/{e['puuid']}") or {}
-    ladder.append({"name": acc.get('gameName', '?'), "tag": acc.get('tagLine', 'TR1'),
+    _b = e.get('_bolge', BOLGELER[0])
+    acc = riot(ROTA[_b], f"riot/account/v1/accounts/by-puuid/{e['puuid']}") or {}
+    ladder.append({"name": acc.get('gameName', '?'), "tag": _b.upper(),
                    "lp": e['leaguePoints'], "w": e['wins'], "l": e['losses'], "pu": e['puuid']})
 matches = []
 if top:
-    ids = riot('europe', f"tft/match/v1/matches/by-puuid/{top[0]['puuid']}/ids?count=5") or []
+    _b0 = top[0].get('_bolge', BOLGELER[0])
+    _r0 = ROTA[_b0]
+    ids = riot(_r0, f"tft/match/v1/matches/by-puuid/{top[0]['puuid']}/ids?count=5") or []
     for mid in ids:
-        m = CACHE.get(mid) or riot('europe', f'tft/match/v1/matches/{mid}')
+        m = CACHE.get(mid) or riot(_r0, f'tft/match/v1/matches/{mid}')
         if not m or 'info' not in m: continue
         me = next((x for x in m['info']['participants'] if x['puuid'] == top[0]['puuid']), None)
         if not me: continue
@@ -324,15 +386,17 @@ if ladder:
 if matches: snap['matches'] = matches
 snap['ts'] = datetime.now(timezone(timedelta(hours=3))).strftime('%d.%m.%Y %H:%M')
 snap['sampleAll'] = {"b": len(allb)}
+snap['regions'] = {"list": [b.upper() for b in BOLGELER],
+                   "boards": {b.upper(): n for b, n in bolge_ozet.items()}}
 # Yama etiketi: GitHub repo degiskeni YAMA'dan (yoksa mevcut/varsayilan). Boylece snap.json donmaz.
 snap['patch'] = guncel_yama_cek() or os.environ.get('YAMA') or snap.get('patch') or '17.7'
 snap['set'] = int(snap['patch'].split('.')[0])  # yamadan turet (17.7 -> 17, 18.1 -> 18)
 
 # --- Veri kalitesi koruması: cok az tahta toplandiysa ESKI veriyi KORU, hata ver ---
 # Boylece bir daha "sessizce basarili ama bos" durumu olusmaz; Actions kirmizi yanar.
-ESIK = 200
+ESIK = 200 if len(BOLGELER) == 1 else 150 * len(BOLGELER)
 if len(allb) < ESIK:
-    sys.exit(f"HATA: yalnizca {len(allb)} tahta toplandi (esik {ESIK}). "
+    sys.exit(f"HATA: yalnizca {len(allb)} tahta toplandi (esik {ESIK}, {len(BOLGELER)} bolge). "
              f"Riot API kismi/bos donmus olabilir. snap.json DEGISTIRILMEDI, eski veri korundu.")
 
 json.dump(snap, open(snap_yolu, 'w', encoding='utf-8'), ensure_ascii=False)
