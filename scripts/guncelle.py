@@ -468,6 +468,63 @@ for it, per in pair.items():
         snap['itemStats'][it] = {"n": tot, "avg": round(raw, 2), "d": d, "t": t,
                                  "amblem": it in _amblem}
 
+# ---- SAMPIYON ISTATISTIKLERI ----
+# base[c] = [kac tahtada gorüldü, siralama toplami] — zaten yukarida hesaplandi,
+# simdiye kadar sadece esya Δ'sinda kullanilip atiliyordu. Disa vererek
+# tactics.tools'un "Units" sekmesinin karsiligini uretiyoruz.
+#   avg  : sampiyonun bulundugu tahtalarin ortalama sirasi
+#   pr   : oynanma orani (kac tahtanin yuzde kacinda vardi)
+#   d    : lig ortalamasina gore fark (negatif = daha iyi)
+#   items: o sampiyon uzerinde EN COK gorulen 3 esya (yalnizca tamamlanmis)
+#   comps: en cok gectigi komp adlari
+_tumTahta = len(lb) or 1
+_genelOrt = (sum(v[1] for v in base.values()) / sum(v[0] for v in base.values())) if base else 4.5
+# sampiyon -> esya sayaci (pair ters cevrilir)
+_champItem = defaultdict(Counter)
+for it, per in pair.items():
+    if it in _bilesen:
+        continue
+    for c, (n, ssum) in per.items():
+        _champItem[c][it] += n
+# sampiyon -> gectigi komplar (lig birlesik, tahta sayisina gore)
+_champComp = defaultdict(Counter)
+for _lg in leagues.values():
+    for _c in _lg.get('comps', []):
+        for _u in _c.get('units', []):
+            _champComp[_u['c']][_c['name']] += _c.get('n', 0)
+
+snap['unitStats'] = {}
+for c, (n, ssum) in base.items():
+    if n < 15:            # cok az gorulen birim istatistik uretmez
+        continue
+    avg = ssum / n
+    snap['unitStats'][c] = {
+        "n": n,
+        "avg": round(avg, 2),
+        "pr": round(100.0 * n / _tumTahta, 1),
+        "d": round(avg - _genelOrt, 2),
+        "items": [i for i, _ in _champItem[c].most_common(3)],
+        "comps": [k for k, _ in _champComp[c].most_common(3)],
+    }
+
+# ---- OZELLIK (TRAIT) ISTATISTIKLERI ----
+# Bir tahtada aktif olan ozellikler b['traits'] icinde geliyor (tier_current >= 1).
+_traitAgg = defaultdict(lambda: [0, 0])
+for b in lb:
+    for tr in (b.get('traits') or []):
+        nm = tr.get('n')
+        if nm in trait_tr:
+            _traitAgg[nm][0] += 1
+            _traitAgg[nm][1] += b['pl']
+snap['traitStats'] = {}
+for tid, (n, ssum) in _traitAgg.items():
+    if n < 15:
+        continue
+    avg = ssum / n
+    snap['traitStats'][tid] = {"n": n, "avg": round(avg, 2),
+                               "pr": round(100.0 * n / _tumTahta, 1),
+                               "d": round(avg - _genelOrt, 2)}
+
 snap['leagues'] = leagues
 snap['ladder'] = ladder
 if ladder:
@@ -490,4 +547,46 @@ if len(allb) < ESIK:
              f"Riot API kismi/bos donmus olabilir. snap.json DEGISTIRILMEDI, eski veri korundu.")
 
 json.dump(snap, open(snap_yolu, 'w', encoding='utf-8'), ensure_ascii=False)
+
+# ---- GECMIS ARSIVI (trend grafigi icin) ----
+# Her gun kucuk bir ozet yazariz: komp adi -> [ortalama, tahta sayisi].
+# Tam snap.json ~200 KB; bu ozet ~3-5 KB. 60 gunluk arsiv bile 300 KB'i gecmez.
+# Bunu kullanarak "bu komp son 7 gunde yukseldi mi" sorusunu cevaplayabiliriz.
+try:
+    _gec_dizin = os.path.join(KOK, 'veri', 'gecmis')
+    os.makedirs(_gec_dizin, exist_ok=True)
+    _bugun_iso = datetime.now(timezone(timedelta(hours=3))).strftime('%Y-%m-%d')
+    # ligler arasi agirlikli ortalama (istemcideki uretAIData ile ayni mantik)
+    _oz = {}
+    for _lg in leagues.values():
+        for _c in _lg.get('comps', []):
+            _k = _c['name']; _n = _c.get('n', 0)
+            _r = _oz.setdefault(_k, [0.0, 0])
+            _r[0] += _c['avg'] * _n; _r[1] += _n
+    _gun = {k: [round(v[0]/v[1], 2), v[1]] for k, v in _oz.items() if v[1]}
+    with open(os.path.join(_gec_dizin, _bugun_iso + '.json'), 'w', encoding='utf-8') as _f:
+        json.dump({'ts': snap['ts'], 'patch': snap['patch'], 'comps': _gun}, _f, ensure_ascii=False)
+    # Index dosyasi: son 30 gunun ozeti tek dosyada (istemci tek istekle okusun)
+    _hepsi = sorted(x for x in os.listdir(_gec_dizin) if x.endswith('.json') and x != 'index.json')
+    _son = _hepsi[-30:]
+    _idx = {'gunler': [], 'comps': {}}
+    for _dosya in _son:
+        try:
+            with open(os.path.join(_gec_dizin, _dosya), encoding='utf-8') as _f:
+                _d = json.load(_f)
+        except Exception:
+            continue
+        _tarih = _dosya[:-5]
+        _idx['gunler'].append(_tarih)
+        for _k, _v in (_d.get('comps') or {}).items():
+            _idx['comps'].setdefault(_k, {})[_tarih] = _v[0]
+    with open(os.path.join(_gec_dizin, 'index.json'), 'w', encoding='utf-8') as _f:
+        json.dump(_idx, _f, ensure_ascii=False)
+    # 60 gunden eskileri temizle
+    for _dosya in _hepsi[:-60]:
+        try: os.remove(os.path.join(_gec_dizin, _dosya))
+        except Exception: pass
+    print(f"gecmis arsivi: {_bugun_iso} yazildi, index {len(_idx['gunler'])} gun", flush=True)
+except Exception as _e:
+    print("gecmis arsivi atlandi:", _e, flush=True)
 print(f"snap.json yazıldı — {snap['ts']} · toplam {len(allb)} tahta")
