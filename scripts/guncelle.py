@@ -195,7 +195,11 @@ def analyze(boards):
         else: style, lvl = "Standart", 8
         # TIER esikleri istemcideki uretAIData() ile AYNI olmali; aksi halde ayni komp
         # Komplar sekmesinde S, AI Komplari'nda A gorunuyordu (118 kompun 30'unda oluyordu).
-        tier = "S" if avg <= 3.85 else "A" if avg <= 4.15 else "B" if avg <= 4.45 else "C"
+        # ONEMLI: kademe, snap.json'a YAZILAN yuvarlanmis ortalamadan hesaplanir. Ham deger
+        # kullanilirsa sinirda (or. 3.850000001) sunucu "A", istemci yuvarlanmis 3.85'i
+        # okuyup "S" der ve iki sekme ayni kompa farkli harf verir.
+        avg_r = round(avg, 2)
+        tier = "S" if avg_r <= 3.85 else "A" if avg_r <= 4.15 else "B" if avg_r <= 4.45 else "C"
         prim = trait_tr[k[0]]; sec = trait_tr[k[1]] if len(k) > 1 else None
         early = [c['id'] for c in sorted(pool12, key=lambda c: (
             -(prim in c['traits']), -(1 if sec and sec in c['traits'] else 0), c['cost'], -uf[c['id']]))
