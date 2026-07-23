@@ -289,7 +289,7 @@ main{max-width:1280px;margin:0 auto;padding:26px 20px 60px}
 .cico:hover{transform:translateY(-3px)}
 .cico-n{font-size:10.5px;color:var(--dim);margin-top:2px;letter-spacing:.2px}.cico-n.az{color:#E0A23C}.azveri{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(224,162,60,.14);color:#E0A23C;border:1px solid rgba(224,162,60,.35)}.u3{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:12.5px;letter-spacing:2px;color:#F0B441;text-shadow:0 1px 3px #000,0 0 6px rgba(240,180,65,.5);font-weight:800;z-index:2;white-space:nowrap}
 .trend{position:absolute;top:-7px;right:-6px;font-size:12px;font-weight:800;border-radius:6px;padding:1px 6px;color:#0E1220;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.reqe{position:absolute;bottom:28px;right:-10px;background:var(--surface2);border:1px solid #B06AF0;border-radius:7px;padding:2px;display:flex;gap:1px;place-items:center;z-index:2;box-shadow:0 0 0 2px rgba(176,106,240,.18)}.reqh{position:absolute;bottom:28px;right:-10px;background:var(--surface2);border:1px solid #E0A23C;border-radius:7px;padding:2px;display:grid;place-items:center;z-index:2;box-shadow:0 0 0 2px rgba(224,162,60,.18)}.augreq-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:6px;background:rgba(224,162,60,.14);color:#E8B75C;border:1px solid rgba(224,162,60,.4);flex-wrap:wrap}.azsw{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none}.azsw input{cursor:pointer}.amblem-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:6px;background:rgba(176,106,240,.14);color:#C79BF5;border:1px solid rgba(176,106,240,.4);flex-wrap:wrap}.amblem-chip .sp{display:inline-block;vertical-align:middle}.reqa{position:absolute;bottom:28px;left:-10px;background:var(--surface2);border:1px solid var(--c2);border-radius:7px;padding:2px;display:grid;place-items:center;z-index:2}
+.reqe{position:absolute;bottom:28px;right:-10px;background:var(--surface2);border:1px solid #B06AF0;border-radius:7px;padding:2px;display:flex;gap:1px;place-items:center;z-index:2;box-shadow:0 0 0 2px rgba(176,106,240,.18)}.reqh{position:absolute;bottom:28px;right:-10px;background:var(--surface2);border:1px solid #E0A23C;border-radius:7px;padding:2px;display:grid;place-items:center;z-index:2;box-shadow:0 0 0 2px rgba(224,162,60,.18)}.augreq-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:6px;background:rgba(224,162,60,.14);color:#E8B75C;border:1px solid rgba(224,162,60,.4);flex-wrap:wrap}.ucore{margin-top:14px}.ucore .ulbl{display:block;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--c2);margin-bottom:6px}.ucore.uflex .ulbl{color:var(--muted)}.ucore.uflex{opacity:.88}.ctag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.3px;padding:3px 8px;border-radius:5px;background:color-mix(in srgb,var(--tc) 16%,transparent);color:var(--tc);border:1px solid color-mix(in srgb,var(--tc) 45%,transparent);margin-left:4px}.azsw{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none}.azsw input{cursor:pointer}.amblem-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:6px;background:rgba(176,106,240,.14);color:#C79BF5;border:1px solid rgba(176,106,240,.4);flex-wrap:wrap}.amblem-chip .sp{display:inline-block;vertical-align:middle}.reqa{position:absolute;bottom:28px;left:-10px;background:var(--surface2);border:1px solid var(--c2);border-radius:7px;padding:2px;display:grid;place-items:center;z-index:2}
 a.pbtn{text-decoration:none;display:inline-block}
 .hbtn{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:linear-gradient(180deg,rgba(200,170,110,.10),rgba(200,170,110,.04));border:1px solid #7A5C28;border-radius:10px;padding:10px 18px;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(240,230,210,.08)}
 .hbtn:hover{color:#F0E6D2;border-color:#C8AA6E;box-shadow:0 0 16px rgba(200,170,110,.3),inset 0 0 0 1px rgba(240,230,210,.15)}
@@ -692,6 +692,7 @@ function detectLang(){
 let LANG = detectLang();
 const I18N = {
   tr: {
+    core_units:"Çekirdek", flex_units:"Esnek slot", sort_by:"Sırala", sort_avg:"Ort. sıraya göre", sort_play:"Oynanmaya göre", sort_top4:"İlk 4'e göre", sort_win:"Kazanmaya göre", tag_highwin:"Yüksek kazanma", tag_consistent:"Tutarlı", tag_itemdep:"Eşya bağımlı",
     needs_aug:"Augment gerekir", aug_req_tip:"Bu komp belirli bir hero augment olmadan kurulamaz. O augment sunulmazsa bu kompa girme.", show_low:"Az veriyi göster", play_rate:"Oynanma",
     needs_emblem:"Amblem gerekir", emblem_tip:"Bu komp bir amblem ister. Amblem dükkândan alınmaz; augment ya da örs (anvil) ile gelir. Amblemin yoksa bu kompu tam kuramazsın.", filter_noemb:"Amblemsiz oynanabilir", filter_emb:"Amblem gerektirenler",
     note_component:"Bileşenler için Δ değeri hesaplanmaz: oyun sonunda elinde kalan bir bileşen 'birleştirilemedi' demektir, bu yüzden istatistik yanıltıcı çıkar. Bileşenin gücü, yapıldığı eşyada görünür.", note_emblem:"Amblemler normal eşya gibi inşa edilmez (augment/örs ile gelir) ve bir özellik kazandırdıkları için Δ değerleri doğal olarak yüksektir. Diğer eşyalarla doğrudan kıyaslama."+" ", low_sample:"az veri", low_sample_tip:"Bu komp 20 tahtadan az örnekle hesaplandı; ortalama sıralaması ±1-1.5 basamak oynayabilir. Kademesini kesin bilgi olarak alma.", ai_over:"üzerinden", metric_avg:"Ort. Sıra", metric_trend:"Eğilim", ai_model:"AI değerlendirmesi",
@@ -829,6 +830,7 @@ const I18N = {
     not_found_rarity:"bu nadirlikte bulunamadı."
   },
   en: {
+    core_units:"Core", flex_units:"Flex", sort_by:"Sort", sort_avg:"By avg. place", sort_play:"By play rate", sort_top4:"By Top 4", sort_win:"By win rate", tag_highwin:"High win %", tag_consistent:"Consistent", tag_itemdep:"Items dependent",
     needs_aug:"Augment required", aug_req_tip:"This comp cannot be built without a specific hero augment. If it is not offered, do not force this comp.", show_low:"Show low sample", play_rate:"Play rate",
     needs_emblem:"Emblem required", emblem_tip:"This comp wants an emblem. Emblems are not bought in the shop; they come from augments or anvils. Without it you cannot field the comp as shown.", filter_noemb:"Playable without emblem", filter_emb:"Requires an emblem",
     note_component:"Components are not given a Δ rating: a component still in your inventory at game end means it was never combined, so the statistic is misleading. A component's value shows up in the item it builds into.", note_emblem:"Emblems are not built like normal items (they come from augments/anvils) and grant a trait, so their Δ is naturally high. Not directly comparable to other items."+" ", low_sample:"low sample", low_sample_tip:"This comp is based on fewer than 20 boards; its average placement can swing by 1-1.5 positions. Treat the tier as provisional.", ai_over:"—", metric_avg:"Avg. Place", metric_trend:"Trend", ai_model:"AI evaluation",
@@ -2152,6 +2154,7 @@ function azVeriChip(n){
 }
 let openComp = -1, styleFilter = "Tümü", leagueSel = "CHALLENGER";
 let azVeriGoster = false;   // varsayilan: az orneklemli komplar gizli (tactics.tools gibi)
+let compSort = "avg";      // avg | play | top4 | win
 let itemCat = "craft", augRar = "Gümüş", openAI = -1, openPost = -1;
 const LGL = {CHALLENGER:"Challenger", GRANDMASTER:"Grandmaster", MASTER:"Master",
              DIAMOND:"Elmas", EMERALD:"Zümrüt", PLATINUM:"Platin"};
@@ -2198,6 +2201,16 @@ function amblemRozet(c, boyut){
     ${a.slice(0,2).map(x => sp(x.item.sx, boyut || 20)).join("")}</span>`;
 }
 
+// Komp etiketleri — tactics.tools'un "High Win % / Consistent / Items Dependent"
+// rozetlerinin veriye dayali karsiligi. Hepsi mevcut alanlardan turetilir.
+function compEtiket(c){
+  const out = [];
+  if(c.win >= 18) out.push([t("tag_highwin"), "#E0565B"]);
+  else if(c.top4 >= 60) out.push([t("tag_consistent"), "var(--c2)"]);
+  const carryU = (c.units||[]).find(u => u.c === c.carry);
+  if(carryU && (carryU.it||[]).length >= 3) out.push([t("tag_itemdep"), "var(--c5)"]);
+  return out.map(([ad,renk]) => `<span class="ctag" style="--tc:${renk}">${ad}</span>`).join("");
+}
 function amblemChip(c){
   const a = compAmblem(c);
   if(!a.length) return "";
@@ -2262,7 +2275,16 @@ function boardHTML(c){
 }
 function compDetail(c){
   const ch = byId[c.carry] || {};
-  const units = c.units.map(u => unitHTML({c:u.c, s:u.s3?3:0, it:u.it}, 56, true)).join("");
+  // CEKIRDEK / ESNEK: veri "fx" alanini iceriyorsa iki gruba ayirip goster.
+  // Eski veride alan yoksa tek liste olarak gosterilir (geriye donuk uyumlu).
+  const _fxVar = c.units.some(u => u.fx !== undefined);
+  const _uHTML = u => unitHTML({c:u.c, s:u.s3?3:0, it:u.it}, 56, true);
+  const cekirdek = _fxVar ? c.units.filter(u => !u.fx) : c.units;
+  const esnek    = _fxVar ? c.units.filter(u =>  u.fx) : [];
+  const units = _fxVar
+    ? `<div class="ucore"><span class="ulbl">${t("core_units")}</span><div class="units" style="margin:0">${cekirdek.map(_uHTML).join("")}</div></div>`
+      + (esnek.length ? `<div class="ucore uflex"><span class="ulbl">${t("flex_units")}</span><div class="units" style="margin:0">${esnek.map(_uHTML).join("")}</div></div>` : "")
+    : c.units.map(_uHTML).join("");
   const early = c.early.map(id => unitHTML({c:id, s:0, it:[]}, 44, true)).join("");
   const carryItems = (c.units.find(u => u.c === c.carry) || {it:[]}).it;
   const augIds0 = [...(c.augs||[])];
@@ -2287,7 +2309,7 @@ function compDetail(c){
     <div class="rowline">
       ${portHTML(ch, 88, 94, TIERCOL[c.tier])}
       <div><div class="rowline" style="gap:10px">${tierBadge(c.tier)}<h3 style="font-size:19px">${esc(dl(c,"name"))}</h3></div>
-        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(c.style))}</span>${(()=>{const ka=keyAugOf(c);return ka?`<span class="tchip" data-open="${ka.id}" tabindex="0" role="button">${sp(ka.sx,17)}${t("key_short")} ${esc(dl(ka,"name"))}</span>`:"";})()}<span class="sub">${c.n} ${t("board")} · ${t("carry_word")} ${esc(ch?dl(ch,"name"):"")}</span>${azVeriChip(c.n)}${amblemChip(c)}${augChip(c)}</div>
+        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(c.style))}</span>${(()=>{const ka=keyAugOf(c);return ka?`<span class="tchip" data-open="${ka.id}" tabindex="0" role="button">${sp(ka.sx,17)}${t("key_short")} ${esc(dl(ka,"name"))}</span>`:"";})()}<span class="sub">${c.n} ${t("board")} · ${t("carry_word")} ${esc(ch?dl(ch,"name"):"")}</span>${azVeriChip(c.n)}${amblemChip(c)}${augChip(c)}${compEtiket(c)}</div>
         <div class="rowline" style="gap:6px;margin-top:9px;flex-wrap:wrap">${c.traits.map(traitBadge).join("")}</div></div>
       <span style="flex:1"></span>
       <div class="metric"><b>${c.avg.toFixed(2)}</b><span>${t("metric_avg")}</span></div>
@@ -2297,7 +2319,7 @@ function compDetail(c){
       ${c.tr?`<div class="metric"><b style="color:${c.tr==="up"?"var(--c2)":"#E0565B"}">${c.tr==="up"?"▲":"▼"} ${Math.abs(c.td)}</b><span>${t("metric_trend")}</span></div>`:""}
       <button class="mclose" data-ccl aria-label="Kapat">✕</button>
     </div>
-    <div class="units" style="margin-top:16px">${units}</div>
+    ${_fxVar ? `<div style="margin-top:16px">${units}</div>` : `<div class="units" style="margin-top:16px">${units}</div>`}
     <div class="boxes">
       <div class="box"><h4>${t("early_game")}</h4><div class="units" style="margin:0;padding-bottom:8px">${early}</div><div class="sub" style="color:var(--text)">${esc((dl(c,"stages")||c.stages||[])[0]||"")}</div></div>
       <div class="box"><h4>${t("item_priority")} — ${esc(ch?dl(ch,"name"):"")}</h4><div class="iprio">${iprio||'<span class="sub">'+t("data_scarce")+'</span>'}</div></div>
@@ -2314,6 +2336,12 @@ function compsHTML(f){
   const L = (SNAP.leagues && SNAP.leagues[leagueSel]) || {comps: [], sample: {m:0, b:0}};
   let list = L.comps.map((c,i) => ({...c, _i:i}));
   if(!azVeriGoster) list = list.filter(c => !azVeri(c.n));
+  // Siralama: guven agirlikli ortalama varsayilan; kullanici degistirebilir.
+  const _adj = c => (c.avgAdj !== undefined ? c.avgAdj : ((c.n*c.avg + SHRINK_C*4.5)/(c.n+SHRINK_C)));
+  if(compSort === "play")      list.sort((a,b) => b.n - a.n);
+  else if(compSort === "top4") list.sort((a,b) => b.top4 - a.top4 || _adj(a) - _adj(b));
+  else if(compSort === "win")  list.sort((a,b) => b.win - a.win || _adj(a) - _adj(b));
+  else                         list.sort((a,b) => _adj(a) - _adj(b));
   if(styleFilter === "__noemb")      list = list.filter(c => !compAmblem(c).length);
   else if(styleFilter === "__emb")   list = list.filter(c => compAmblem(c).length);
   else if(styleFilter !== "Tümü")    list = list.filter(c => c.style.startsWith(styleFilter));
@@ -2326,6 +2354,7 @@ function compsHTML(f){
       <span>${t("badge_set")} ${esc(SNAP.patch||"")} · ${SNAP.ts} · ${bolgeEtiketi()} ${LGL[leagueSel]} ${L.sample.m} ${t("match")} / ${L.sample.b} ${t("board")}</span>
       ${EP("tft-match-v1")}<span style="flex:1"></span>
       <select id="clg" aria-label="${t('league')}">${Object.keys(LGL).map(k => `<option value="${k}" ${k===leagueSel?"selected":""}>${LGL[k]}</option>`).join("")}</select>
+      <select id="csort" aria-label="${t("sort_by")}">${[["avg",t("sort_avg")],["play",t("sort_play")],["top4",t("sort_top4")],["win",t("sort_win")]].map(([v,l]) => `<option value="${v}" ${v===compSort?"selected":""}>${l}</option>`).join("")}</select>
       <label class="azsw" title="${t("low_sample_tip")}"><input type="checkbox" id="azsw" ${azVeriGoster?"checked":""}> ${t("show_low")}</label>
       <select id="cstyle" aria-label="${t('playstyle')}">${styles.map(([v,lbl]) => `<option value="${v}" ${v===styleFilter?"selected":""}>${lbl}</option>`).join("")}</select>
     </div>`;
@@ -2379,6 +2408,7 @@ document.addEventListener("click", e => {
 document.addEventListener("change", e => {
   if(e.target.id === "cstyle"){ styleFilter = e.target.value; render(); }
   if(e.target.id === "azsw"){ azVeriGoster = e.target.checked; openComp = -1; render(); }
+  if(e.target.id === "csort"){ compSort = e.target.value; openComp = -1; render(); }
   if(e.target.id === "clg"){ leagueSel = e.target.value; openComp = -1; render(); }
   if(e.target.id === "r-lvl"){ rollLvl = +e.target.value; render(); }
   if(e.target.id === "r-cost"){ rollCost = +e.target.value; render(); }
@@ -2666,7 +2696,7 @@ function aiDetail(r){
       ${portHTML(ch, 88, 96, TIERCOL[r.tier])}
       <div style="flex:1;min-width:230px">
         <h3 style="font-size:20px">${esc(dl(r,"ad"))}</h3>
-        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(r.style||""))}</span><span class="sub">${r.n||"?"} ${t("board")} ${t("ai_over")} ${t("ai_eval")}</span>${azVeriChip(r.n)}${amblemChip(r)}${augChip(r)}</div>
+        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(r.style||""))}</span><span class="sub">${r.n||"?"} ${t("board")} ${t("ai_over")} ${t("ai_eval")}</span>${azVeriChip(r.n)}${amblemChip(r)}${augChip(r)}${compEtiket(r)}</div>
         <div class="rowline" style="gap:6px;margin-top:9px;flex-wrap:wrap">${(r.traits||[]).map(traitBadge).join("")}</div>
       </div>
       ${r.avg!==undefined?`<div class="metric"><b>${r.avg.toFixed(2)}</b><span>${t("ai_avg")}</span></div>
