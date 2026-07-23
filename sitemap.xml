@@ -10,8 +10,9 @@
   <url><loc>https://tftradar.com/tft-bilgi</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tftradar.com/roll-hesaplayici</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tftradar.com/takim-kurucu</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://tftradar.com/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tftradar.com/blog</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://tftradar.com/blog/set-17-meta-rehberi</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://tftradar.com/blog/tft-ekonomi-rehberi</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://tftradar.com/blog/esya-delta-analizi</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tftradar.com/blog/meta-raporu-2026-07-23</loc><lastmod>2026-07-23</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
