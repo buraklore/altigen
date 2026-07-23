@@ -199,7 +199,16 @@ def analyze(boards):
         # kullanilirsa sinirda (or. 3.850000001) sunucu "A", istemci yuvarlanmis 3.85'i
         # okuyup "S" der ve iki sekme ayni kompa farkli harf verir.
         avg_r = round(avg, 2)
-        tier = "S" if avg_r <= 3.85 else "A" if avg_r <= 4.15 else "B" if avg_r <= 4.45 else "C"
+        # GUVEN AGIRLIKLI ORTALAMA (shrinkage / empirical Bayes)
+        # 9 tahtalik bir komp 1.78 ortalama yakalayabilir; bu gercek guc degil, gurultudur.
+        # Kademeyi ham ortalamadan verirsek boyle bir komp "S" olur ve listenin basina gecer.
+        # Cozum: ortalamayi notr sira olan 4.5'e dogru orneklem buyuklugune gore cek.
+        #   duzeltilmis = (n*ort + C*4.5) / (n + C)     C = "on bilgi orneklem buyuklugu"
+        # n buyudukce duzeltilmis deger ham ortalamaya yaklasir; n kucukken 4.5'e cekilir.
+        # Kademe ve siralama BU degerden yapilir; kullaniciya gosterilen ort. yine hamdir.
+        SHRINK_C, NOTR = 20, 4.5
+        avg_adj = round((n * avg + SHRINK_C * NOTR) / (n + SHRINK_C), 2)
+        tier = "S" if avg_adj <= 3.85 else "A" if avg_adj <= 4.15 else "B" if avg_adj <= 4.45 else "C"
         prim = trait_tr[k[0]]; sec = trait_tr[k[1]] if len(k) > 1 else None
         early = [c['id'] for c in sorted(pool12, key=lambda c: (
             -(prim in c['traits']), -(1 if sec and sec in c['traits'] else 0), c['cost'], -uf[c['id']]))
@@ -260,12 +269,12 @@ def analyze(boards):
                       f"Seviye 8'e hızlı çık, {cname} 2★ için agresif roll yap.",
                       f"Kalan altınla tahtayı {champ_by_id[hi]['name']} gibi yüksek maliyetlilerle güçlendir."]
         out.append({"name": " + ".join(trait_tr[t] for t in k), "tier": tier, "style": style, "n": n,
-                    "avg": round(avg, 2), "top4": round(100*sum(1 for b in bs if b['pl'] <= 4)/n),
+                    "avg": avg_r, "avgAdj": avg_adj, "top4": round(100*sum(1 for b in bs if b['pl'] <= 4)/n),
                     "win": round(100*sum(1 for b in bs if b['pl'] == 1)/n),
                     "carry": carry, "traits": tbadges, "units": unit_objs,
                     "early": early, "alts": alts, "stages": stages,
                     "tr": trend, "td": tdelta, "kt": list(k)})
-    out.sort(key=lambda c: c['avg'])
+    out.sort(key=lambda c: c.get('avgAdj', c['avg']))   # guven agirlikli siralama
     return out
 
 tinfo = [(t['id'], t['id'].split('_', 1)[1].lower(), t['name'].lower()) for t in oyun['traits']]
