@@ -656,6 +656,18 @@ function applySnap(s){
   render();
 }
 if(LIVE){
+  fetch("veri/blog.json", {cache: "no-store"})
+    .then(r => r.ok ? r.json() : null)
+    .then(list => {
+      if(!list || !list.length) return;
+      const oncekiSlug = (openPost >= 0 && BLOG[openPost]) ? BLOG[openPost].slug : null;
+      blogBirlestir(list);
+      const yol = location.pathname.split("/").filter(Boolean);
+      if(yol[0] === "blog" && yol[1]) openPost = BLOG.findIndex(b => b.slug === yol[1]);
+      else if(oncekiSlug) openPost = BLOG.findIndex(b => b.slug === oncekiSlug);
+      if(tab === "blog") render();
+    })
+    .catch(() => {});
   fetch("veri/snap.json", {cache: "no-store"})
     .then(r => r.ok ? r.json() : null)
     .then(s => { if(s && s.ts && s.ts !== SNAP.ts){ applySnap(s); AIDATA = uretAIData(); bilingualizeAI(AIDATA); if(tab === "ai") render(); } })
@@ -2590,7 +2602,7 @@ function bilgiHTML(){
     </div>
     <div class="sub" style="margin-top:12px">${t("bilgi_src")}</div></div>`;
 }
-const BLOG = [
+const BLOG_ELLE = [
  {slug:"set-17-meta-rehberi", tarih:"07.07.2026", renk:"var(--cyan)", kapakN:["Samira","Ornn","Aurelion Sol"],
   baslik:"Set 17 Meta Rehberi: Yama 17.7'nın En Güçlü Kompları",
   baslik_en:"Set 17 Meta Guide: The Strongest Comps of Patch 17.7",
@@ -2665,6 +2677,15 @@ const BLOG = [
   <p>The method's output is recalculated daily in the <button class="blink" data-goto="items">Items</button> tab — in S-tier, mana engines (Blue Buff, Archangel's) and Crownguard stand out. The green ▲ category marks the most-built, red ▼ the ones left out of the meta; popularity and value don't always overlap, so read both together.</p>
   <p class="bkaynak">Data: <a href="https://developer.riotgames.com/apis#tft-match-v1" target="_blank" rel="noopener">Riot TFT Match API</a> · Visuals/text: <a href="https://www.communitydragon.org/" target="_blank" rel="noopener">Community Dragon</a></p>`}
 ];
+// Otomatik uretilen yazilar (veri/blog.json) en basa eklenir; elle yazilanlar korunur.
+let BLOG = BLOG_ELLE.slice();
+function blogBirlestir(oto){
+  if(!Array.isArray(oto) || !oto.length) return;
+  const sluglar = new Set(BLOG_ELLE.map(p => p.slug));
+  const temiz = oto.filter(p => p && p.slug && p.govde && !sluglar.has(p.slug));
+  if(!temiz.length) return;
+  BLOG = [...temiz, ...BLOG_ELLE];
+}
 // Blog alanını dile göre seç (EN modunda _en varsa onu döndür)
 function bl(p, alan){
   if(LANG === "en"){
@@ -2713,7 +2734,7 @@ function blogLD(p){
   sc.textContent = JSON.stringify({
     "@context":"https://schema.org","@type":"BlogPosting",
     "headline": bl(p,"baslik"), "description": bl(p,"ozet"),
-    "inLanguage":"tr-TR", "datePublished":"2026-07-07",
+    "inLanguage": LANG==="en" ? "en" : "tr-TR", "datePublished": p.tarihISO || "2026-07-07", "dateModified": p.tarihISO || "2026-07-07",
     "author":{"@type":"Organization","name":"TFTRadar"},
     "publisher":{"@type":"Organization","name":"TFTRadar"},
     "mainEntityOfPage":"https://tftradar.com/blog/"+p.slug,
