@@ -193,7 +193,9 @@ def analyze(boards):
         elif avlvl >= 8.4: style, lvl = "Hızlı 9", 9
         elif avlvl >= 7.55: style, lvl = "Hızlı 8", 8
         else: style, lvl = "Standart", 8
-        tier = "S" if avg <= 4.10 else "A" if avg <= 4.35 else "B" if avg <= 4.60 else "C"
+        # TIER esikleri istemcideki uretAIData() ile AYNI olmali; aksi halde ayni komp
+        # Komplar sekmesinde S, AI Komplari'nda A gorunuyordu (118 kompun 30'unda oluyordu).
+        tier = "S" if avg <= 3.85 else "A" if avg <= 4.15 else "B" if avg <= 4.45 else "C"
         prim = trait_tr[k[0]]; sec = trait_tr[k[1]] if len(k) > 1 else None
         early = [c['id'] for c in sorted(pool12, key=lambda c: (
             -(prim in c['traits']), -(1 if sec and sec in c['traits'] else 0), c['cost'], -uf[c['id']]))
@@ -229,9 +231,21 @@ def analyze(boards):
         earlyN = ", ".join(champ_by_id[e]['name'] for e in early[:3])
         hi = max(core, key=cost)
         threes = [champ_by_id[u['c']]['name'] for u in unit_objs if u['s3']][:2]
+        # REROLL HEDEFI: 3 yildiz yalnizca 1-2-3 maliyetlilerde gercekci hedeftir.
+        # 4 maliyetlinin havuzda 10 kopyasi var, 3* icin 9 gerekir -> pratikte imkansiz.
+        # Bu yuzden "hedef X 3*" metninde TASIYICI adi degil, tahtada gercekten 3 yildiza
+        # cikan UCUZ birimler kullanilir. (style zaten 1-2-3 maliyetli 3*'lara gore secilir.)
+        ucuz3 = [champ_by_id[u['c']]['name'] for u in unit_objs
+                 if u['s3'] and cost(u['c']) <= 3][:2]
+        # Turkce sayi eki: 5'te/8'de/9'da — sondaki unluye gore
+        _EK = {5: "5'te", 6: "6'da", 7: "7'de", 8: "8'de", 9: "9'da", 10: "10'da"}
+        lvl_ek = _EK.get(lvl, f"{lvl}'de")
         if style.startswith("Yavaş"):
+            hedef = " ve ".join(f"{a} 3★" for a in ucuz3) if ucuz3 else f"{cname} 2★"
             stages = [f"Erken birimlerle ({earlyN}) sıralamayı koru; eşyaları beklemeden bas, ekonomi kur.",
-                      f"Seviye {lvl}'te dur, 50 altının üstünde roll yap: hedef {cname} 3★" + (f" ve {threes[1]} 3★" if len(threes) > 1 else "") + ".",
+                      f"Seviye {lvl_ek} dur, 50 altının üstünde roll yap: hedef {hedef}."
+                      + (f" Taşıyıcın {cname} ({cost(carry)} maliyet) 2★ yeterli — onu 3★ yapmaya çalışma."
+                         if cost(carry) >= 4 else ""),
                       f"3★'lar tamamlanınca seviye atla; tahtayı {champ_by_id[hi]['name']} ve yüksek maliyetlilerle kapla."]
         elif style == "Hızlı 9":
             stages = [f"Az roll, çok faiz: ({earlyN}) ile ayakta kal, 50 altını koru.",
@@ -414,7 +428,14 @@ for b in lb:
             if it in item_ids:
                 pair[it][c][0] += 1; pair[it][c][1] += b['pl']
 snap['itemStats'] = {}
+# BILESENLER (comp=True) Δ siralamasina GIRMEZ: oyun sonunda elde kalmis bir bilesen
+# "birlestirilememis" demektir, bu yuzden Δ'si her zaman pozitif cikar ve esya kotuymus
+# gibi gorunur. Or. TEK Kilici Δ+0.88 -> "C kademe". Metrik bilesenler icin gecersiz.
+_bilesen = {i['id'] for i in oyun['items'] if i.get('comp')}
+_amblem = {i['id'] for i in oyun['items'] if (i.get('cat') == 'emblem')}
 for it, per in pair.items():
+    if it in _bilesen:
+        continue
     num = den = tot = 0
     for c, (n, s) in per.items():
         if n < 8 or base[c][0] < 12: continue
@@ -424,7 +445,8 @@ for it, per in pair.items():
         d = round(num/den, 2)
         raw = sum(s for n, s in per.values())/sum(n for n, s in per.values())
         t = "S" if d <= -0.35 else "A" if d <= -0.12 else "B" if d <= 0.08 else "C"
-        snap['itemStats'][it] = {"n": tot, "avg": round(raw, 2), "d": d, "t": t}
+        snap['itemStats'][it] = {"n": tot, "avg": round(raw, 2), "d": d, "t": t,
+                                 "amblem": it in _amblem}
 
 snap['leagues'] = leagues
 snap['ladder'] = ladder
