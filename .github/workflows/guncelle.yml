@@ -18,10 +18,12 @@ jobs:
           RIOT_API_KEY: ${{ secrets.RIOT_API_KEY }}
           YAMA: ${{ vars.YAMA }}
         run: python scripts/guncelle.py
+      - name: Blog yazisi uret (veri gudumlu)
+        run: python scripts/blog_uret.py
       - name: Degisiklikleri commit'le
         run: |
           git config user.name  "altigen-bot"
           git config user.email "bot@altigen"
-          git add veri/snap.json
+          git add veri/snap.json veri/blog.json
           git diff --cached --quiet || git commit -m "Otomatik veri guncellemesi"
           git push
