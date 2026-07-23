@@ -258,15 +258,57 @@ tinfo = [(t['id'], t['id'].split('_', 1)[1].lower(), t['name'].lower()) for t in
 _HERO_AUG = re.compile(r'_Augment_[A-Za-z]+(Carry|GodAugment)$')
 alow = [(a['id'], a['id'].lower(), a['name'].lower(), a['d'].lower())
         for a in oyun['augments'] if not _HERO_AUG.search(a['id'])]
+
+# --- Ozellik (trait) -> augment eslesmesi -------------------------------------
+# ESKI mantik ham alt-dize aramasi yapiyordu ve iki tur yanlis eslesme uretiyordu:
+#   "Meka" -> "Mekanik Hizlandirici"  (kelime ICINDE eslesme)
+#   "Komutan" -> "Anima Komutani"     (baska ozelligin augmentinin ADI)
+# Yeni mantik iki GUVENILIR sinyale dayanir:
+#   1) Aciklamada ozellik adi, kelime basinda ve gecerli bir Turkce ekle geciyorsa
+#      ("Seyyahlar ... kazanir", "Medyum birimlerinin", "Hakimler yasalarina")
+#   2) Sete ozel augmentlerde id, ozelligin ic kod adini iceriyorsa
+#      (TFT17_Augment_AnimaSquad_Commander -> TFT17_AnimaSquad)
+_TR_EK = {"", "lar", "ler", "ları", "leri", "ların", "lerin", "larla", "lerle",
+          "ı", "i", "u", "ü", "ın", "in", "un", "ün", "a", "e", "ya", "ye",
+          "dan", "den", "tan", "ten", "da", "de", "ta", "te", "lardan", "lerden",
+          "lık", "lik", "li", "lı", "lu", "lü"}
+_HARF = re.compile(r'[0-9a-zçğıöşü]', re.I)
+_EK_AL = re.compile(r'^[a-zçğıöşü]*')
+
+
+def _trait_gecer(ad_low, metin_low):
+    """Ozellik adi metinde kelime basinda + gecerli Turkce ekle geciyor mu?"""
+    if len(ad_low) < 4:
+        return False
+    t = metin_low.replace("'", "").replace("’", "")
+    k = ad_low.replace("'", "").replace("’", "")
+    p = t.find(k)
+    while p != -1:
+        onceki = t[p-1] if p > 0 else ' '
+        if not _HARF.match(onceki):
+            ek = _EK_AL.match(t[p+len(k):]).group(0)
+            if ek in _TR_EK:
+                return True
+        p = t.find(k, p + 1)
+    return False
+
+
 def augs_for(trait_ids):
-    toks = [(a, tok, nm) for tid in trait_ids for a, tok, nm in tinfo if a == tid]
+    hedef = [(tid, nm) for tid, tok, nm in tinfo if tid in set(trait_ids)]
     hits = []
     for aid, al, anm, ad in alow:
         sc = 0
-        for tid, tok, nm in toks:
-            if (len(tok) >= 4 and tok in al) or (len(nm) >= 4 and nm in anm): sc = max(sc, 2)
-            elif len(nm) >= 5 and nm in ad: sc = max(sc, 1)
-        if sc: hits.append((sc, aid))
+        for tid, nm in hedef:
+            if _trait_gecer(nm, ad):                       # (1) aciklama sinyali
+                sc = max(sc, 2)
+                continue
+            onek = (re.match(r'^TFT\d*_', tid) or [''])[0]  # (2) id sinyali (sete ozel)
+            kod = tid[len(onek):].replace('UniqueTrait', '').replace('Undetermined', '') \
+                                 .replace('Trait', '').lower()
+            if onek and len(kod) >= 4 and al.startswith(onek.lower()) and kod in al:
+                sc = max(sc, 2)
+        if sc:
+            hits.append((sc, aid))
     hits.sort(key=lambda x: (-x[0], x[1]))
     return [h[1] for h in hits[:8]]
 
