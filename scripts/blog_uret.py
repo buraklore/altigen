@@ -10,7 +10,7 @@ icerigi KULLANILMAZ. Uretilen her cumle kendi olctugun sayilardan gelir.
 
 Kullanim:  python3 scripts/blog_uret.py
 """
-import json, os, sys, html
+import json, os, re, sys, html
 from datetime import datetime, timezone, timedelta
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -293,6 +293,46 @@ def rapor_uret(snap, oyun, bugun):
     }
 
 
+def sitemap_yaz(oto_yazilar):
+    """sitemap.xml'i yeniden uretir: statik sayfalar + elle yazilan bloglar +
+    OTOMATIK uretilen meta raporlari. Otomatik yazilar her gun degistigi icin
+    sitemap'in de her gun guncellenmesi gerekir, yoksa yeni yazilar taranmaz."""
+    KOK_URL = "https://tftradar.com"
+    statik = [("/", "daily", "1.0"), ("/komplar", "daily", "0.9"),
+              ("/ai-komplari", "daily", "0.9"), ("/set-rehberi", "weekly", "0.8"),
+              ("/esyalar", "daily", "0.8"), ("/augmentler", "daily", "0.8"),
+              ("/oyuncu", "weekly", "0.6"), ("/tft-bilgi", "weekly", "0.7"),
+              ("/roll-hesaplayici", "monthly", "0.7"), ("/takim-kurucu", "monthly", "0.7"),
+              ("/blog", "daily", "0.8")]
+    # Elle yazilan blog slug'lari index.html'deki BLOG_ELLE dizisinden okunur
+    elle = []
+    try:
+        h = open(os.path.join(KOK, 'index.html'), encoding='utf-8').read()
+        bas = h.index('const BLOG_ELLE = [')
+        son = h.index('\n];', bas)
+        elle = re.findall(r'slug:\s*"([^"]+)"', h[bas:son])
+    except Exception:
+        elle = ["set-17-meta-rehberi", "tft-ekonomi-rehberi", "esya-delta-analizi"]
+
+    sat = ['<?xml version="1.0" encoding="UTF-8"?>',
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for yol, sik, onc in statik:
+        sat.append(f'  <url><loc>{KOK_URL}{yol}</loc><changefreq>{sik}</changefreq>'
+                   f'<priority>{onc}</priority></url>')
+    for sl in elle:
+        sat.append(f'  <url><loc>{KOK_URL}/blog/{sl}</loc><changefreq>monthly</changefreq>'
+                   f'<priority>0.6</priority></url>')
+    for y in oto_yazilar:
+        lm = y.get('tarihISO') or ''
+        lmx = f'<lastmod>{lm}</lastmod>' if lm else ''
+        sat.append(f'  <url><loc>{KOK_URL}/blog/{y["slug"]}</loc>{lmx}'
+                   f'<changefreq>monthly</changefreq><priority>0.7</priority></url>')
+    sat.append('</urlset>')
+    with open(os.path.join(KOK, 'sitemap.xml'), 'w', encoding='utf-8') as f:
+        f.write('\n'.join(sat) + '\n')
+    return len(statik) + len(elle) + len(oto_yazilar)
+
+
 def main():
     snap = yukle(SNAP_YOLU)
     oyun = yukle(OYUN_YOLU)
@@ -322,6 +362,11 @@ def main():
     kelime = len(yazi['govde'].replace('<', ' <').split())
     print(f"blog.json yazildi — '{yazi['slug']}' (~{kelime} kelime), toplam {len(mevcut)} otomatik yazi",
           flush=True)
+    try:
+        adet = sitemap_yaz(mevcut)
+        print(f"sitemap.xml yazildi — {adet} URL", flush=True)
+    except Exception as ex:
+        print(f"sitemap yazilamadi: {ex}", flush=True)
     return 0
 
 
