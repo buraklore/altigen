@@ -166,8 +166,15 @@ def analyze(boards):
         if _saldiri_skoru(cr[0]) == 0:  # hic saldiri esyasi yoksa eski mantik
             cr = sorted(core, key=lambda c: -_ort_esya(c))
         carry = cr[0]; carryish = cr[:2]
+        # CEKIRDEK (core) / ESNEK (flex) ayrimi — tactics.tools'un "Core / Flex" gosterimi.
+        # uf[c]/n = o birimin kumedeki tahtalarin yuzde kacinda gorüldügü.
+        # %60 ve uzeri: kompun olmazsa olmazi (cekirdek). Altindakiler doldurma/esnek slot.
+        # Oyuncuya "sunlar sart, kalan 2 slot esnek" demek pratikte cok isine yarar.
+        CEKIRDEK_ESIK = 0.60
         unit_objs = [{"c": c, "it": [i for i, _ in items_per[c].most_common(3)] if (c in carryish or _ort_esya(c) >= 1.5) else [],
-                      "s3": star3[c] >= 0.25*uf[c]} for c in core]
+                      "s3": star3[c] >= 0.25*uf[c],
+                      "fx": uf[c] < CEKIRDEK_ESIK * n,
+                      "uf": round(uf[c] / n, 2)} for c in core]
         sb = sorted(bs, key=lambda b: b.get('dt') or 0)
         half = len(sb)//2
         trend, tdelta = None, 0
