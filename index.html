@@ -1754,19 +1754,40 @@ function augRecBox(comp){
     <div class="augrec-legend">${legend}</div></div>`;
 }
 
-function augPrio2(comp, hs){
+// TEK DOGRULUK KAYNAGI: augment oncelik sirasi.
+// Hem komp/AI ikonundaki rozet hem detaydaki "Augment onceligi" kutusu BUNU kullanir,
+// boylece rozette gorunen augment ile panelin ilk kutusu HER ZAMAN aynidir.
+// Sira: 1) tasiyicinin kendi hero augmenti  2) kompun kendi augs listesi
+//       3) recommendAugments'in ilgili (rel) bulduklari  4) genel dolgu augmentleri
+function augOncelik(comp){
   const rec = recommendAugments(comp);
-  const _cK = _carryUnitKeys(comp);
-  const _ka = keyAugOf(comp); const _ex = [...(comp.augs||[]).filter(id => _augOkFor(id, _cK)), ...(_ka ? [_ka.id] : [])];
-  _ex.forEach(aid => { const a = byId[aid]; if(!a || !a.rar || !rec[a.rar]) return; const arr = rec[a.rar], _i = arr.findIndex(o => o.aug && o.aug.id === aid); if(_i >= 0){ const it = arr.splice(_i, 1)[0]; it.rel = true; arr.unshift(it); } else { arr.unshift({aug: a, rel: true}); } });
+  const cK = _carryUnitKeys(comp);
+  const sirali = [], gorulen = new Set();
+  const ekle = (aug, rel) => {
+    if(!aug || !aug.id || gorulen.has(aug.id)) return;
+    if(!_augOkFor(aug.id, cK)) return;        // baska birimin hero augmenti asla
+    gorulen.add(aug.id);
+    sirali.push({aug, rel: !!rel, rar: aug.rar});
+  };
+  const ka = keyAugOf(comp);                   // 1) tasiyicinin kendi hero/tanri augmenti
+  if(ka) ekle(ka, true);
+  (comp.augs || []).forEach(id => ekle(byId[id], true));   // 2) kompun kendi listesi
+  // 3) ilgili bulunanlar — uretAIData ile AYNI nadirlik sirasi (Altin -> Prizmatik -> Gumus)
+  for(const rar of ["Altın", "Prizmatik", "Gümüş"])
+    (rec[rar] || []).filter(o => o.rel).forEach(o => ekle(o.aug, true));
+  // 4) genel dolgu (yildizsiz) — listeyi tamamlamak icin
+  for(const rar of ["Altın", "Prizmatik", "Gümüş"])
+    (rec[rar] || []).filter(o => !o.rel).forEach(o => ekle(o.aug, false));
+  return sirali;
+}
+
+function augPrio2(comp, hs){
   const rarCol = {"Gümüş":"#C6CDDB", "Altın":"var(--c5)", "Prizmatik":"#7FE3F0"};
-  const tiles = [];
-  for(const rar of ["Gümüş", "Altın", "Prizmatik"]){
-    for(const {aug, rel} of (rec[rar]||[]).slice(0, 2)){
-      tiles.push(`<button class="augrec-tile${rel?" rel":""}" data-open="${aug.id}" tabindex="0" role="button" style="--rc:${rarCol[rar]}" aria-label="${esc(dl(aug,"name"))}" title="${esc(dl(aug,"name"))} · ${rarLabel(rar)}${rel?" · "+t("aug_for_comp"):""}">
-        ${portHTML(aug, 34, 38, rel?"var(--gold)":rarCol[rar])}${rel?'<span class="augrec-star">★</span>':""}<div class="cnm">${esc(dl(aug,"name"))}</div></button>`);
-    }
-  }
+  const tiles = augOncelik(comp).slice(0, 6).map(({aug, rel, rar}) => {
+    const rc = rarCol[rar] || "#C6CDDB";
+    return `<button class="augrec-tile${rel?" rel":""}" data-open="${aug.id}" tabindex="0" role="button" style="--rc:${rc}" aria-label="${esc(dl(aug,"name"))}" title="${esc(dl(aug,"name"))} · ${rarLabel(rar)}${rel?" · "+t("aug_for_comp"):""}">
+        ${portHTML(aug, 34, 38, rel?"var(--gold)":rc)}${rel?'<span class="augrec-star">★</span>':""}<div class="cnm">${esc(dl(aug,"name"))}</div></button>`;
+  });
   const legend = ["Gümüş","Altın","Prizmatik"].map(r => `<span class="augrec-leg" style="--c:${rarCol[r]}">${rarLabel(r)}</span>`).join("");
   return `<div class="box augrec-box"><h4${hs||""}>${t("aug_priority")}</h4>
     <div class="augrec-tiles">${tiles.join("")}</div>
@@ -2389,7 +2410,8 @@ document.addEventListener("keydown", e => {
 function aiIcon(r, idx){
   const ch = byId[r.carry] || {};
   const s3 = (r.units||[]).some(u => u.c === r.carry && u.s3);
-  const ka = (r.augs && r.augs[0] && byId[r.augs[0]]) ? byId[r.augs[0]] : null;
+  const _ao = augOncelik(r)[0];                      // panelin ILK kutusu
+  const ka = (_ao && _ao.rel) ? _ao.aug : null;      // rozet yalnizca kompa OZEL augment icin
   return `<button class="cico ${openAI===idx?"on":""}" data-aicomp="${idx}" aria-label="${esc(dl(r,"ad"))}${s3?t("three_star_comp"):""}">
     ${portHTML(ch, 80, 86, TIERCOL[r.tier])}${s3?'<span class="u3">★★★</span>':""}${ka?`<span class="reqa" title="${t("prio_aug")} ${esc(dl(ka,"name"))}">${sp(ka.sx,20)}</span>`:""}
     <div class="cnm">${esc(ch&&ch.name?dl(ch,"name"):dl(r,"ad"))}</div></button>`;
