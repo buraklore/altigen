@@ -289,7 +289,7 @@ main{max-width:1280px;margin:0 auto;padding:26px 20px 60px}
 .cico:hover{transform:translateY(-3px)}
 .cico-n{font-size:10.5px;color:var(--dim);margin-top:2px;letter-spacing:.2px}.cico-n.az{color:#E0A23C}.azveri{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(224,162,60,.14);color:#E0A23C;border:1px solid rgba(224,162,60,.35)}.u3{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:12.5px;letter-spacing:2px;color:#F0B441;text-shadow:0 1px 3px #000,0 0 6px rgba(240,180,65,.5);font-weight:800;z-index:2;white-space:nowrap}
 .trend{position:absolute;top:-7px;right:-6px;font-size:12px;font-weight:800;border-radius:6px;padding:1px 6px;color:#0E1220;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.reqe{position:absolute;bottom:28px;right:-10px;background:var(--surface2);border:1px solid #B06AF0;border-radius:7px;padding:2px;display:flex;gap:1px;place-items:center;z-index:2;box-shadow:0 0 0 2px rgba(176,106,240,.18)}.amblem-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:6px;background:rgba(176,106,240,.14);color:#C79BF5;border:1px solid rgba(176,106,240,.4);flex-wrap:wrap}.amblem-chip .sp{display:inline-block;vertical-align:middle}.reqa{position:absolute;bottom:28px;left:-10px;background:var(--surface2);border:1px solid var(--c2);border-radius:7px;padding:2px;display:grid;place-items:center;z-index:2}
+.reqe{position:absolute;bottom:28px;right:-10px;background:var(--surface2);border:1px solid #B06AF0;border-radius:7px;padding:2px;display:flex;gap:1px;place-items:center;z-index:2;box-shadow:0 0 0 2px rgba(176,106,240,.18)}.reqh{position:absolute;bottom:28px;right:-10px;background:var(--surface2);border:1px solid #E0A23C;border-radius:7px;padding:2px;display:grid;place-items:center;z-index:2;box-shadow:0 0 0 2px rgba(224,162,60,.18)}.augreq-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:6px;background:rgba(224,162,60,.14);color:#E8B75C;border:1px solid rgba(224,162,60,.4);flex-wrap:wrap}.azsw{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none}.azsw input{cursor:pointer}.amblem-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:6px;background:rgba(176,106,240,.14);color:#C79BF5;border:1px solid rgba(176,106,240,.4);flex-wrap:wrap}.amblem-chip .sp{display:inline-block;vertical-align:middle}.reqa{position:absolute;bottom:28px;left:-10px;background:var(--surface2);border:1px solid var(--c2);border-radius:7px;padding:2px;display:grid;place-items:center;z-index:2}
 a.pbtn{text-decoration:none;display:inline-block}
 .hbtn{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:linear-gradient(180deg,rgba(200,170,110,.10),rgba(200,170,110,.04));border:1px solid #7A5C28;border-radius:10px;padding:10px 18px;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(240,230,210,.08)}
 .hbtn:hover{color:#F0E6D2;border-color:#C8AA6E;box-shadow:0 0 16px rgba(200,170,110,.3),inset 0 0 0 1px rgba(240,230,210,.15)}
@@ -692,6 +692,7 @@ function detectLang(){
 let LANG = detectLang();
 const I18N = {
   tr: {
+    needs_aug:"Augment gerekir", aug_req_tip:"Bu komp belirli bir hero augment olmadan kurulamaz. O augment sunulmazsa bu kompa girme.", show_low:"Az veriyi göster", play_rate:"Oynanma",
     needs_emblem:"Amblem gerekir", emblem_tip:"Bu komp bir amblem ister. Amblem dükkândan alınmaz; augment ya da örs (anvil) ile gelir. Amblemin yoksa bu kompu tam kuramazsın.", filter_noemb:"Amblemsiz oynanabilir", filter_emb:"Amblem gerektirenler",
     note_component:"Bileşenler için Δ değeri hesaplanmaz: oyun sonunda elinde kalan bir bileşen 'birleştirilemedi' demektir, bu yüzden istatistik yanıltıcı çıkar. Bileşenin gücü, yapıldığı eşyada görünür.", note_emblem:"Amblemler normal eşya gibi inşa edilmez (augment/örs ile gelir) ve bir özellik kazandırdıkları için Δ değerleri doğal olarak yüksektir. Diğer eşyalarla doğrudan kıyaslama."+" ", low_sample:"az veri", low_sample_tip:"Bu komp 20 tahtadan az örnekle hesaplandı; ortalama sıralaması ±1-1.5 basamak oynayabilir. Kademesini kesin bilgi olarak alma.", ai_over:"üzerinden", metric_avg:"Ort. Sıra", metric_trend:"Eğilim", ai_model:"AI değerlendirmesi",
     // Navigasyon
@@ -828,6 +829,7 @@ const I18N = {
     not_found_rarity:"bu nadirlikte bulunamadı."
   },
   en: {
+    needs_aug:"Augment required", aug_req_tip:"This comp cannot be built without a specific hero augment. If it is not offered, do not force this comp.", show_low:"Show low sample", play_rate:"Play rate",
     needs_emblem:"Emblem required", emblem_tip:"This comp wants an emblem. Emblems are not bought in the shop; they come from augments or anvils. Without it you cannot field the comp as shown.", filter_noemb:"Playable without emblem", filter_emb:"Requires an emblem",
     note_component:"Components are not given a Δ rating: a component still in your inventory at game end means it was never combined, so the statistic is misleading. A component's value shows up in the item it builds into.", note_emblem:"Emblems are not built like normal items (they come from augments/anvils) and grant a trait, so their Δ is naturally high. Not directly comparable to other items."+" ", low_sample:"low sample", low_sample_tip:"This comp is based on fewer than 20 boards; its average placement can swing by 1-1.5 positions. Treat the tier as provisional.", ai_over:"—", metric_avg:"Avg. Place", metric_trend:"Trend", ai_model:"AI evaluation",
     nav_player:"Player", nav_comps:"Comps", nav_ai:"AI Comps", nav_set:"Set Guide",
@@ -2116,11 +2118,40 @@ function bolgeEtiketi(){
   return (r && r.length) ? r.join(" + ") : "TR1";
 }
 const MIN_GUVEN = 20;
+// Sunucudaki guncelle.py ile AYNI olmali (guven agirlikli ortalama sabiti)
+const SHRINK_C = 20;
+// --- Augment gereksinimi ---------------------------------------------------
+// Amblem gibi, bazi komplar da BELIRLI bir hero augment olmadan kurulamaz
+// (or. "Istilaci Zed" augmenti olmadan Zed tahtaya gelmez). tftactics.gg bu
+// komplari "Augment" etiketiyle, TFT Academy ise ayri "Situational" grubunda
+// gosterir. Biz de amblemle ayni sekilde acikca isaretliyoruz.
+function compGerekliAugment(c){
+  const cK = _carryUnitKeys(c), out = [], gorulen = new Set();
+  for(const aid of (c.augs || [])){
+    const a = byId[aid], hero = _heroKey(aid);
+    if(a && hero && cK.has(hero) && !gorulen.has(aid)){ gorulen.add(aid); out.push(a); }
+  }
+  const ka = keyAugOf(c);
+  if(ka && _heroKey(ka.id) && !gorulen.has(ka.id)){ gorulen.add(ka.id); out.push(ka); }
+  return out;
+}
+function augRozet(c, boyut){
+  const a = compGerekliAugment(c);
+  if(!a.length) return "";
+  return `<span class="reqh" title="${t("needs_aug")}: ${a.map(x => esc(dl(x,"name"))).join(", ")}">${sp(a[0].sx, boyut || 20)}</span>`;
+}
+function augChip(c){
+  const a = compGerekliAugment(c);
+  if(!a.length) return "";
+  const liste = a.map(x => `${sp(x.sx,16)}<b>${esc(dl(x,"name"))}</b>`).join(" · ");
+  return `<span class="augreq-chip" title="${t("aug_req_tip")}">${t("needs_aug")}: ${liste}</span>`;
+}
 function azVeri(n){ return (n || 0) < MIN_GUVEN; }
 function azVeriChip(n){
   return azVeri(n) ? `<span class="azveri" title="${t("low_sample_tip")}">${t("low_sample")}</span>` : "";
 }
 let openComp = -1, styleFilter = "Tümü", leagueSel = "CHALLENGER";
+let azVeriGoster = false;   // varsayilan: az orneklemli komplar gizli (tactics.tools gibi)
 let itemCat = "craft", augRar = "Gümüş", openAI = -1, openPost = -1;
 const LGL = {CHALLENGER:"Challenger", GRANDMASTER:"Grandmaster", MASTER:"Master",
              DIAMOND:"Elmas", EMERALD:"Zümrüt", PLATINUM:"Platin"};
@@ -2198,7 +2229,7 @@ function compIcon(c, idx, f){
   const ka = keyAugOf(c);
   const tr = c.tr ? `<span class="trend" style="background:${c.tr==="up"?"var(--c2)":"#E0565B"}" title="${c.tr==="up"?t("comp_trend_up"):t("comp_trend_down")}">${c.tr==="up"?"▲":"▼"}</span>` : "";
   return `<button class="cico ${openComp===idx?"on":""}" data-comp="${idx}" aria-label="${esc(dl(c,"name"))}${s3?t("three_star_comp"):""} · ${c.n} ${t("board")}">
-    ${portHTML(ch, 80, 86, TIERCOL[c.tier])}${s3?'<span class="u3">★★★</span>':""}${tr}${ka?`<span class="reqa" title="${t("key_aug")} ${esc(dl(ka,"name"))}">${sp(ka.sx,20)}</span>`:""}${amblemRozet(c, 20)}
+    ${portHTML(ch, 80, 86, TIERCOL[c.tier])}${s3?'<span class="u3">★★★</span>':""}${tr}${ka?`<span class="reqa" title="${t("key_aug")} ${esc(dl(ka,"name"))}">${sp(ka.sx,20)}</span>`:""}${amblemRozet(c, 20)}${augRozet(c, 20)}
     <div class="cnm" ${hl?'style="color:var(--gold)"':""}>${esc(dl(ch,"name")||dl(c,"name"))}</div>
     <div class="cico-n${azVeri(c.n)?" az":""}">${c.n} ${t("board")}${azVeri(c.n)?" ⚠":""}</div></button>`;
 }
@@ -2256,10 +2287,11 @@ function compDetail(c){
     <div class="rowline">
       ${portHTML(ch, 88, 94, TIERCOL[c.tier])}
       <div><div class="rowline" style="gap:10px">${tierBadge(c.tier)}<h3 style="font-size:19px">${esc(dl(c,"name"))}</h3></div>
-        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(c.style))}</span>${(()=>{const ka=keyAugOf(c);return ka?`<span class="tchip" data-open="${ka.id}" tabindex="0" role="button">${sp(ka.sx,17)}${t("key_short")} ${esc(dl(ka,"name"))}</span>`:"";})()}<span class="sub">${c.n} ${t("board")} · ${t("carry_word")} ${esc(ch?dl(ch,"name"):"")}</span>${azVeriChip(c.n)}${amblemChip(c)}</div>
+        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(c.style))}</span>${(()=>{const ka=keyAugOf(c);return ka?`<span class="tchip" data-open="${ka.id}" tabindex="0" role="button">${sp(ka.sx,17)}${t("key_short")} ${esc(dl(ka,"name"))}</span>`:"";})()}<span class="sub">${c.n} ${t("board")} · ${t("carry_word")} ${esc(ch?dl(ch,"name"):"")}</span>${azVeriChip(c.n)}${amblemChip(c)}${augChip(c)}</div>
         <div class="rowline" style="gap:6px;margin-top:9px;flex-wrap:wrap">${c.traits.map(traitBadge).join("")}</div></div>
       <span style="flex:1"></span>
       <div class="metric"><b>${c.avg.toFixed(2)}</b><span>${t("metric_avg")}</span></div>
+      <div class="metric"><b>%${((c.n/((SNAP.leagues[leagueSel]||{sample:{b:1}}).sample.b||1))*100).toFixed(1)}</b><span>${t("play_rate")}</span></div>
       <div class="metric"><b>%${c.top4}</b><span>${t("ai_top4")}</span></div>
       <div class="metric"><b>%${c.win}</b><span>${t("ai_win")}</span></div>
       ${c.tr?`<div class="metric"><b style="color:${c.tr==="up"?"var(--c2)":"#E0565B"}">${c.tr==="up"?"▲":"▼"} ${Math.abs(c.td)}</b><span>${t("metric_trend")}</span></div>`:""}
@@ -2281,6 +2313,7 @@ function compDetail(c){
 function compsHTML(f){
   const L = (SNAP.leagues && SNAP.leagues[leagueSel]) || {comps: [], sample: {m:0, b:0}};
   let list = L.comps.map((c,i) => ({...c, _i:i}));
+  if(!azVeriGoster) list = list.filter(c => !azVeri(c.n));
   if(styleFilter === "__noemb")      list = list.filter(c => !compAmblem(c).length);
   else if(styleFilter === "__emb")   list = list.filter(c => compAmblem(c).length);
   else if(styleFilter !== "Tümü")    list = list.filter(c => c.style.startsWith(styleFilter));
@@ -2293,6 +2326,7 @@ function compsHTML(f){
       <span>${t("badge_set")} ${esc(SNAP.patch||"")} · ${SNAP.ts} · ${bolgeEtiketi()} ${LGL[leagueSel]} ${L.sample.m} ${t("match")} / ${L.sample.b} ${t("board")}</span>
       ${EP("tft-match-v1")}<span style="flex:1"></span>
       <select id="clg" aria-label="${t('league')}">${Object.keys(LGL).map(k => `<option value="${k}" ${k===leagueSel?"selected":""}>${LGL[k]}</option>`).join("")}</select>
+      <label class="azsw" title="${t("low_sample_tip")}"><input type="checkbox" id="azsw" ${azVeriGoster?"checked":""}> ${t("show_low")}</label>
       <select id="cstyle" aria-label="${t('playstyle')}">${styles.map(([v,lbl]) => `<option value="${v}" ${v===styleFilter?"selected":""}>${lbl}</option>`).join("")}</select>
     </div>`;
   if(!list.length) return head + `<div class="empty">${f ? `"${esc(q.value)}" ${t("comp_none_league")}` : t("comp_none_sample")}</div>`;
@@ -2344,6 +2378,7 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("change", e => {
   if(e.target.id === "cstyle"){ styleFilter = e.target.value; render(); }
+  if(e.target.id === "azsw"){ azVeriGoster = e.target.checked; openComp = -1; render(); }
   if(e.target.id === "clg"){ leagueSel = e.target.value; openComp = -1; render(); }
   if(e.target.id === "r-lvl"){ rollLvl = +e.target.value; render(); }
   if(e.target.id === "r-cost"){ rollCost = +e.target.value; render(); }
@@ -2610,7 +2645,7 @@ function aiIcon(r, idx){
   const _ao = augOncelik(r)[0];                      // panelin ILK kutusu
   const ka = (_ao && _ao.rel) ? _ao.aug : null;      // rozet yalnizca kompa OZEL augment icin
   return `<button class="cico ${openAI===idx?"on":""}" data-aicomp="${idx}" aria-label="${esc(dl(r,"ad"))}${s3?t("three_star_comp"):""}">
-    ${portHTML(ch, 80, 86, TIERCOL[r.tier])}${s3?'<span class="u3">★★★</span>':""}${ka?`<span class="reqa" title="${t("prio_aug")} ${esc(dl(ka,"name"))}">${sp(ka.sx,20)}</span>`:""}${amblemRozet(r, 20)}
+    ${portHTML(ch, 80, 86, TIERCOL[r.tier])}${s3?'<span class="u3">★★★</span>':""}${ka?`<span class="reqa" title="${t("prio_aug")} ${esc(dl(ka,"name"))}">${sp(ka.sx,20)}</span>`:""}${amblemRozet(r, 20)}${augRozet(r, 20)}
     <div class="cnm">${esc(ch&&ch.name?dl(ch,"name"):dl(r,"ad"))}</div>
     <div class="cico-n${azVeri(r.n)?" az":""}">${r.n||"?"} ${t("board")}${azVeri(r.n)?" ⚠":""}</div></button>`;
 }
@@ -2631,7 +2666,7 @@ function aiDetail(r){
       ${portHTML(ch, 88, 96, TIERCOL[r.tier])}
       <div style="flex:1;min-width:230px">
         <h3 style="font-size:20px">${esc(dl(r,"ad"))}</h3>
-        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(r.style||""))}</span><span class="sub">${r.n||"?"} ${t("board")} ${t("ai_over")} ${t("ai_eval")}</span>${azVeriChip(r.n)}${amblemChip(r)}</div>
+        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(r.style||""))}</span><span class="sub">${r.n||"?"} ${t("board")} ${t("ai_over")} ${t("ai_eval")}</span>${azVeriChip(r.n)}${amblemChip(r)}${augChip(r)}</div>
         <div class="rowline" style="gap:6px;margin-top:9px;flex-wrap:wrap">${(r.traits||[]).map(traitBadge).join("")}</div>
       </div>
       ${r.avg!==undefined?`<div class="metric"><b>${r.avg.toFixed(2)}</b><span>${t("ai_avg")}</span></div>
@@ -3039,7 +3074,10 @@ function uretAIData(){
     const avg  = n ? +(h.avgW/n).toFixed(2) : (c.avg || 4.5);
     const top4 = n ? Math.round(h.top4W/n) : (c.top4 || 0);
     const win  = n ? Math.round(h.winW/n)  : (c.win  || 0);
-    const tier = avg <= 3.85 ? "S" : avg <= 4.15 ? "A" : avg <= 4.45 ? "B" : "C";
+    // Kademe, sunucudakiyle AYNI guven agirlikli ortalamadan hesaplanir (shrinkage).
+    // Az tahtali komp gurultuden dolayi ust kademeye cikmasin diye ortalama notr 4.5'e cekilir.
+    const avgAdj = +(((n * avg) + SHRINK_C * 4.5) / (n + SHRINK_C)).toFixed(2);
+    const tier = avgAdj <= 3.85 ? "S" : avgAdj <= 4.15 ? "A" : avgAdj <= 4.45 ? "B" : "C";
     const mainTrait = (c.traits && c.traits[0]) ? traitAdOf(c.traits[0][0]) : "";
     const carryN = byId[c.carry] ? dl(byId[c.carry],"name") : c.name;
     const carryUnit = (c.units||[]).find(u => u.c === c.carry) || {it:[]};
@@ -3071,9 +3109,9 @@ function uretAIData(){
     const gec = LANG==="tr" ? (hizli
       ? `Güç sivrilmesi seviye 8-9'da gelir: ${carryN} 2★ ve ${coreItem||"çekirdek eşya"} tamamlandığında tahta zirveye ulaşır. ${sonBirim} gibi 5 maliyetliler girince komp kapanır — bu noktadan sonra kalan altın doğrudan HP alım gücüdür, gereksiz roll yapma. Geç oyunda ${carryN}'ı arka köşede tut ve önüne en etli tankı koy; rakipte suikastçı veya sıçrama varsa köşeyi değiştirerek odaklanmayı kır. Öncelik sırası: taşıyıcı 2★ → çekirdek eşya → ön hat 2★ → 5 maliyetli takviye.`
       : `Güç sivrilmesi Aşama 4 başında, 3★'lar tamamlandığında başlar; asıl tavan seviye 8-9'da ${sonBirim} gibi yüksek maliyetliler eklendiğinde açılır. ${carryN}'ın eşya çekirdeği (${coreItem||"ana eşya"}) bitmeden agresif roll'a girme. Geç oyunda tahtayı yüksek maliyetlilerle doldur; menzilli taşıyıcıyı arka köşede, yakın dövüş taşıyıcıyı korunaklı ön köşede konumla ve her tur pozisyonu rakip açılarına göre ayarla. Kalan altını önce ön hat dayanıklılığına, sonra kadro yükseltmelerine harca.`) : (hizli ? `Power spike comes at level 8-9: the board peaks once ${carryN} 2★ and ${coreItem||"the core item"} are complete. When 5-costs like ${sonBirim} come in the comp closes out — after that, leftover gold is direct HP-buying power, so avoid needless rolls. Late game keep ${carryN} in the back corner with your beefiest tank in front; if the enemy runs assassins or leaps, shift the corner to break their focus. Priority: carry 2★ → core item → frontline 2★ → 5-cost reinforcement.` : `Power spike begins early Stage 4 once your 3★s are done; the real ceiling opens at level 8-9 when high-costs like ${sonBirim} are added. Don't roll aggressively before ${carryN}'s item core (${coreItem||"main item"}) is finished. Late game fill the board with high-costs; place the ranged carry in the back corner and the melee carry in a protected front corner, adjusting position each round to the enemy's angles. Spend leftover gold on frontline durability first, then roster upgrades.`);
-    return {ad:c.name, tier, carry:c.carry, units:c.units, style:c.style, early:c.early||[],
+    return {ad:c.name, tier, avgAdj, carry:c.carry, units:c.units, style:c.style, early:c.early||[],
             aug: augs[0] || null, augs, augNot, neden, erken, gec, avg, top4, win, n, alts: c.alts || [], traits: c.traits || []};
-  }).sort((a,b) => "SABC".indexOf(a.tier) - "SABC".indexOf(b.tier) || a.avg - b.avg);
+  }).sort((a,b) => "SABC".indexOf(a.tier) - "SABC".indexOf(b.tier) || (a.avgAdj||a.avg) - (b.avgAdj||b.avg));
   const ozet = LANG==="tr" ? (`Canlı ${bolgeEtiketi()} verisinden türetilen AI değerlendirmesi — ${rows.length} komp. Tier ve analiz, ligler arası ağırlıklı ortalama sıralamaya göre hesaplanır; komplar her güncellendiğinde bu sayfa da güncellenir.`) : (`AI evaluation derived from live ${bolgeEtiketi()} data · ${rows.length} comps. Tier and analysis are computed from a cross-league weighted-average ranking; this page updates whenever the comps update.`);
   return {patch: SNAP.patch, ts: SNAP.ts, model: t("ai_model"), ozet, rows};
 }
