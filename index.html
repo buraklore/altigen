@@ -289,7 +289,7 @@ main{max-width:1280px;margin:0 auto;padding:26px 20px 60px}
 .cico:hover{transform:translateY(-3px)}
 .cico-n{font-size:10.5px;color:var(--dim);margin-top:2px;letter-spacing:.2px}.cico-n.az{color:#E0A23C}.azveri{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(224,162,60,.14);color:#E0A23C;border:1px solid rgba(224,162,60,.35)}.u3{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:12.5px;letter-spacing:2px;color:#F0B441;text-shadow:0 1px 3px #000,0 0 6px rgba(240,180,65,.5);font-weight:800;z-index:2;white-space:nowrap}
 .trend{position:absolute;top:-7px;right:-6px;font-size:12px;font-weight:800;border-radius:6px;padding:1px 6px;color:#0E1220;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.reqa{position:absolute;bottom:28px;left:-10px;background:var(--surface2);border:1px solid var(--c2);border-radius:7px;padding:2px;display:grid;place-items:center;z-index:2}
+.reqe{position:absolute;bottom:28px;right:-10px;background:var(--surface2);border:1px solid #B06AF0;border-radius:7px;padding:2px;display:flex;gap:1px;place-items:center;z-index:2;box-shadow:0 0 0 2px rgba(176,106,240,.18)}.amblem-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:6px;background:rgba(176,106,240,.14);color:#C79BF5;border:1px solid rgba(176,106,240,.4);flex-wrap:wrap}.amblem-chip .sp{display:inline-block;vertical-align:middle}.reqa{position:absolute;bottom:28px;left:-10px;background:var(--surface2);border:1px solid var(--c2);border-radius:7px;padding:2px;display:grid;place-items:center;z-index:2}
 a.pbtn{text-decoration:none;display:inline-block}
 .hbtn{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:linear-gradient(180deg,rgba(200,170,110,.10),rgba(200,170,110,.04));border:1px solid #7A5C28;border-radius:10px;padding:10px 18px;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(240,230,210,.08)}
 .hbtn:hover{color:#F0E6D2;border-color:#C8AA6E;box-shadow:0 0 16px rgba(200,170,110,.3),inset 0 0 0 1px rgba(240,230,210,.15)}
@@ -692,6 +692,7 @@ function detectLang(){
 let LANG = detectLang();
 const I18N = {
   tr: {
+    needs_emblem:"Amblem gerekir", emblem_tip:"Bu komp bir amblem ister. Amblem dükkândan alınmaz; augment ya da örs (anvil) ile gelir. Amblemin yoksa bu kompu tam kuramazsın.", filter_noemb:"Amblemsiz oynanabilir", filter_emb:"Amblem gerektirenler",
     note_component:"Bileşenler için Δ değeri hesaplanmaz: oyun sonunda elinde kalan bir bileşen 'birleştirilemedi' demektir, bu yüzden istatistik yanıltıcı çıkar. Bileşenin gücü, yapıldığı eşyada görünür.", note_emblem:"Amblemler normal eşya gibi inşa edilmez (augment/örs ile gelir) ve bir özellik kazandırdıkları için Δ değerleri doğal olarak yüksektir. Diğer eşyalarla doğrudan kıyaslama."+" ", low_sample:"az veri", low_sample_tip:"Bu komp 20 tahtadan az örnekle hesaplandı; ortalama sıralaması ±1-1.5 basamak oynayabilir. Kademesini kesin bilgi olarak alma.", ai_over:"üzerinden", metric_avg:"Ort. Sıra", metric_trend:"Eğilim", ai_model:"AI değerlendirmesi",
     // Navigasyon
     nav_player:"Oyuncu", nav_comps:"Komplar", nav_ai:"AI Kompları", nav_set:"Set Rehberi",
@@ -827,6 +828,7 @@ const I18N = {
     not_found_rarity:"bu nadirlikte bulunamadı."
   },
   en: {
+    needs_emblem:"Emblem required", emblem_tip:"This comp wants an emblem. Emblems are not bought in the shop; they come from augments or anvils. Without it you cannot field the comp as shown.", filter_noemb:"Playable without emblem", filter_emb:"Requires an emblem",
     note_component:"Components are not given a Δ rating: a component still in your inventory at game end means it was never combined, so the statistic is misleading. A component's value shows up in the item it builds into.", note_emblem:"Emblems are not built like normal items (they come from augments/anvils) and grant a trait, so their Δ is naturally high. Not directly comparable to other items."+" ", low_sample:"low sample", low_sample_tip:"This comp is based on fewer than 20 boards; its average placement can swing by 1-1.5 positions. Treat the tier as provisional.", ai_over:"—", metric_avg:"Avg. Place", metric_trend:"Trend", ai_model:"AI evaluation",
     nav_player:"Player", nav_comps:"Comps", nav_ai:"AI Comps", nav_set:"Set Guide",
     nav_items:"Items", nav_augments:"Augments", nav_bilgi:"TFT Info",
@@ -2139,6 +2141,56 @@ function keyAugOf(c){
   const l = norm(ch.name);
   return DATA.augments.find(a => norm(a.name).includes(l)) || null;
 }
+// --- Amblem gereksinimi ------------------------------------------------------
+// Bir komp amblem istiyorsa (gercek maclarda bir birim uzerinde amblem esyasi
+// gorulduyse) bunu ACIKCA gostermek gerekir: amblem dukkandan alinmaz, augment
+// ya da orsten gelir. Oyuncu amblemi yoksa o kompu KURAMAZ.
+// TFT Academy de ayni yaklasimi kullanir: komp basliginda tasiyicinin yaninda
+// amblem ikonu, tahtada da amblemi tutan birimin uzerinde.
+function compAmblem(c){
+  const out = [], gorulen = new Set();
+  for(const u of (c.units || [])){
+    for(const it of (u.it || [])){
+      const item = byId[it];
+      if(item && item.cat === "emblem" && !gorulen.has(it)){
+        gorulen.add(it);
+        out.push({item, unit: byId[u.c] || null});
+      }
+    }
+  }
+  return out;
+}
+function amblemRozet(c, boyut){
+  const a = compAmblem(c);
+  if(!a.length) return "";
+  return `<span class="reqe" title="${t("needs_emblem")}: ${a.map(x => esc(dl(x.item,"name"))).join(", ")}">
+    ${a.slice(0,2).map(x => sp(x.item.sx, boyut || 20)).join("")}</span>`;
+}
+
+function amblemChip(c){
+  const a = compAmblem(c);
+  if(!a.length) return "";
+  const liste = a.map(x => `${sp(x.item.sx,16)}<b>${esc(dl(x.item,"name"))}</b>${x.unit?` <span style="opacity:.75">(${esc(dl(x.unit,"name"))})</span>`:""}`).join(" · ");
+  return `<span class="amblem-chip" title="${t("emblem_tip")}">${t("needs_emblem")}: ${liste}</span>`;
+}
+// --- Ayni adi tasiyan ozellik varyantlari ------------------------------------
+// Set 17'de "Yildiz Gozlemcisi" 8 ayri kayit olarak gelir (7 takimyildizi varyanti
+// + ana kayit) ve her birinin esikleri FARKLIDIR. Ada gore duz eslestirme yapilirsa
+// dizideki SONUNCU kayit kazanir (Stargazer_Wolf, esik 3/4/5/6) ve Takim Kurucu
+// yanlis sinerji esigi gosterir. Dogrusu: ana kaydi (en kisa id, varyant soneki yok)
+// tercih et; oyun ici takimyildizi her mac degistigi icin genel esik odur.
+function anaTrait(ad){
+  const hepsi = (DATA.traits || []).filter(t => t.name === ad);
+  if(!hepsi.length) return null;
+  if(hepsi.length === 1) return hepsi[0];
+  return hepsi.slice().sort((a, b) => a.id.length - b.id.length)[0];
+}
+// Takimyildizi varyantinin adini aciklamadan cikar: "... Bu oyun: Avci. ..." -> "Avci"
+function traitVaryantAdi(t){
+  const m = (t.d || "").match(/Bu oyun:\s*([^.]+)\./);
+  return m ? m[1].trim() : null;
+}
+
 function compIcon(c, idx, f){
   const ch = byId[c.carry] || {};
   const hl = f && compMatches(c, f);
@@ -2146,7 +2198,7 @@ function compIcon(c, idx, f){
   const ka = keyAugOf(c);
   const tr = c.tr ? `<span class="trend" style="background:${c.tr==="up"?"var(--c2)":"#E0565B"}" title="${c.tr==="up"?t("comp_trend_up"):t("comp_trend_down")}">${c.tr==="up"?"▲":"▼"}</span>` : "";
   return `<button class="cico ${openComp===idx?"on":""}" data-comp="${idx}" aria-label="${esc(dl(c,"name"))}${s3?t("three_star_comp"):""} · ${c.n} ${t("board")}">
-    ${portHTML(ch, 80, 86, TIERCOL[c.tier])}${s3?'<span class="u3">★★★</span>':""}${tr}${ka?`<span class="reqa" title="${t("key_aug")} ${esc(dl(ka,"name"))}">${sp(ka.sx,20)}</span>`:""}
+    ${portHTML(ch, 80, 86, TIERCOL[c.tier])}${s3?'<span class="u3">★★★</span>':""}${tr}${ka?`<span class="reqa" title="${t("key_aug")} ${esc(dl(ka,"name"))}">${sp(ka.sx,20)}</span>`:""}${amblemRozet(c, 20)}
     <div class="cnm" ${hl?'style="color:var(--gold)"':""}>${esc(dl(ch,"name")||dl(c,"name"))}</div>
     <div class="cico-n${azVeri(c.n)?" az":""}">${c.n} ${t("board")}${azVeri(c.n)?" ⚠":""}</div></button>`;
 }
@@ -2204,7 +2256,7 @@ function compDetail(c){
     <div class="rowline">
       ${portHTML(ch, 88, 94, TIERCOL[c.tier])}
       <div><div class="rowline" style="gap:10px">${tierBadge(c.tier)}<h3 style="font-size:19px">${esc(dl(c,"name"))}</h3></div>
-        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(c.style))}</span>${(()=>{const ka=keyAugOf(c);return ka?`<span class="tchip" data-open="${ka.id}" tabindex="0" role="button">${sp(ka.sx,17)}${t("key_short")} ${esc(dl(ka,"name"))}</span>`:"";})()}<span class="sub">${c.n} ${t("board")} · ${t("carry_word")} ${esc(ch?dl(ch,"name"):"")}</span>${azVeriChip(c.n)}</div>
+        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(c.style))}</span>${(()=>{const ka=keyAugOf(c);return ka?`<span class="tchip" data-open="${ka.id}" tabindex="0" role="button">${sp(ka.sx,17)}${t("key_short")} ${esc(dl(ka,"name"))}</span>`:"";})()}<span class="sub">${c.n} ${t("board")} · ${t("carry_word")} ${esc(ch?dl(ch,"name"):"")}</span>${azVeriChip(c.n)}${amblemChip(c)}</div>
         <div class="rowline" style="gap:6px;margin-top:9px;flex-wrap:wrap">${c.traits.map(traitBadge).join("")}</div></div>
       <span style="flex:1"></span>
       <div class="metric"><b>${c.avg.toFixed(2)}</b><span>${t("metric_avg")}</span></div>
@@ -2229,11 +2281,13 @@ function compDetail(c){
 function compsHTML(f){
   const L = (SNAP.leagues && SNAP.leagues[leagueSel]) || {comps: [], sample: {m:0, b:0}};
   let list = L.comps.map((c,i) => ({...c, _i:i}));
-  if(styleFilter !== "Tümü") list = list.filter(c => c.style.startsWith(styleFilter));
+  if(styleFilter === "__noemb")      list = list.filter(c => !compAmblem(c).length);
+  else if(styleFilter === "__emb")   list = list.filter(c => compAmblem(c).length);
+  else if(styleFilter !== "Tümü")    list = list.filter(c => c.style.startsWith(styleFilter));
   if(f) list = list.filter(c => compMatches(c, f));
   count.textContent = list.length + " " + t("comps_count");
   if(openComp >= 0 && !list.some(c => c._i === openComp)) openComp = -1;
-  const styles = [["Tümü",t("style_all")],["Hızlı 9",t("style_fast9")],["Hızlı 8",t("style_fast8")],["Yavaş Roll",t("style_slowroll")],["Standart",t("style_standard")]];
+  const styles = [["Tümü",t("style_all")],["__noemb",t("filter_noemb")],["__emb",t("filter_emb")],["Hızlı 9",t("style_fast9")],["Hızlı 8",t("style_fast8")],["Yavaş Roll",t("style_slowroll")],["Standart",t("style_standard")]];
   const head = `<div class="draftbar" style="border-color:var(--c2);border-style:solid">
       <span class="draftbadge" style="background:var(--c2)">${t("live_data")}</span>
       <span>${t("badge_set")} ${esc(SNAP.patch||"")} · ${SNAP.ts} · ${bolgeEtiketi()} ${LGL[leagueSel]} ${L.sample.m} ${t("match")} / ${L.sample.b} ${t("board")}</span>
@@ -2556,7 +2610,7 @@ function aiIcon(r, idx){
   const _ao = augOncelik(r)[0];                      // panelin ILK kutusu
   const ka = (_ao && _ao.rel) ? _ao.aug : null;      // rozet yalnizca kompa OZEL augment icin
   return `<button class="cico ${openAI===idx?"on":""}" data-aicomp="${idx}" aria-label="${esc(dl(r,"ad"))}${s3?t("three_star_comp"):""}">
-    ${portHTML(ch, 80, 86, TIERCOL[r.tier])}${s3?'<span class="u3">★★★</span>':""}${ka?`<span class="reqa" title="${t("prio_aug")} ${esc(dl(ka,"name"))}">${sp(ka.sx,20)}</span>`:""}
+    ${portHTML(ch, 80, 86, TIERCOL[r.tier])}${s3?'<span class="u3">★★★</span>':""}${ka?`<span class="reqa" title="${t("prio_aug")} ${esc(dl(ka,"name"))}">${sp(ka.sx,20)}</span>`:""}${amblemRozet(r, 20)}
     <div class="cnm">${esc(ch&&ch.name?dl(ch,"name"):dl(r,"ad"))}</div>
     <div class="cico-n${azVeri(r.n)?" az":""}">${r.n||"?"} ${t("board")}${azVeri(r.n)?" ⚠":""}</div></button>`;
 }
@@ -2577,7 +2631,7 @@ function aiDetail(r){
       ${portHTML(ch, 88, 96, TIERCOL[r.tier])}
       <div style="flex:1;min-width:230px">
         <h3 style="font-size:20px">${esc(dl(r,"ad"))}</h3>
-        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(r.style||""))}</span><span class="sub">${r.n||"?"} ${t("board")} ${t("ai_over")} ${t("ai_eval")}</span>${azVeriChip(r.n)}</div>
+        <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(r.style||""))}</span><span class="sub">${r.n||"?"} ${t("board")} ${t("ai_over")} ${t("ai_eval")}</span>${azVeriChip(r.n)}${amblemChip(r)}</div>
         <div class="rowline" style="gap:6px;margin-top:9px;flex-wrap:wrap">${(r.traits||[]).map(traitBadge).join("")}</div>
       </div>
       ${r.avg!==undefined?`<div class="metric"><b>${r.avg.toFixed(2)}</b><span>${t("ai_avg")}</span></div>
@@ -2664,7 +2718,7 @@ function kurucuHTML(){
   const takimC = kurucuTakim.map(u => ({...u, ch: byId[u.id]})).filter(u => u.ch);
   const say = {};
   takimC.forEach(u => u.ch.traits.forEach(tn => say[tn] = (say[tn]||0)+1));
-  const traitByName = {}; DATA.traits.forEach(t => traitByName[t.name] = t);
+  const traitByName = {}; DATA.traits.forEach(t => { if(!(t.name in traitByName)) traitByName[t.name] = anaTrait(t.name); });
   const aktif = Object.keys(say).map(tn => {
     const t = traitByName[tn]; if(!t) return null;
     const bp = t.bp || [], n = say[tn];
@@ -3215,7 +3269,7 @@ function render(){
         <div class="rowline" style="align-items:flex-start">
           ${portHTML(tt, 38, 44, "var(--c3)")}
           <div style="flex:1;min-width:220px">
-            <h3 style="display:inline-block;cursor:pointer" data-open="${tt.id}" tabindex="0" role="button">${esc(dl(tt,"name"))}</h3>
+            <h3 style="display:inline-block;cursor:pointer" data-open="${tt.id}" tabindex="0" role="button">${esc(dl(tt,"name"))}${(DATA.traits.filter(x=>x.name===tt.name).length>1 && traitVaryantAdi(tt))?` <span style="opacity:.65;font-weight:600;font-size:13px">· ${esc(traitVaryantAdi(tt))}</span>`:""}</h3>
             <span class="sub"> · ${members.length} ${t("units_word")}</span>
             <div class="sub" style="margin-top:3px;max-width:680px">${esc(d1).slice(0,150)}${d1.length>150?"…":""}</div>
           </div>
