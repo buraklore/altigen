@@ -1677,6 +1677,17 @@ function bilingualizeAI(ai){
 // Sinyaller: taşıyıcı hero augmenti + comp'un trait augmentleri + o kompta gerçekten kullanılanlar
 // + top oyuncuların bu komplarda en çok kullandığı augmentler (meta frekansı) + ekonomi/tier.
 function _augKey(id){ return (id||"").replace(/^TFT\d*_/, ""); }
+// --- Augment gecerlilik yardimcilari (issue: tank birimin hero augmenti onerilmesin) ---
+// Bir esya SALDIRI esyasi mi (tasiyici esyasi) — bilesenlerine gore, sunucu hasar_esyasi_mi ile ayni mantik
+const _OFF_COMP = new Set(["TFT_Item_BFSword","TFT_Item_NeedlesslyLargeRod","TFT_Item_RecurveBow","TFT_Item_SparringGloves"]);
+const _DEF_COMP = new Set(["TFT_Item_ChainVest","TFT_Item_NegatronCloak","TFT_Item_GiantsBelt","TFT_Item_FryingPan"]);
+function _offItem(id){ const it = byId[id]; if(!it) return false; const rec = it.rec || []; if(!rec.length) return false; let o=0,d=0; rec.forEach(c=>{ if(_OFF_COMP.has(c)) o++; else if(_DEF_COMP.has(c)) d++; }); return o>=1 && o>=d; }
+// Kompta TASIYICI olarak kurulmus birim anahtarlari: ana carry + saldiri esyasi tasiyan ikincil birimler
+function _carryUnitKeys(comp){ const keys = new Set(); const ck = _augKey(comp.carry||"").toLowerCase(); if(ck) keys.add(ck); (comp.units||[]).forEach(u => { const items = u.it || u.itemNames || []; if(items.length && items.some(_offItem)) keys.add(_augKey((u.c||u.character_id||"")).toLowerCase()); }); return keys; }
+// Hero/tanri augmentinin ait oldugu sampiyon (XxxCarry / XxxGodAugment); trait/genel augment ise null
+function _heroKey(aid){ const m = (aid||"").match(/_Augment_([A-Za-z]+?)(Carry|GodAugment)$/); return m ? m[1].toLowerCase() : null; }
+// Augment bu komp icin gecerli mi: hero augment SADECE o sampiyon tasiyiciyken; digerleri her zaman gecerli
+function _augOkFor(aid, carryKeys){ const h = _heroKey(aid); return !h || carryKeys.has(h); }
 // Küratörlü güçlü GENEL augmentler (eşya/bileşen üretimi + ekonomi) — comp-özel augment yetmediğinde dolgu
 const AUG_GENEL = {
   "Gümüş": ["TFT6_Augment_ItemGrabBag1","TFT9_Augment_IronAssets","TFT6_Augment_PandorasItems","TFT_Augment_SmallGrabBag","TFT6_Augment_TinyTitans","TFT_Augment_CognitiveTax"],
@@ -1689,14 +1700,15 @@ function recommendAugments(comp){
   const traitKeys = (comp.traits || []).map(x => _augKey(Array.isArray(x) ? x[0] : x))
     .map(k => k.replace("UniqueTrait", "").replace("Undetermined", "").replace("Trait", ""))
     .filter(k => k.length > 3);
+  const carryKeys = _carryUnitKeys(comp);   // yalnizca tasiyici birimler (hero augment gecerliligi icin)
   // Hero/tanrı augmentinin ait olduğu şampiyon (TFT17_Augment_NamiCarry / ...GodAugment)
   function heroOf(aid){ const m = aid.match(/_Augment_([A-Za-z]+?)(Carry|GodAugment)/); return m ? m[1].toLowerCase() : null; }
   function relScore(a){
     const h = heroOf(a.id);
     if(h){
       if(h === ck) return 1000;          // taşıyıcının kendi hero/tanrı augmenti — en uygun
-      if(unitKeys.has(h)) return 600;     // kompta bulunan başka bir birimin hero augmenti
-      return -1;                          // kompta OLMAYAN şampiyonun augmenti → asla önerme (Zed vb.)
+      if(carryKeys.has(h)) return 600;    // yalnızca TAŞIYICI olarak kurulmuş (saldırı eşyalı) ikincil birim
+      return -1;                          // tank/destek birimin ya da kompta olmayan şampiyonun augmenti → asla
     }
     for(const tk of traitKeys){ if(tk && a.id.indexOf(tk) !== -1) return 500; } // kompun özelliğine ait trait augmenti
     return 0;                             // ilgili değil (küratörlü genel listede olabilir)
@@ -1732,7 +1744,8 @@ function augRecBox(comp){
 
 function augPrio2(comp, hs){
   const rec = recommendAugments(comp);
-  const _ka = keyAugOf(comp); const _ex = [...(comp.augs||[]), ...(_ka ? [_ka.id] : [])];
+  const _cK = _carryUnitKeys(comp);
+  const _ka = keyAugOf(comp); const _ex = [...(comp.augs||[]).filter(id => _augOkFor(id, _cK)), ...(_ka ? [_ka.id] : [])];
   _ex.forEach(aid => { const a = byId[aid]; if(!a || !a.rar || !rec[a.rar]) return; const arr = rec[a.rar], _i = arr.findIndex(o => o.aug && o.aug.id === aid); if(_i >= 0){ const it = arr.splice(_i, 1)[0]; it.rel = true; arr.unshift(it); } else { arr.unshift({aug: a, rel: true}); } });
   const rarCol = {"Gümüş":"#C6CDDB", "Altın":"var(--c5)", "Prizmatik":"#7FE3F0"};
   const tiles = [];
@@ -2387,6 +2400,7 @@ function aiDetail(r){
       <div style="flex:1;min-width:230px">
         <h3 style="font-size:20px">${esc(dl(r,"ad"))}</h3>
         <div class="rowline" style="gap:8px;margin-top:7px"><span class="pill">${esc(styleLabel(r.style||""))}</span><span class="sub">${r.n||"?"} ${t("board")} ${LANG==="tr"?"üzerinden":"—"} ${t("ai_eval")}</span></div>
+        <div class="rowline" style="gap:6px;margin-top:9px;flex-wrap:wrap">${(r.traits||[]).map(traitBadge).join("")}</div>
       </div>
       ${r.avg!==undefined?`<div class="metric"><b>${r.avg.toFixed(2)}</b><span>${t("ai_avg")}</span></div>
       <div class="metric"><b>%${r.top4}</b><span>${t("ai_top4")}</span></div>
@@ -2783,7 +2797,8 @@ function uretAIData(){
     try {
       const rec = recommendAugments(c);
       const rel = [...(rec["Altın"]||[]), ...(rec["Prizmatik"]||[]), ...(rec["Gümüş"]||[])].filter(x => x.rel);
-      augs = [...new Set([...(c.augs||[]), ...rel.map(x => x.aug.id)])].slice(0, 5);
+      const _cK = _carryUnitKeys(c);
+      augs = [...new Set([...(c.augs||[]), ...rel.map(x => x.aug.id)])].filter(id => _augOkFor(id, _cK)).slice(0, 5);
       augNot = rel.length
         ? `Öncelik ${dl(rel[0].aug,"name")}${rel[1] ? "; sunulmazsa " + dl(rel[1].aug,"name") : ""}. Hiçbiri gelmezse ekonomi (altın/deneyim) augmentini savaş augmentine tercih et.`
         : "Bu kompun özelliğe bağlı augmenti yok: ilk seçimde ekonomi, ikinci seçimde taşıyıcıyı büyüten savaş augmenti, üçüncüde esnek kal.";
