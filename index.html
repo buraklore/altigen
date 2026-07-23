@@ -1701,18 +1701,107 @@ function _heroKey(aid){ const m = (aid||"").match(/_Augment_([A-Za-z]+?)(Carry|G
 // Augment bu komp icin gecerli mi: hero augment SADECE o sampiyon tasiyiciyken; digerleri her zaman gecerli
 function _augOkFor(aid, carryKeys){ const h = _heroKey(aid); return !h || carryKeys.has(h); }
 // Küratörlü güçlü GENEL augmentler (eşya/bileşen üretimi + ekonomi) — comp-özel augment yetmediğinde dolgu
+// --- Augment siniflandirma ----------------------------------------------------
+// NOT: siniflandirma HER ZAMAN Turkce alanlar (a.d / t.name) uzerinden yapilir;
+// arayuz dili EN olsa bile sonuc degismesin diye dl() KULLANILMAZ.
+const _AUG_KW = {
+  ad:     ["saldırı gücü"],
+  ap:     ["yetenek gücü"],
+  as:     ["saldırı hızı"],
+  tank:   ["zırh", "büyü direnci", "azami can", "maksimum can"],
+  econ:   ["altın kazan", "faiz", "altın kazanırsın"],
+  item:   ["bileşen", "eşya kazan", "tamamlanmış eşya"],
+  reroll: ["dükkân", "yenileme", "bedelsiz"]
+};
+function _augTip(a){
+  const d = (a && a.d || "").toLocaleLowerCase("tr");
+  const o = {};
+  for(const k in _AUG_KW) o[k] = _AUG_KW[k].some(w => d.indexOf(w) !== -1);
+  return o;
+}
+// Turkce ek listesi: trait adindan sonra gelebilecek gecerli ekler.
+// "Seyyah"+"lar" gecerli, ama "Meka"+"nik" DEGIL -> yanlis eslesme engellenir.
+const _TR_EK = ["", "lar", "ler", "ları", "leri", "ların", "lerin", "larla", "lerle",
+                "ı", "i", "u", "ü", "ın", "in", "un", "ün", "a", "e", "ya", "ye",
+                "dan", "den", "tan", "ten", "da", "de", "ta", "te", "lardan", "lerden",
+                "lık", "lik", "li", "lı", "lu", "lü"];
+// Trait adi aciklamada GERCEKTEN geciyor mu? (kelime siniri + gecerli Turkce ek)
+function _traitGecer(ad, metin){
+  if(!ad || ad.length < 4) return false;
+  const t = (metin || "").toLocaleLowerCase("tr").replace(/['’]/g, "");
+  const k = ad.toLocaleLowerCase("tr").replace(/['’]/g, "");
+  let p = t.indexOf(k);
+  while(p !== -1){
+    const onceki = p > 0 ? t[p-1] : " ";
+    if(!/[a-zçğıöşü0-9]/i.test(onceki)){            // kelime basinda mi?
+      const kalan = t.slice(p + k.length);
+      const ek = (kalan.match(/^[a-zçğıöşü]*/) || [""])[0];
+      if(_TR_EK.indexOf(ek) !== -1) return true;     // gecerli ek ya da tam eslesme
+    }
+    p = t.indexOf(k, p + 1);
+  }
+  return false;
+}
+// Kompun savas profili: tasiyicinin esyalarindan AD/AP, style'dan reroll/hizli
+function _compProfil(comp){
+  const carryU = (comp.units || []).find(u => (u.c || u.character_id) === comp.carry) || {};
+  const items = carryU.it || carryU.itemNames || [];
+  let ad = 0, ap = 0;
+  items.forEach(id => {
+    const rec = (byId[id] || {}).rec || [];
+    rec.forEach(c => {
+      if(c === "TFT_Item_BFSword" || c === "TFT_Item_RecurveBow") ad++;
+      if(c === "TFT_Item_NeedlesslyLargeRod") ap++;
+    });
+  });
+  const st = comp.style || "";
+  return {ad: ad >= ap && ad > 0, ap: ap > ad, reroll: /Yavaş/.test(st), hizli: /Hızlı/.test(st)};
+}
+
 const AUG_GENEL = {
   "Gümüş": ["TFT6_Augment_ItemGrabBag1","TFT9_Augment_IronAssets","TFT6_Augment_PandorasItems","TFT_Augment_SmallGrabBag","TFT6_Augment_TinyTitans","TFT_Augment_CognitiveTax"],
   "Altın": ["TFT_Augment_ExclusiveCustomization","TFT6_Augment_PortableForge","TFT_Augment_MoneyHungry","TFT6_Augment_TradeSector","TFT9_Augment_BigGrabBag","TFT17_Augment_ApotheoticForge"],
   "Prizmatik": ["TFT_Augment_MoneyMonsoon","TFT9_Augment_HedgeFund","TFT7_Augment_UrfsGrabBag2","TFT_Augment_OneBuffTwoBuff","TFT6_Augment_TradeSector2","TFT_Augment_MinMaxer"]
 };
+// Bir augment BELIRLI bir ozellige mi kilitli? (aciklamasinda ozellik adi geciyorsa)
+// Ornek: "Zaman Akisi" -> Zamankiran. Boyle bir augment, o ozelligi TASIMAYAN kompa
+// asla onerilmemeli; aksi halde "Dukkan/altin" gibi kelimeler yuzunden ekonomi
+// augmenti sanilip yanlis kompa dusuyordu.
+let _tKilitCache = null;
+function _traitKilit(a){
+  if(!_tKilitCache) _tKilitCache = {};
+  if(_tKilitCache[a.id] !== undefined) return _tKilitCache[a.id];
+  const bulunan = [];
+  for(const tr of (DATA.traits || [])){
+    if(!tr.name || tr.name.length < 4) continue;
+    let esles = false;
+    // (1) ACIKLAMA sinyali: "Seyyahlar ... kazanir" gibi ozellik adi aciklamada geciyor
+    if(_traitGecer(tr.name, a.d)) esles = true;
+    // (2) ID sinyali: SETE OZEL augmentlerde id, ozelligin ic kod adini icerir.
+    //     Ornek: TFT17_Augment_AnimaSquad_Commander -> TFT17_AnimaSquad (Anima).
+    //     Aciklamada ozellik adi gecmese bile bu augment o ozellige aittir.
+    //     Set oneki sarti, "TFT_Augment_Flexible"in "Flex"e yanlis eslesmesini onler.
+    if(!esles){
+      const onek = (tr.id.match(/^TFT\d*_/) || [""])[0];          // "TFT17_"
+      const kod = tr.id.slice(onek.length)
+        .replace("UniqueTrait", "").replace("Undetermined", "").replace("Trait", "");
+      if(onek && kod.length >= 4 && a.id.indexOf(onek) === 0 && a.id.indexOf(kod) !== -1) esles = true;
+    }
+    if(esles) bulunan.push(tr.name);
+  }
+  return (_tKilitCache[a.id] = bulunan);
+}
+
 function recommendAugments(comp){
   const ck = _augKey(comp.carry || "").toLowerCase();
-  const unitKeys = new Set((comp.units || []).map(u => _augKey((u.c || u.character_id || "")).toLowerCase()).filter(Boolean));
-  const traitKeys = (comp.traits || []).map(x => _augKey(Array.isArray(x) ? x[0] : x))
-    .map(k => k.replace("UniqueTrait", "").replace("Undetermined", "").replace("Trait", ""))
-    .filter(k => k.length > 3);
+  // Kompun ozellik ADLARI (Turkce) — augment aciklamasinda bunlari arayacagiz.
+  const traitAdlari = (comp.traits || []).map(x => {
+    const tid = Array.isArray(x) ? x[0] : x;
+    const tr = byId[tid];
+    return tr ? tr.name : null;
+  }).filter(Boolean);
   const carryKeys = _carryUnitKeys(comp);   // yalnizca tasiyici birimler (hero augment gecerliligi icin)
+  const prof = _compProfil(comp);
   // Hero/tanrı augmentinin ait olduğu şampiyon (TFT17_Augment_NamiCarry / ...GodAugment)
   function heroOf(aid){ const m = aid.match(/_Augment_([A-Za-z]+?)(Carry|GodAugment)/); return m ? m[1].toLowerCase() : null; }
   function relScore(a){
@@ -1722,18 +1811,42 @@ function recommendAugments(comp){
       if(carryKeys.has(h)) return 600;    // yalnızca TAŞIYICI olarak kurulmuş (saldırı eşyalı) ikincil birim
       return -1;                          // tank/destek birimin ya da kompta olmayan şampiyonun augmenti → asla
     }
-    for(const tk of traitKeys){ if(tk && a.id.indexOf(tk) !== -1) return 500; } // kompun özelliğine ait trait augmenti
-    return 0;                             // ilgili değil (küratörlü genel listede olabilir)
+    // TRAIT AUGMENTI: augment ACIKLAMASINDA kompun ozellik adi geciyorsa (kelime siniri +
+    // gecerli Turkce ek). Boylece "Seyyahlar ... kazanir" yakalanir, "Mekanik" ise
+    // "Meka" ozelligine YANLISLIKLA eslesmez.
+    const kilit = _traitKilit(a);
+    if(kilit.length){
+      return kilit.some(ad => traitAdlari.indexOf(ad) !== -1) ? 500 : -1;
+    }
+    return 0;
+  }
+  // Evrensel augmentler (250 tane) kompun profiline gore puanlanir: her kompa ayni
+  // ekonomi listesini vermek yerine AD/AP ve oyun tarzina uyani one cikar.
+  function genelScore(a){
+    const tip = _augTip(a);
+    let s = 0;
+    if(prof.ad && tip.ad) s += 300;
+    if(prof.ap && tip.ap) s += 300;
+    if(prof.ad && tip.as) s += 120;              // saldiri hizi AD tasiyiciya yarar
+    if(prof.reroll && tip.reroll) s += 260;      // reroll kompu dukkân augmentini sever
+    if(prof.hizli && tip.econ) s += 240;         // hizli 8/9 ekonomiyle beslenir
+    if(tip.econ) s += 90;                        // ekonomi her komp icin makul
+    if(tip.item) s += 70;
+    return s;
   }
   const out = {};
   for(const rar of ["Gümüş", "Altın", "Prizmatik"]){
+    const havuz = DATA.augments.filter(a => a.rar === rar);
     // 1) Comp'a gerçekten uygun augmentler (taşıyıcı/birim hero + trait)
-    const rel = DATA.augments.filter(a => a.rar === rar).map(a => ({ a, s: relScore(a) }))
+    const rel = havuz.map(a => ({ a, s: relScore(a) }))
       .filter(x => x.s > 0).sort((x, y) => y.s - x.s || dl(x.a, "name").localeCompare(dl(y.a, "name"), "tr"))
       .map(x => ({ aug: x.a, rel: true }));
-    // 2) 3'e küratörlü güçlü genel augmentlerle tamamla
+    // 2) Kompun profiline en uygun evrensel augmentlerle tamamla
     const picked = new Set(rel.map(r => r.aug.id));
-    const fill = (AUG_GENEL[rar] || []).filter(id => byId[id] && !picked.has(id)).map(id => ({ aug: byId[id], rel: false }));
+    const fill = havuz.filter(a => !picked.has(a.id) && relScore(a) === 0)
+      .map(a => ({ a, s: genelScore(a) })).filter(x => x.s > 0)
+      .sort((x, y) => y.s - x.s || dl(x.a, "name").localeCompare(dl(y.a, "name"), "tr"))
+      .map(x => ({ aug: x.a, rel: false }));
     out[rar] = [...rel, ...fill].slice(0, 3);
   }
   return out;
@@ -1766,6 +1879,15 @@ function augOncelik(comp){
   const ekle = (aug, rel) => {
     if(!aug || !aug.id || gorulen.has(aug.id)) return;
     if(!_augOkFor(aug.id, cK)) return;        // baska birimin hero augmenti asla
+    // ozellige kilitli augment, o ozelligi tasimayan kompa girmesin (sunucudan gelse bile)
+    const kilit = _traitKilit(aug);
+    if(kilit.length){
+      const adlar = (comp.traits || []).map(x => {
+        const tid = Array.isArray(x) ? x[0] : x;
+        return (byId[tid] || {}).name;
+      });
+      if(!kilit.some(ad => adlar.indexOf(ad) !== -1)) return;
+    }
     gorulen.add(aug.id);
     sirali.push({aug, rel: !!rel, rar: aug.rar});
   };
