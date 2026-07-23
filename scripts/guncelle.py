@@ -251,7 +251,13 @@ def analyze(boards):
     return out
 
 tinfo = [(t['id'], t['id'].split('_', 1)[1].lower(), t['name'].lower()) for t in oyun['traits']]
-alow = [(a['id'], a['id'].lower(), a['name'].lower(), a['d'].lower()) for a in oyun['augments']]
+# Hero/tanri augmentleri (XxxCarry / XxxGodAugment) trait eslesmesinden HARIC tutulur:
+# bunlar yalnizca kendi sampiyonu tasiyiciyken anlamlidir; trait adi/aciklama benzerligiyle
+# yanlislikla onerilmemeli ( or. "Bonk!"=NasusCarry, aciklamasinda "dovuscu" geciyor diye
+# Dovuscu kompuna dusuyordu). Tasiyicinin kendi hero augmenti istemcide keyAugOf/recommendAugments ile gelir.
+_HERO_AUG = re.compile(r'_Augment_[A-Za-z]+(Carry|GodAugment)$')
+alow = [(a['id'], a['id'].lower(), a['name'].lower(), a['d'].lower())
+        for a in oyun['augments'] if not _HERO_AUG.search(a['id'])]
 def augs_for(trait_ids):
     toks = [(a, tok, nm) for tid in trait_ids for a, tok, nm in tinfo if a == tid]
     hits = []
