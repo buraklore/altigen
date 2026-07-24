@@ -16,17 +16,81 @@
 
   var YENILE_MS = 60000;   // overlay verisini kac ms'de bir tazele (60 sn)
 
+  // Tier renkleri — ham (Riot) tier anahtarlariyla, dilden bagimsiz.
   var TIER_RENK = {
-    Demir: "#8A8D91", Bronz: "#B4805B", "Gümüş": "#9FB0C3", "Altın": "#F0B441",
-    Platin: "#4FC4B0", "Zümrüt": "#4FD18B", Elmas: "#59B3F0",
-    Usta: "#B06AF0", "Büyük Usta": "#E0565B", "Şampiyon": "#3FC9D8",
+    IRON: "#8A8D91", BRONZE: "#B4805B", SILVER: "#9FB0C3", GOLD: "#F0B441",
+    PLATINUM: "#4FC4B0", EMERALD: "#4FD18B", DIAMOND: "#59B3F0",
+    MASTER: "#B06AF0", GRANDMASTER: "#E0565B", CHALLENGER: "#3FC9D8",
   };
 
-  var $ = function (id) { return document.getElementById(id); };
+  // ---- dil (i18n) ------------------------------------------------------------
+  // Tier adlari her iki dilde. Overlay ve olusturucu dile gore metin secer.
+  var TIER_AD = {
+    tr: { IRON: "Demir", BRONZE: "Bronz", SILVER: "Gümüş", GOLD: "Altın",
+      PLATINUM: "Platin", EMERALD: "Zümrüt", DIAMOND: "Elmas",
+      MASTER: "Usta", GRANDMASTER: "Büyük Usta", CHALLENGER: "Şampiyon" },
+    en: { IRON: "Iron", BRONZE: "Bronze", SILVER: "Silver", GOLD: "Gold",
+      PLATINUM: "Platinum", EMERALD: "Emerald", DIAMOND: "Diamond",
+      MASTER: "Master", GRANDMASTER: "Grandmaster", CHALLENGER: "Challenger" },
+  };
+  var USTLIG = ["MASTER", "GRANDMASTER", "CHALLENGER"];  // bolumu (I/II..) olmayan ligler
+
+  var METIN = {
+    tr: {
+      baslik: 'Yayın Overlay\'i', altAciklama: 'Rankını, LP\'ni ve son maçlarını yayınında göster. İndirme yok, API anahtarı derdi yok — Riot ID\'ni gir, OBS linkini al.',
+      riotId: 'Riot ID', bolge: 'Bölge', dil: 'Dil',
+      olusturBtn: '⚔️ Overlay Linkini Oluştur', linkLabel: 'OBS\'ye ekleyeceğin link',
+      kopyala: 'Kopyala', kopyalandi: 'Kopyalandı ✓', onizleme: 'Önizleme',
+      ortSira: 'Ort. Sıra', derecesiz: 'Derecesiz', lp: 'LP',
+      yardimBaslik: '🎬 OBS\'ye nasıl eklenir?',
+      yardim1: 'OBS\'de <b>Kaynaklar → Ekle → Tarayıcı</b> (Browser)',
+      yardim2: 'URL kısmına yukarıdaki linki yapıştır',
+      yardim3: 'Genişlik <code>424</code>, Yükseklik <code>200</code>',
+      yardim4: 'Arka plan şeffaf gelir — oyunun üstünde durur',
+      k1b: 'Rankın canlı görünür', k1d: 'Şampiyon 784 LP mi? İzleyicilerin anlık olarak görsün. Maç bitince otomatik güncellenir.',
+      k2b: 'Son maçların ve ortalaman', k2d: 'Son 8 maçtaki sıraların renkli pullarla, ortalama sıran tek bakışta.',
+      k3b: 'İndirme yok, şeffaf', k3d: 'Overwolf gerekmez. OBS\'de tarayıcı kaynağı olarak eklenir, oyunun üstüne oturur.',
+      k4b: 'API anahtarı bizde', k4d: 'Başka trackerların aksine kendi Riot anahtarını girip her gün yenilemek zorunda değilsin.',
+      hataId: 'Riot ID "isim#etiket" biçiminde olmalı (ör. Faker#TR1).',
+      hataBaglanti: 'Bağlanılamadı.', hataVeri: 'Veri alınamadı',
+    },
+    en: {
+      baslik: 'Stream Overlay', altAciklama: 'Show your rank, LP and recent games on stream. No download, no API key hassle — enter your Riot ID, get an OBS link.',
+      riotId: 'Riot ID', bolge: 'Region', dil: 'Language',
+      olusturBtn: '⚔️ Generate Overlay Link', linkLabel: 'Link to add in OBS',
+      kopyala: 'Copy', kopyalandi: 'Copied ✓', onizleme: 'Preview',
+      ortSira: 'Avg. Place', derecesiz: 'Unranked', lp: 'LP',
+      yardimBaslik: '🎬 How to add to OBS?',
+      yardim1: 'In OBS: <b>Sources → Add → Browser</b>',
+      yardim2: 'Paste the link above into the URL field',
+      yardim3: 'Width <code>424</code>, Height <code>200</code>',
+      yardim4: 'Background is transparent — sits on top of the game',
+      k1b: 'Your rank, live', k1d: 'Challenger at 784 LP? Let your viewers see it in real time. Auto-updates after each game.',
+      k2b: 'Recent games & average', k2d: 'Your last 8 placements in colored chips, average place at a glance.',
+      k3b: 'No download, transparent', k3d: 'No Overwolf needed. Added as a browser source in OBS, sits on top of your game.',
+      k4b: 'We hold the API key', k4d: 'Unlike other trackers, you don\'t have to enter your own Riot key and renew it every day.',
+      hataId: 'Riot ID must be in "name#tag" format (e.g. Faker#TR1).',
+      hataBaglanti: 'Could not connect.', hataVeri: 'Could not fetch data',
+    },
+  };
 
   function parametre(ad) {
     return new URLSearchParams(location.search).get(ad);
   }
+
+  // Aktif dil: URL ?dil= veya ?lang=, yoksa tarayici, yoksa tr.
+  function dilSec() {
+    var d = (parametre("dil") || parametre("lang") || "").toLowerCase();
+    if (d === "en" || d === "tr") return d;
+    var nav = (navigator.language || "tr").toLowerCase();
+    return nav.indexOf("tr") === 0 ? "tr" : "en";
+  }
+  var DIL = dilSec();
+  function T(anahtar) { return (METIN[DIL] || METIN.tr)[anahtar]; }
+  // Tier ham anahtarini aktif dilde metne cevir.
+  function tierMetni(ham) { return (TIER_AD[DIL] || TIER_AD.tr)[ham] || ham; }
+
+  var $ = function (id) { return document.getElementById(id); };
 
   // Oluşturucu ekranı için kayan yıldız/parıltı üret (TFT "yıldız tozu" hissi)
   function yildizUret() {
@@ -72,35 +136,35 @@
   }
 
   // ---- veri cek + ciz --------------------------------------------------------
-  function veriCek(riotId, bolge) {
+  // cizMi=true ise overlay modu (kart dogrudan cizilir). Olusturucu modu false
+  // gonderir; onizlemeyi cagiran taraf kendisi cizer.
+  function veriCek(riotId, bolge, cizMi) {
     var url = API_KOK + "/api/oyuncu?riotId=" + encodeURIComponent(riotId) +
       "&bolge=" + encodeURIComponent(bolge) + "&adet=10";
     return fetch(url, { cache: "no-store" })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
-        if (!res.ok || res.j.hata) throw new Error(res.j.hata || "Veri alınamadı");
-        // cizOverlay yalnizca overlay modunda gerekli (o DOM'a yazar). Olusturucu
-        // modunda o elementler yok; onizlemeyi cagiran taraf kendisi cizer.
-        if ($("kartIcerik")) cizOverlay(res.j);
+        if (!res.ok || res.j.hata) throw new Error(res.j.hata || T("hataVeri"));
+        if (cizMi) cizOverlay(res.j);
         return res.j;
       });
   }
 
   // Overlay kartinin ic HTML'ini uretir — hem gercek overlay hem onizleme kullanir.
   function kartHTML(d) {
-    var tierTr = d.lig ? d.lig.tierTr : null;
-    var renk = TIER_RENK[tierTr] || "#3FC9D8";
+    var ham = d.lig ? d.lig.tier : null;               // ham tier: CHALLENGER
+    var renk = TIER_RENK[ham] || "#3FC9D8";
     var isim = (d.riotId || "").split("#")[0];
     var bolge = (d.bolge || "").toUpperCase();
 
     var tierBlok, lpBlok;
     if (d.lig) {
-      var ustLig = ["Usta", "Büyük Usta", "Şampiyon"].indexOf(d.lig.tierTr) >= 0;
+      var ustLig = USTLIG.indexOf(ham) >= 0;           // Master+ -> bolum yok
       var rankMetni = (!ustLig && d.lig.rank) ? " " + d.lig.rank : "";
-      tierBlok = '<div class="tier" style="color:' + renk + '">' + esc(d.lig.tierTr + rankMetni) + '</div>';
-      lpBlok = '<div class="lp"><span>' + d.lig.lp + '</span><small>LP</small></div>';
+      tierBlok = '<div class="tier" style="color:' + renk + '">' + esc(tierMetni(ham) + rankMetni) + '</div>';
+      lpBlok = '<div class="lp"><span>' + d.lig.lp + '</span><small>' + T("lp") + '</small></div>';
     } else {
-      tierBlok = '<div class="tier" style="color:#B9C6D8">Derecesiz</div>';
+      tierBlok = '<div class="tier" style="color:#B9C6D8">' + T("derecesiz") + '</div>';
       lpBlok = '';
     }
 
@@ -112,7 +176,7 @@
     var ortMetin = o.ort != null ? o.ort.toFixed(2) : "—";
     var ortaBlok = (d.maclar || []).length
       ? '<div class="orta"><div class="maclar">' + maclar + '</div>' +
-        '<div class="ortkutu"><b class="' + ortSinif + '">' + ortMetin + '</b><span>Ort. Sıra</span></div></div>'
+        '<div class="ortkutu"><b class="' + ortSinif + '">' + ortMetin + '</b><span>' + T("ortSira") + '</span></div></div>'
       : '';
 
     return '<div class="kart" style="--tier:' + renk + '59">' +
@@ -129,71 +193,30 @@
     });
   }
 
+  // Overlay modu: karti kartHTML ile ciz (dil + tier mantigi tek yerde).
   function cizOverlay(d) {
-    $("miniDurum").style.display = "none";
-    $("kartIcerik").style.display = "block";
-
-    var tierTr = d.lig ? d.lig.tierTr : null;
-    var renk = TIER_RENK[tierTr] || "#3FC9D8";
-    // sol kenar isigi + rozet rengi
-    $("kart").style.setProperty("--tier", renk + "59");   // %35 alpha
-    $("rozet").innerHTML = amblemSVG(renk);
-
-    $("ovIsim").textContent = (d.riotId || "").split("#")[0];
-    $("ovBolge").textContent = (d.bolge || "").toUpperCase();
-
-    if (d.lig) {
-      // Master/GM/Challenger'da bolum yok; proxy temizler ama eski onbellek ihtimaline karsi
-      // burada da guvence: bu ucunde rank'i asla gosterme.
-      var ustLig = ["Usta", "Büyük Usta", "Şampiyon"].indexOf(d.lig.tierTr) >= 0;
-      var rankMetni = (!ustLig && d.lig.rank) ? " " + d.lig.rank : "";
-      $("ovTier").textContent = d.lig.tierTr + rankMetni;
-      $("ovTier").style.color = renk;
-      $("ovLp").textContent = d.lig.lp;
-      $("ovLp").parentNode.style.display = "";
-    } else {
-      $("ovTier").textContent = "Derecesiz";
-      $("ovTier").style.color = "#B9C6D8";
-      $("ovLp").parentNode.style.display = "none";
-    }
-
-    // son maclar + ort
-    var o = d.ozet || {};
-    var s = $("ovMaclar");
-    s.innerHTML = "";
-    (d.maclar || []).slice(0, 8).forEach(function (m) {
-      var el = document.createElement("div");
-      el.className = "pul p" + m.pl;
-      el.textContent = m.pl;
-      s.appendChild(el);
-    });
-    var ob = $("ovOrt");
-    if (o.ort != null) {
-      ob.textContent = o.ort.toFixed(2);
-      ob.className = o.ort <= 4.0 ? "iyi" : o.ort >= 5.0 ? "kotu" : "";
-    } else {
-      ob.textContent = "—"; ob.className = "";
-    }
-    // hic mac yoksa orta satiri gizle (kart daha derli toplu dursun)
-    $("ovOrta").style.display = (d.maclar || []).length ? "flex" : "none";
+    var kap = $("overlay");
+    if (!kap) return;
+    kap.innerHTML = kartHTML(d);
   }
 
   function overlayHata(mesaj) {
-    $("kartIcerik").style.display = "none";
-    var m = $("miniDurum");
-    m.style.display = "block";
-    m.textContent = mesaj;
+    var kap = $("overlay");
+    if (kap) kap.innerHTML = '<div class="kart"><div class="mini-durum">' + esc(mesaj) + '</div></div>';
   }
 
   // ---- MOD 1: OVERLAY --------------------------------------------------------
   function overlayModu(riotId, bolge) {
     $("overlay").classList.add("acik");
     document.title = riotId + " · TFTRadar";
+    var ilkYuklemeYapildi = false;
     function tazele() {
-      veriCek(riotId, bolge).catch(function (e) {
-        // Ilk yuklemede hata goster; sonraki tazelemelerde eski karti koru
-        if ($("kartIcerik").style.display === "none") overlayHata(e.message || "Bağlanılamadı");
-      });
+      veriCek(riotId, bolge, true)
+        .then(function () { ilkYuklemeYapildi = true; })
+        .catch(function (e) {
+          // Ilk yuklemede hata goster; sonraki tazelemelerde eski karti koru
+          if (!ilkYuklemeYapildi) overlayHata(e.message || T("hataBaglanti"));
+        });
     }
     tazele();
     setInterval(tazele, YENILE_MS);
@@ -203,10 +226,11 @@
   function olusturModu() {
     $("olustur").classList.add("acik");
     yildizUret();
+    olusturMetinleri();   // arayuz metinlerini aktif dile gore yaz
 
     function link(riotId, bolge) {
       return API_KOK + "/overlay.html?id=" + encodeURIComponent(riotId) +
-        "&bolge=" + encodeURIComponent(bolge);
+        "&bolge=" + encodeURIComponent(bolge) + "&dil=" + DIL;
     }
 
     $("olusturBtn").addEventListener("click", function () {
@@ -215,12 +239,12 @@
       var h = $("olusturHata");
       h.textContent = "";
       if (riotId.indexOf("#") < 0) {
-        h.textContent = 'Riot ID "isim#etiket" biçiminde olmalı (ör. Faker#TR1).';
+        h.textContent = T("hataId");
         return;
       }
       $("olusturBtn").disabled = true;
       // Once dogrula: oyuncu gercekten var mi?
-      veriCek(riotId, bolge)
+      veriCek(riotId, bolge, false)
         .then(function (d) {
           var u = link(d.riotId, bolge);
           $("linkText").value = u;
@@ -228,7 +252,7 @@
           $("onizlikKart").innerHTML = kartHTML(d);
           $("sonuc").classList.add("acik");
         })
-        .catch(function (e) { h.textContent = e.message || "Oyuncu bulunamadı."; })
+        .catch(function (e) { h.textContent = e.message || T("hataVeri"); })
         .then(function () { $("olusturBtn").disabled = false; });
     });
 
@@ -243,9 +267,55 @@
         navigator.clipboard.writeText(t.value);
       } catch (e) { document.execCommand("copy"); }
       var b = $("kopyalaBtn");
-      b.textContent = "Kopyalandı ✓"; b.classList.add("ok");
-      setTimeout(function () { b.textContent = "Kopyala"; b.classList.remove("ok"); }, 1600);
+      b.textContent = T("kopyalandi"); b.classList.add("ok");
+      setTimeout(function () { b.textContent = T("kopyala"); b.classList.remove("ok"); }, 1600);
     });
+
+    // Dil butonlari
+    var butonlar = document.querySelectorAll(".dil-btn");
+    for (var i = 0; i < butonlar.length; i++) {
+      butonlar[i].addEventListener("click", function () {
+        var yeni = this.getAttribute("data-dil");
+        if (yeni === DIL) return;
+        // URL'e dil ekleyip yeniden yukle — en temiz, tum metinler guncellenir.
+        var u = new URL(location.href);
+        u.searchParams.set("dil", yeni);
+        location.href = u.toString();
+      });
+    }
+  }
+
+  // Olusturucu ekranindaki tum sabit metinleri aktif dile gore yaz.
+  function olusturMetinleri() {
+    var yaz = function (id, deger, html) {
+      var e = $(id); if (!e) return;
+      if (html) e.innerHTML = deger; else e.textContent = deger;
+    };
+    yaz("mBaslik", T("baslik"));
+    yaz("mAlt", T("altAciklama"));
+    yaz("mRiotLbl", T("riotId"));
+    yaz("mBolgeLbl", T("bolge"));
+    yaz("mDilLbl", T("dil"));
+    yaz("olusturBtn", T("olusturBtn"));
+    yaz("mLinkLbl", T("linkLabel"));
+    yaz("kopyalaBtn", T("kopyala"));
+    yaz("mOnizLbl", T("onizleme"));
+    yaz("mYardimBaslik", T("yardimBaslik"));
+    yaz("mY1", T("yardim1"), true);
+    yaz("mY2", T("yardim2"), true);
+    yaz("mY3", T("yardim3"), true);
+    yaz("mY4", T("yardim4"), true);
+    yaz("mK1b", T("k1b")); yaz("mK1d", T("k1d"));
+    yaz("mK2b", T("k2b")); yaz("mK2d", T("k2d"));
+    yaz("mK3b", T("k3b")); yaz("mK3d", T("k3d"));
+    yaz("mK4b", T("k4b")); yaz("mK4d", T("k4d"));
+    // aktif dil butonunu isaretle
+    var butonlar = document.querySelectorAll(".dil-btn");
+    for (var i = 0; i < butonlar.length; i++) {
+      butonlar[i].classList.toggle("aktif", butonlar[i].getAttribute("data-dil") === DIL);
+    }
+    // html lang
+    document.documentElement.lang = DIL;
   }
 
   // ---- baslat: parametreye gore mod sec --------------------------------------
