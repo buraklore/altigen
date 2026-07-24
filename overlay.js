@@ -79,9 +79,54 @@
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
         if (!res.ok || res.j.hata) throw new Error(res.j.hata || "Veri alınamadı");
-        cizOverlay(res.j);
+        // cizOverlay yalnizca overlay modunda gerekli (o DOM'a yazar). Olusturucu
+        // modunda o elementler yok; onizlemeyi cagiran taraf kendisi cizer.
+        if ($("kartIcerik")) cizOverlay(res.j);
         return res.j;
       });
+  }
+
+  // Overlay kartinin ic HTML'ini uretir — hem gercek overlay hem onizleme kullanir.
+  function kartHTML(d) {
+    var tierTr = d.lig ? d.lig.tierTr : null;
+    var renk = TIER_RENK[tierTr] || "#3FC9D8";
+    var isim = (d.riotId || "").split("#")[0];
+    var bolge = (d.bolge || "").toUpperCase();
+
+    var tierBlok, lpBlok;
+    if (d.lig) {
+      var ustLig = ["Usta", "Büyük Usta", "Şampiyon"].indexOf(d.lig.tierTr) >= 0;
+      var rankMetni = (!ustLig && d.lig.rank) ? " " + d.lig.rank : "";
+      tierBlok = '<div class="tier" style="color:' + renk + '">' + esc(d.lig.tierTr + rankMetni) + '</div>';
+      lpBlok = '<div class="lp"><span>' + d.lig.lp + '</span><small>LP</small></div>';
+    } else {
+      tierBlok = '<div class="tier" style="color:#B9C6D8">Derecesiz</div>';
+      lpBlok = '';
+    }
+
+    var o = d.ozet || {};
+    var maclar = (d.maclar || []).slice(0, 8).map(function (m) {
+      return '<div class="pul p' + m.pl + '">' + m.pl + '</div>';
+    }).join("");
+    var ortSinif = o.ort != null ? (o.ort <= 4.0 ? "iyi" : o.ort >= 5.0 ? "kotu" : "") : "";
+    var ortMetin = o.ort != null ? o.ort.toFixed(2) : "—";
+    var ortaBlok = (d.maclar || []).length
+      ? '<div class="orta"><div class="maclar">' + maclar + '</div>' +
+        '<div class="ortkutu"><b class="' + ortSinif + '">' + ortMetin + '</b><span>Ort. Sıra</span></div></div>'
+      : '';
+
+    return '<div class="kart" style="--tier:' + renk + '59">' +
+      '<div class="ust"><div class="rozet">' + amblemSVG(renk) + '</div>' +
+      '<div class="bilgi"><div class="isim">' + esc(isim) + '<span class="bolge">' + esc(bolge) + '</span></div>' +
+      tierBlok + lpBlok + '</div></div>' +
+      ortaBlok +
+      '<div class="marka"><span class="logo">R</span><b>TFT<span>RADAR</span>.COM</b></div></div>';
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
   }
 
   function cizOverlay(d) {
@@ -179,7 +224,8 @@
         .then(function (d) {
           var u = link(d.riotId, bolge);
           $("linkText").value = u;
-          $("onizlikFrame").src = u;
+          // Onizlemeyi iframe yerine DOGRUDAN ciz — X-Frame-Options / CSP engeline takilmaz.
+          $("onizlikKart").innerHTML = kartHTML(d);
           $("sonuc").classList.add("acik");
         })
         .catch(function (e) { h.textContent = e.message || "Oyuncu bulunamadı."; })
