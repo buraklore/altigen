@@ -81,7 +81,11 @@
     $("ovBolge").textContent = (d.bolge || "").toUpperCase();
 
     if (d.lig) {
-      $("ovTier").textContent = d.lig.tierTr + (d.lig.rank ? " " + d.lig.rank : "");
+      // Master/GM/Challenger'da bolum yok; proxy temizler ama eski onbellek ihtimaline karsi
+      // burada da guvence: bu ucunde rank'i asla gosterme.
+      var ustLig = ["Usta", "Büyük Usta", "Şampiyon"].indexOf(d.lig.tierTr) >= 0;
+      var rankMetni = (!ustLig && d.lig.rank) ? " " + d.lig.rank : "";
+      $("ovTier").textContent = d.lig.tierTr + rankMetni;
       $("ovTier").style.color = renk;
       $("ovLp").textContent = d.lig.lp;
       $("ovLp").parentNode.style.display = "";
