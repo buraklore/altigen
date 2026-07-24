@@ -495,6 +495,28 @@ footer p{color:var(--muted);font-size:12px;line-height:1.6;max-width:820px}
 .legal li{margin:0 0 6px}
 .legal b{color:var(--text)}
 .legal-upd{font-size:12px;color:var(--c3);text-transform:uppercase;letter-spacing:.06em}
+/* ===== Overlay tanitim karti ===== */
+.tab-overlay{text-decoration:none;color:var(--gold)!important;font-weight:800;position:relative}
+.tab-overlay::after{content:"↗";font-size:10px;margin-left:3px;opacity:.7;vertical-align:super}
+.hbtn-overlay{text-decoration:none;display:inline-flex;align-items:center;
+  background:linear-gradient(100deg,rgba(255,194,61,.16),rgba(255,194,61,.05));
+  border:1px solid var(--gold);color:var(--gold)}
+.hbtn-overlay:hover{background:var(--gold);color:#0A1628}
+.feat-overlay{background:linear-gradient(160deg,rgba(255,194,61,.1),rgba(255,194,61,.02))!important;
+  border:1px solid rgba(255,194,61,.35)!important;position:relative}
+.feat-overlay::after{content:"OBS";position:absolute;top:10px;right:10px;font-size:9px;
+  font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:4px;
+  background:rgba(255,194,61,.2);color:var(--gold)}
+.feat-overlay:hover{border-color:var(--gold)!important}
+.overlay-tanit{display:flex;align-items:center;gap:14px;padding:16px 18px;margin-bottom:14px;border-radius:14px;text-decoration:none;color:var(--text);background:linear-gradient(100deg,rgba(255,194,61,.12),rgba(255,194,61,.03));border:1px solid rgba(255,194,61,.28);transition:all .16s}
+.overlay-tanit:hover{border-color:var(--gold);background:linear-gradient(100deg,rgba(255,194,61,.18),rgba(255,194,61,.05))}
+.overlay-tanit .ot-ikon{width:44px;height:44px;flex:none}
+.overlay-tanit .ot-ikon svg{width:44px;height:44px}
+.overlay-tanit .ot-metin{flex:1;min-width:0}
+.overlay-tanit .ot-metin b{display:block;font-size:15px;font-weight:800;margin-bottom:2px}
+.overlay-tanit .ot-metin .sub{font-size:12.5px;line-height:1.4}
+.overlay-tanit .ot-ok{flex:none;font-weight:800;font-size:13px;color:var(--gold);white-space:nowrap}
+@media(max-width:560px){.overlay-tanit .ot-ok{display:none}}
 /* ===== Footer ===== */
 .site-footer{border-top:1px solid var(--line);background:linear-gradient(180deg,var(--surface),#0A0E1A);margin-top:50px}
 .foot-inner{max-width:1280px;margin:0 auto;padding:34px 20px 22px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:28px}
@@ -543,6 +565,7 @@ footer p{color:var(--muted);font-size:12px;line-height:1.6;max-width:820px}
         <button class="tab" role="tab" aria-selected="false" data-t="roll" data-i18n="nav_roll">Roll Hesaplayıcı</button>
       </div>
     </div>
+    <a class="tab tab-overlay" href="/overlay.html" target="_blank" rel="noopener" data-i18n="nav_overlay">Overlay</a>
     <button class="tab" role="tab" aria-selected="false" data-t="items" data-i18n="nav_items">Eşyalar</button>
     <button class="tab" role="tab" aria-selected="false" data-t="augments" data-i18n="nav_augments">Augmentler</button>
     <button class="tab" role="tab" aria-selected="false" data-t="kurucu" data-i18n="nav_kurucu">Takım Kurucu</button>
@@ -581,6 +604,7 @@ footer p{color:var(--muted);font-size:12px;line-height:1.6;max-width:820px}
       <button class="foot-link" data-goto="player" data-i18n="nav_player">Oyuncu</button>
       <button class="foot-link" data-goto="ai" data-i18n="nav_ai">AI Kompları</button>
       <button class="foot-link" data-goto="roll" data-i18n="nav_roll">Roll Hesaplayıcı</button>
+      <a class="foot-link" href="/overlay.html" target="_blank" rel="noopener" data-i18n="nav_overlay" style="display:block;text-align:left;text-decoration:none">Yayın Overlay'i</a>
     </div>
     <div class="foot-col">
       <h4 data-i18n="foot_site_col">Site</h4>
@@ -703,6 +727,8 @@ const I18N = {
     nav_player:"Oyuncu", nav_comps:"Komplar", nav_ai:"AI Kompları", nav_set:"Set Rehberi",
     nav_items:"Eşyalar", nav_augments:"Augmentler", nav_bilgi:"TFT Bilgi",
     nav_roll:"Roll Hesaplayıcı", nav_kurucu:"Takım Kurucu", nav_blog:"Blog", nav_tools:"Araçlar ▾",
+    nav_overlay:"Yayın Overlay'i", overlay_promo_title:"Yayın Overlay'i — OBS için", overlay_promo_desc:"Rankını, LP'ni ve son maçlarını yayınında göster. İndirme yok, tek tıkla OBS linki.", overlay_promo_cta:"Oluştur",
+    home_cta_overlay:"Yayın Overlay'i", home_f_overlay_h:"Yayın Overlay'i", home_f_overlay_d:"OBS için şeffaf rank kartı. Rankın, LP'n ve son maçların yayında — indirme yok.",
     nav_about:"Hakkında", nav_privacy:"Gizlilik", nav_terms:"Kullanım Şartları",
     home_tagline:"Gerçek TR + EUW + NA + KR verisiyle Set 17 TFT rehberi. Meta komplar, oyuncu arama, AI analizler ve hesaplayıcılar — hepsi Türkçe.",
     home_cta_comps:"Meta Komplara Bak", home_cta_player:"Oyuncu Ara",
@@ -842,6 +868,8 @@ const I18N = {
     nav_player:"Player", nav_comps:"Comps", nav_ai:"AI Comps", nav_set:"Set Guide",
     nav_items:"Items", nav_augments:"Augments", nav_bilgi:"TFT Info",
     nav_roll:"Roll Calculator", nav_kurucu:"Team Builder", nav_blog:"Blog", nav_tools:"Tools ▾",
+    nav_overlay:"Stream Overlay", overlay_promo_title:"Stream Overlay — for OBS", overlay_promo_desc:"Show your rank, LP and recent games on stream. No download, one-click OBS link.", overlay_promo_cta:"Create",
+    home_cta_overlay:"Stream Overlay", home_f_overlay_h:"Stream Overlay", home_f_overlay_d:"Transparent rank card for OBS. Your rank, LP and recent games on stream — no download.",
     nav_about:"About", nav_privacy:"Privacy", nav_terms:"Terms of Use",
     home_tagline:"A Set 17 TFT guide powered by real TR1 data. Meta comps, player search, AI analysis and calculators.",
     home_cta_comps:"Browse Meta Comps", home_cta_player:"Search a Player",
@@ -2621,6 +2649,11 @@ function playerHTML(){
     ? t("player_live_hint")
     : `Canlı arama Vercel sürümünde çalışır; bu statik dosyada devre dışıdır.`;
   return livebar(info, ["account-v1","tft-league-v1/by-puuid","tft-match-v1"]) + `
+    <a class="overlay-tanit" href="/overlay.html" target="_blank" rel="noopener">
+      <span class="ot-ikon" aria-hidden="true"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M32 4 L56 14 L56 34 Q56 51 32 60 Q8 51 8 34 L8 14 Z" fill="none" stroke="var(--gold)" stroke-width="3"/><path d="M32 21 l3 6.4 7 .9 -5.1 4.7 1.3 6.9 L32 42.5 l-6.2 3.3 1.3 -6.9 -5.1 -4.7 7 -.9 Z" fill="var(--gold)"/></svg></span>
+      <span class="ot-metin"><b>${t("overlay_promo_title")}</b><span class="sub">${t("overlay_promo_desc")}</span></span>
+      <span class="ot-ok">${t("overlay_promo_cta")} →</span>
+    </a>
     <div class="panel"><div class="rowline">
       <select id="preg" aria-label="${t('region')}" ${LIVE?"":"disabled"}>${Object.keys(PLATFORMS).map(p=>`<option>${p}</option>`).join("")}</select>
       <input class="pinput" id="pq" style="color:var(--text)" placeholder="${t('player_search_ph')}" ${LIVE?"":"disabled"} aria-label="${t('nav_player')}">
@@ -3307,13 +3340,16 @@ function homeHTML(){
     {t:"roll",   col:"#19E3D0", vis: cardCh(3), h:t("home_f_roll_h"),    d:t("home_f_roll_d")},
     {t:"kurucu", col:"#2ED67C", vis: cardCh(4), h:t("home_f_builder_h"), d:t("home_f_builder_d")},
     {t:"items",  col:"#FF7B9C", item: bigItem,  h:t("home_f_items_h"),   d:t("home_f_items_d")},
+    {t:"overlay", col:"#FFC23D", href:"/overlay.html", h:t("home_f_overlay_h"), d:t("home_f_overlay_d"), rozet:true, star:true},
     {t:"bilgi", col:"#9B7EDE", vis: cardCh(5), h:t("home_f_bilgi_h"), d:t("home_f_bilgi_d")},
     {t:"blog",  col:"#E8A13C", vis: cardCh(6), h:t("home_f_blog_h"),  d:t("home_f_blog_d")}
   ];
-  const cards = feats.map(f => `<button class="feat" data-goto="${f.t}" style="--fc:${f.col}">
-    <span class="feat-vis">${f.item ? `<span class="feat-item">${sp(f.item.sx, 60)}</span>` : (f.vis ? portHTML(f.vis, 74, 80, f.col) : "")}</span>
-    <b class="feat-h">${f.h}${f.star ? ' <span style="color:#FFC23D">★</span>' : ''}</b>
-    <span class="feat-d">${f.d}</span></button>`).join("");
+  const cards = feats.map(f => { const etiket = f.href ? "a" : "button";
+    const nitelik = f.href ? `href="${f.href}" target="_blank" rel="noopener"` : `data-goto="${f.t}"`;
+    const gorsel = f.rozet
+      ? `<span class="feat-vis"><svg viewBox="0 0 64 64" width="70" height="70" xmlns="http://www.w3.org/2000/svg"><path d="M32 4 L56 14 L56 34 Q56 51 32 60 Q8 51 8 34 L8 14 Z" fill="none" stroke="${f.col}" stroke-width="3"/><path d="M32 21 l3 6.4 7 .9 -5.1 4.7 1.3 6.9 L32 42.5 l-6.2 3.3 1.3 -6.9 -5.1 -4.7 7 -.9 Z" fill="${f.col}"/></svg></span>`
+      : `<span class="feat-vis">${f.item ? `<span class="feat-item">${sp(f.item.sx, 60)}</span>` : (f.vis ? portHTML(f.vis, 74, 80, f.col) : "")}</span>`;
+    return `<${etiket} class="feat${f.rozet?" feat-overlay":""}" ${nitelik} style="--fc:${f.col}">${gorsel}<b class="feat-h">${f.h}${f.star ? ' <span style="color:#FFC23D">★</span>' : ''}</b><span class="feat-d">${f.d}</span></${etiket}>`; }).join("");
   return `<div class="landing">
     <section class="hero">
       <div class="hero-glow" aria-hidden="true"></div>
@@ -3322,6 +3358,7 @@ function homeHTML(){
       <div class="hero-cta">
         <button class="hbtn hbtn-main" data-goto="comps">${t("home_cta_comps")}</button>
         <button class="hbtn" data-goto="player">${t("home_cta_player")}</button>
+        <a class="hbtn hbtn-overlay" href="/overlay.html" target="_blank" rel="noopener">${t("home_cta_overlay")}</a>
       </div>
     </section>
     <section class="feat-grid">${cards}</section>
