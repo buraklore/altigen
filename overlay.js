@@ -28,6 +28,23 @@
     return new URLSearchParams(location.search).get(ad);
   }
 
+  // Oluşturucu ekranı için kayan yıldız/parıltı üret (TFT "yıldız tozu" hissi)
+  function yildizUret() {
+    var kap = $("yildizlar");
+    if (!kap) return;
+    var simgeler = ["✦", "✧", "⭑", "✵", "◆"];
+    for (var i = 0; i < 18; i++) {
+      var y = document.createElement("span");
+      y.className = "yildiz";
+      y.textContent = simgeler[i % simgeler.length];
+      y.style.left = Math.random() * 100 + "%";
+      y.style.fontSize = (9 + Math.random() * 12) + "px";
+      y.style.animationDuration = (7 + Math.random() * 9) + "s";
+      y.style.animationDelay = (-Math.random() * 12) + "s";
+      kap.appendChild(y);
+    }
+  }
+
   // ---- tier amblemi (SVG, tier rengine gore) --------------------------------
   // Riot amblem gorselleri yerine kendi SVG'miz: telif yok, harici baglanti yok.
   function amblemSVG(renk) {
@@ -140,6 +157,7 @@
   // ---- MOD 2: LINK OLUSTURUCU ------------------------------------------------
   function olusturModu() {
     $("olustur").classList.add("acik");
+    yildizUret();
 
     function link(riotId, bolge) {
       return API_KOK + "/overlay.html?id=" + encodeURIComponent(riotId) +
