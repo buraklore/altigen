@@ -502,6 +502,19 @@ footer p{color:var(--muted);font-size:12px;line-height:1.6;max-width:820px}
   background:linear-gradient(100deg,rgba(255,194,61,.16),rgba(255,194,61,.05));
   border:1px solid var(--gold);color:var(--gold)}
 .hbtn-overlay:hover{background:var(--gold);color:#0A1628}
+.hbtn-overlay-big{font-size:18px;padding:18px 44px;border-radius:14px;
+  background:linear-gradient(180deg,#F8CE6E,#E8A428);color:#181000;border-color:var(--gold);
+  box-shadow:0 6px 24px rgba(255,194,61,.28),inset 0 0 0 1px rgba(255,255,255,.15);
+  position:relative;overflow:hidden}
+.hbtn-overlay-big::before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);
+  transform:skewX(-20deg);animation:parla 3.2s ease-in-out infinite}
+@keyframes parla{0%,60%{left:-60%}80%,100%{left:130%}}
+.hbtn-overlay-big::after{content:"OBS";position:absolute;top:8px;right:10px;font-size:9px;
+  font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:4px;
+  background:rgba(24,16,0,.25);color:#181000}
+.hbtn-overlay-big:hover{background:linear-gradient(180deg,#FFD873,#F0B441);
+  box-shadow:0 8px 30px rgba(255,194,61,.4),inset 0 0 0 1px rgba(255,255,255,.2)}
 .feat-overlay{background:linear-gradient(160deg,rgba(255,194,61,.1),rgba(255,194,61,.02))!important;
   border:1px solid rgba(255,194,61,.35)!important;position:relative}
 .feat-overlay::after{content:"OBS";position:absolute;top:10px;right:10px;font-size:9px;
@@ -3339,7 +3352,6 @@ function homeHTML(){
     {t:"ai",     col:"#C560FF", vis: cardCh(2), h:t("home_f_ai_h"),      d:t("home_f_ai_d"), star:true},
     {t:"roll",   col:"#19E3D0", vis: cardCh(3), h:t("home_f_roll_h"),    d:t("home_f_roll_d")},
     {t:"kurucu", col:"#2ED67C", vis: cardCh(4), h:t("home_f_builder_h"), d:t("home_f_builder_d")},
-    {t:"items",  col:"#FF7B9C", item: bigItem,  h:t("home_f_items_h"),   d:t("home_f_items_d")},
     {t:"overlay", col:"#FFC23D", href:"/overlay.html", h:t("home_f_overlay_h"), d:t("home_f_overlay_d"), rozet:true, star:true},
     {t:"bilgi", col:"#9B7EDE", vis: cardCh(5), h:t("home_f_bilgi_h"), d:t("home_f_bilgi_d")},
     {t:"blog",  col:"#E8A13C", vis: cardCh(6), h:t("home_f_blog_h"),  d:t("home_f_blog_d")}
@@ -3356,9 +3368,7 @@ function homeHTML(){
       <div class="hero-champs" aria-hidden="true">${champMontage}</div>
       <h1 class="hero-title">TFT<span>RADAR</span></h1>
       <div class="hero-cta">
-        <button class="hbtn hbtn-main" data-goto="comps">${t("home_cta_comps")}</button>
-        <button class="hbtn" data-goto="player">${t("home_cta_player")}</button>
-        <a class="hbtn hbtn-overlay" href="/overlay.html" target="_blank" rel="noopener">${t("home_cta_overlay")}</a>
+        <a class="hbtn hbtn-overlay hbtn-overlay-big" href="/overlay.html" target="_blank" rel="noopener">${t("home_cta_overlay")}</a>
       </div>
     </section>
     <section class="feat-grid">${cards}</section>
