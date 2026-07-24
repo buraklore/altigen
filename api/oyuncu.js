@@ -57,9 +57,12 @@ module.exports = async (req, res) => {
       const solo = (girisler || []).find(x => x.queueType === 'RANKED_TFT') || (girisler || [])[0] || null;
       if (solo && solo.tier) {
         const w = solo.wins || 0, l = solo.losses || 0, top = w + l;
+        // Master / Grandmaster / Challenger'da BOLUM (I/II/III/IV) yoktur; sadece LP vardir.
+        // Riot yine de rank="I" dondurur -> "Sampiyon I" gibi yanlis gorunur. Temizle.
+        const ustLig = ['MASTER', 'GRANDMASTER', 'CHALLENGER'].indexOf(solo.tier) >= 0;
         lig = {
           tier: solo.tier, tierTr: TR_TIER[solo.tier] || solo.tier,
-          rank: solo.rank || '', lp: solo.leaguePoints || 0,
+          rank: ustLig ? '' : (solo.rank || ''), lp: solo.leaguePoints || 0,
           birincilik: w, toplam: top,
         };
       }
