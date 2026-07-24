@@ -116,6 +116,13 @@
   .panel h1 span{color:var(--gold)}
   .panel .alt{color:var(--muted);font-size:13px;margin-bottom:22px;line-height:1.5}
   .alan{margin-bottom:14px}
+  .alan-ikili{display:flex;gap:12px;align-items:flex-end}
+  .dil-secim{display:flex;gap:6px}
+  .dil-btn{background:rgba(10,22,40,.7);border:1px solid #2A3E58;color:var(--muted);
+    border-radius:9px;padding:12px 16px;font-size:14px;font-weight:800;font-family:inherit;
+    cursor:pointer;transition:all .15s;letter-spacing:.5px}
+  .dil-btn:hover{border-color:var(--cyan);color:var(--text)}
+  .dil-btn.aktif{background:linear-gradient(180deg,#FFD873,#E8A428);color:#181000;border-color:var(--gold)}
   .alan label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;
     text-transform:uppercase;letter-spacing:.4px}
   .alan input,.alan select{width:100%;background:rgba(10,22,40,.7);border:1px solid #2A3E58;
@@ -216,26 +223,35 @@
       <div class="form-kutu">
         <div class="baslik">
           <span class="logo">R</span>
-          <h1>TFT<span>RADAR</span> Yayın Overlay'i</h1>
+          <h1>TFT<span>RADAR</span> <span id="mBaslik">Yayın Overlay'i</span></h1>
         </div>
-        <div class="alt">Rankını, LP'ni ve son maçlarını yayınında göster. İndirme yok, API anahtarı derdi yok — Riot ID'ni gir, OBS linkini al.</div>
+        <div class="alt" id="mAlt">Rankını, LP'ni ve son maçlarını yayınında göster. İndirme yok, API anahtarı derdi yok — Riot ID'ni gir, OBS linkini al.</div>
 
         <div class="alan">
-          <label>Riot ID</label>
+          <label id="mRiotLbl">Riot ID</label>
           <input id="riotId" placeholder="isim#TFT1" autocomplete="off" spellcheck="false">
         </div>
-        <div class="alan">
-          <label>Bölge</label>
-          <select id="bolge">
-            <option value="euw1">Batı Avrupa (EUW)</option>
-            <option value="tr1">Türkiye (TR1)</option>
-            <option value="eun1">Doğu Avrupa (EUNE)</option>
-            <option value="na1">Kuzey Amerika (NA)</option>
-            <option value="kr">Kore (KR)</option>
-            <option value="br1">Brezilya (BR)</option>
-            <option value="jp1">Japonya (JP)</option>
-            <option value="oc1">Okyanusya (OCE)</option>
-          </select>
+        <div class="alan alan-ikili">
+          <div style="flex:1">
+            <label id="mBolgeLbl">Bölge</label>
+            <select id="bolge">
+              <option value="euw1">Batı Avrupa (EUW)</option>
+              <option value="tr1">Türkiye (TR1)</option>
+              <option value="eun1">Doğu Avrupa (EUNE)</option>
+              <option value="na1">Kuzey Amerika (NA)</option>
+              <option value="kr">Kore (KR)</option>
+              <option value="br1">Brezilya (BR)</option>
+              <option value="jp1">Japonya (JP)</option>
+              <option value="oc1">Okyanusya (OCE)</option>
+            </select>
+          </div>
+          <div style="flex:none">
+            <label id="mDilLbl">Dil</label>
+            <div class="dil-secim">
+              <button type="button" class="dil-btn" data-dil="tr">TR</button>
+              <button type="button" class="dil-btn" data-dil="en">EN</button>
+            </div>
+          </div>
         </div>
         <button class="gobtn" id="olusturBtn">⚔️ Overlay Linkini Oluştur</button>
         <div class="hata" id="olusturHata"></div>
@@ -253,42 +269,42 @@
       <div class="yan">
         <div class="yan-kart">
           <span class="yk-ikon" style="background:rgba(63,201,216,.14)">🏆</span>
-          <span class="yk-metin"><b>Rankın canlı görünür</b><span>Şampiyon 784 LP mi? İzleyicilerin anlık olarak görsün. Maç bitince otomatik güncellenir.</span></span>
+          <span class="yk-metin"><b id="mK1b">Rankın canlı görünür</b><span id="mK1d">Şampiyon 784 LP mi? İzleyicilerin anlık olarak görsün. Maç bitince otomatik güncellenir.</span></span>
         </div>
         <div class="yan-kart">
           <span class="yk-ikon" style="background:rgba(79,209,139,.14)">📊</span>
-          <span class="yk-metin"><b>Son maçların ve ortalaman</b><span>Son 8 maçtaki sıraların renkli pullarla, ortalama sıran tek bakışta.</span></span>
+          <span class="yk-metin"><b id="mK2b">Son maçların ve ortalaman</b><span id="mK2d">Son 8 maçtaki sıraların renkli pullarla, ortalama sıran tek bakışta.</span></span>
         </div>
         <div class="yan-kart">
           <span class="yk-ikon" style="background:rgba(255,194,61,.14)">✨</span>
-          <span class="yk-metin"><b>İndirme yok, şeffaf</b><span>Overwolf gerekmez. OBS'de tarayıcı kaynağı olarak eklenir, oyunun üstüne oturur.</span></span>
+          <span class="yk-metin"><b id="mK3b">İndirme yok, şeffaf</b><span id="mK3d">Overwolf gerekmez. OBS'de tarayıcı kaynağı olarak eklenir, oyunun üstüne oturur.</span></span>
         </div>
         <div class="yan-kart">
           <span class="yk-ikon" style="background:rgba(176,106,240,.14)">🔒</span>
-          <span class="yk-metin"><b>API anahtarı bizde</b><span>Başka trackerların aksine kendi Riot anahtarını girip her gün yenilemek zorunda değilsin.</span></span>
+          <span class="yk-metin"><b id="mK4b">API anahtarı bizde</b><span id="mK4d">Başka trackerların aksine kendi Riot anahtarını girip her gün yenilemek zorunda değilsin.</span></span>
         </div>
       </div>
 
       <!-- sonuç: link + önizleme -->
       <div id="sonuc">
-        <div class="alan"><label>OBS'ye ekleyeceğin link</label>
+        <div class="alan"><label id="mLinkLbl">OBS'ye ekleyeceğin link</label>
           <div class="linkkutu">
             <input id="linkText" readonly>
             <button class="kopyala" id="kopyalaBtn">Kopyala</button>
           </div>
         </div>
-        <div class="alan"><label>Önizleme</label>
+        <div class="alan"><label id="mOnizLbl">Önizleme</label>
           <div class="onizlik">
             <div id="onizlikKart" style="width:420px"></div>
           </div>
         </div>
         <div class="yardim">
-          <h3>🎬 OBS'ye nasıl eklenir?</h3>
+          <h3 id="mYardimBaslik">🎬 OBS'ye nasıl eklenir?</h3>
           <ol>
-            <li>OBS'de <b>Kaynaklar → Ekle → Tarayıcı</b> (Browser)</li>
-            <li>URL kısmına yukarıdaki linki yapıştır</li>
-            <li>Genişlik <code>424</code>, Yükseklik <code>200</code></li>
-            <li>Arka plan şeffaf gelir — oyunun üstünde durur</li>
+            <li id="mY1">OBS'de <b>Kaynaklar → Ekle → Tarayıcı</b> (Browser)</li>
+            <li id="mY2">URL kısmına yukarıdaki linki yapıştır</li>
+            <li id="mY3">Genişlik <code>424</code>, Yükseklik <code>200</code></li>
+            <li id="mY4">Arka plan şeffaf gelir — oyunun üstünde durur</li>
           </ol>
         </div>
       </div>
