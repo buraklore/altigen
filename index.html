@@ -291,8 +291,8 @@ main{max-width:1280px;margin:0 auto;padding:26px 20px 60px}
 .tlb{width:80px;height:80px;border-radius:16px;display:grid;place-items:center;font-family:var(--disp);font-weight:900;font-size:38px;color:#0E1220;flex:none;position:relative;overflow:hidden;isolation:isolate;box-shadow:0 10px 26px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,255,255,.45),inset 0 -3px 8px rgba(0,0,0,.2);text-shadow:0 1px 2px rgba(255,255,255,.3)}
 @supports (box-shadow:0 0 10px color-mix(in srgb,red,blue)){.tlb{box-shadow:0 8px 24px -2px color-mix(in srgb,var(--tc) 60%,transparent),0 4px 12px rgba(0,0,0,.4),inset 0 2px 0 rgba(255,255,255,.45),inset 0 -3px 8px rgba(0,0,0,.2)}}
 .tlb::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(160deg,rgba(255,255,255,.4),rgba(255,255,255,0) 55%);pointer-events:none}
-.tlrow{flex:1;display:flex;gap:18px;flex-wrap:wrap;background:linear-gradient(180deg,#122642,#0A1728);border:1px solid var(--gline);border-left:4px solid var(--tc,var(--gline));border-radius:14px;padding:16px 20px;min-height:92px;box-shadow:0 10px 26px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05)}
-@supports (background:color-mix(in srgb,red,blue)){.tlrow{background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 12%,#0F2033),color-mix(in srgb,var(--tc) 5%,#0A1728));border:1px solid color-mix(in srgb,var(--tc) 30%,var(--gline));border-left:4px solid var(--tc);box-shadow:0 10px 26px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05),0 0 24px -8px color-mix(in srgb,var(--tc) 45%,transparent)}}
+.tlrow{flex:1;display:flex;gap:18px;flex-wrap:wrap;background:linear-gradient(180deg,#122642,#0A1728);border:1px solid var(--gline);border-radius:14px;padding:16px 20px;min-height:92px;box-shadow:0 10px 26px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05)}
+@supports (background:color-mix(in srgb,red,blue)){.tl[data-tier] .tlrow{background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 12%,#0F2033),color-mix(in srgb,var(--tc) 5%,#0A1728));border:1px solid color-mix(in srgb,var(--tc) 30%,var(--gline));border-left:4px solid var(--tc);box-shadow:0 10px 26px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05),0 0 24px -8px color-mix(in srgb,var(--tc) 45%,transparent)}}
 .cico{cursor:pointer;text-align:center;width:104px;background:none;border:none;padding:6px 4px 4px;color:inherit;font:inherit;position:relative;transition:transform .16s ease}
 .cico:hover{transform:translateY(-5px)}
 .cico:hover .port{transform:scale(1.04)}
@@ -396,7 +396,7 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px
 .pbtn[aria-selected="true"]{color:#181000;background:linear-gradient(180deg,#F8CE6E,#E8A428);border-color:var(--gold);box-shadow:0 0 14px rgba(240,180,65,.35)}
 .mini2{cursor:pointer;text-align:center;width:78px;background:none;border:none;padding:0;color:inherit;font:inherit}
 .mini2 .port{margin:0 auto}
-.mini2 .cnm{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.2;word-break:break-word}
+.mini2 .cnm{font-size:12px;font-weight:600;color:var(--text);margin-top:6px;line-height:1.25;word-break:break-word}
 .dist{display:flex;gap:5px;align-items:flex-end}
 .dcol{display:flex;flex-direction:column;align-items:center;gap:3px}
 .dcol span{font-size:10px;color:var(--muted)}
@@ -3330,7 +3330,7 @@ function aiHTML(){
   for(const t of ["S","A","B","C"]){
     const rs = rows.filter(r => r.tier === t);
     if(!rs.length) continue;
-    html += `<div class="tl"><span class="tlb" style="background:${TIERCOL[t]}">${t}</span>
+    html += `<div class="tl" data-tier="${t}" style="--tc:${TIERCOL[t]}"><span class="tlb" style="background:${TIERCOL[t]}">${t}</span>
       <div class="tlrow">${rs.map(r => aiIcon(r, r._i)).join("")}</div></div>`;
     const open = rs.find(r => r._i === openAI);
     if(open) html += aiDetail(open);
@@ -3542,7 +3542,8 @@ function render(){
       const badge = tk === "—"
         ? `<span class="tlb" style="background:var(--surface2);color:var(--muted);font-size:11px;border:1px solid var(--line)">${t("low_data")}</span>`
         : `<span class="tlb" style="background:${TIERCOL[tk]}">${tk}</span>`;
-      html += `<div class="tl">${badge}<div class="tlrow">${tiers[tk].map(cell).join("")}</div></div>`;
+      const tlAttr = tk === "—" ? "" : ` data-tier="${tk}" style="--tc:${TIERCOL[tk]}"`;
+      html += `<div class="tl"${tlAttr}>${badge}<div class="tlrow">${tiers[tk].map(cell).join("")}</div></div>`;
     }
     if(!n) html += `<div class="empty">${t("not_in_cat").replace("%s", esc(q.value))}</div>`;
   } else if(tab === "augments"){
@@ -3562,7 +3563,8 @@ function render(){
       const badge = tk === "—"
         ? `<span class="tlb" style="background:var(--surface2);color:var(--muted);font-size:10px;border:1px solid var(--line)">${t("aug_other")}</span>`
         : `<span class="tlb" style="background:${TIERCOL[tk]}">${tk}</span>`;
-      html += `<div class="tl">${badge}<div class="tlrow">${tiers[tk].map(cell).join("")}</div></div>`;
+      const tlAttr = tk === "—" ? "" : ` data-tier="${tk}" style="--tc:${TIERCOL[tk]}"`;
+      html += `<div class="tl"${tlAttr}>${badge}<div class="tlrow">${tiers[tk].map(cell).join("")}</div></div>`;
     }
     if(!n) html += `<div class="empty">"${esc(q.value)}" ${t("not_found_rarity")}</div>`;
   } else if(tab === "comps"){ view.innerHTML = compsHTML(f); return;
