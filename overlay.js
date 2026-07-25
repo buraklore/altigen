@@ -309,6 +309,11 @@
     yaz("mK2b", T("k2b")); yaz("mK2d", T("k2d"));
     yaz("mK3b", T("k3b")); yaz("mK3d", T("k3d"));
     yaz("mK4b", T("k4b")); yaz("mK4d", T("k4d"));
+    // tier renk seridindeki lig adlarini aktif dile gore yaz
+    var tierSpanlari = document.querySelectorAll("[data-tier]");
+    for (var j = 0; j < tierSpanlari.length; j++) {
+      tierSpanlari[j].textContent = tierMetni(tierSpanlari[j].getAttribute("data-tier"));
+    }
     // aktif dil butonunu isaretle
     var butonlar = document.querySelectorAll(".dil-btn");
     for (var i = 0; i < butonlar.length; i++) {
