@@ -2359,7 +2359,7 @@ function compIcon(c, idx, f){
   const ka = keyAugOf(c);
   const tr = c.tr ? `<span class="trend" style="background:${c.tr==="up"?"var(--c2)":"#E0565B"}" title="${c.tr==="up"?t("comp_trend_up"):t("comp_trend_down")}">${c.tr==="up"?"▲":"▼"}</span>` : "";
   return `<button class="cico ${openComp===idx?"on":""}" data-comp="${idx}" aria-label="${esc(dl(c,"name"))}${s3?t("three_star_comp"):""} · ${c.n} ${t("board")}">
-    ${portHTML(ch, 92, 98, TIERCOL[c.tier])}${s3?'<span class="u3">★★★</span>':""}${tr}${ka?`<span class="reqa" title="${t("key_aug")} ${esc(dl(ka,"name"))}">${sp(ka.sx,20)}</span>`:""}${amblemRozet(c, 20)}${augRozet(c, 20)}
+    ${portHTML(ch, 92, 98, TIERCOL[c.tier])}${s3?'<span class="u3">★★★</span>':""}${tr}${ka?`<span class="reqa" title="${t("key_aug")} ${esc(dl(ka,"name"))}">${sp(ka.sx,20)}</span>`:""}${augRozet(c, 20)}
     <div class="cnm" ${hl?'style="color:var(--gold)"':""}>${esc(dl(ch,"name")||dl(c,"name"))}</div>
     <div class="cico-n${azVeri(c.n)?" az":""}">${c.n} ${t("board")}${azVeri(c.n)?" ⚠":""}</div></button>`;
 }
