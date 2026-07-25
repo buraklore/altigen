@@ -586,7 +586,7 @@ footer p{color:var(--muted);font-size:12px;line-height:1.6;max-width:820px}
     <div class="tooldd" id="tooldd">
       <button class="tab tooldd-btn tab-star" id="tooldd-btn" aria-haspopup="true" aria-expanded="false" data-i18n="nav_tools">Araçlar ▾</button>
       <div class="tooldd-menu" id="tooldd-menu">
-        <button class="tab" role="tab" aria-selected="false" data-t="bilgi" data-i18n="nav_bilgi">TFT Bilgi</button>
+        <button class="tab" role="tab" aria-selected="false" data-t="bilgi" data-i18n="nav_bilgi">Şampiyon Havuzu</button>
         <button class="tab" role="tab" aria-selected="false" data-t="roll" data-i18n="nav_roll">Roll Hesaplayıcı</button>
       </div>
     </div>
@@ -749,7 +749,7 @@ const I18N = {
     note_component:"Bileşenler için Δ değeri hesaplanmaz: oyun sonunda elinde kalan bir bileşen 'birleştirilemedi' demektir, bu yüzden istatistik yanıltıcı çıkar. Bileşenin gücü, yapıldığı eşyada görünür.", note_emblem:"Amblemler normal eşya gibi inşa edilmez (augment/örs ile gelir) ve bir özellik kazandırdıkları için Δ değerleri doğal olarak yüksektir. Diğer eşyalarla doğrudan kıyaslama."+" ", low_sample:"az veri", low_sample_tip:"Bu komp 20 tahtadan az örnekle hesaplandı; ortalama sıralaması ±1-1.5 basamak oynayabilir. Kademesini kesin bilgi olarak alma.", ai_over:"üzerinden", metric_avg:"Ort. Sıra", metric_trend:"Eğilim", ai_model:"AI değerlendirmesi",
     // Navigasyon
     nav_player:"Oyuncu", nav_comps:"Komplar", nav_ai:"AI Kompları", nav_set:"Set Rehberi",
-    nav_items:"Eşyalar", nav_augments:"Augmentler", nav_bilgi:"TFT Bilgi",
+    nav_items:"Eşyalar", nav_augments:"Augmentler", nav_bilgi:"Şampiyon Havuzu",
     nav_roll:"Roll Hesaplayıcı", nav_kurucu:"Takım Kurucu", nav_blog:"Blog", nav_tools:"Araçlar ▾",
     nav_overlay:"Yayın Overlay'i", overlay_promo_title:"Yayın Overlay'i — OBS için", overlay_promo_desc:"Rankını, LP'ni ve son maçlarını yayınında göster. İndirme yok, tek tıkla OBS linki.", overlay_promo_cta:"Oluştur",
     home_cta_overlay:"Yayın Overlay'i", home_f_overlay_h:"Yayın Overlay'i", home_f_overlay_d:"OBS için şeffaf rank kartı. Rankın, LP'n ve son maçların yayında — indirme yok.",
@@ -890,7 +890,7 @@ const I18N = {
     needs_emblem:"Emblem required", emblem_tip:"This comp wants an emblem. Emblems are not bought in the shop; they come from augments or anvils. Without it you cannot field the comp as shown.", filter_noemb:"Playable without emblem", filter_emb:"Requires an emblem",
     note_component:"Components are not given a Δ rating: a component still in your inventory at game end means it was never combined, so the statistic is misleading. A component's value shows up in the item it builds into.", note_emblem:"Emblems are not built like normal items (they come from augments/anvils) and grant a trait, so their Δ is naturally high. Not directly comparable to other items."+" ", low_sample:"low sample", low_sample_tip:"This comp is based on fewer than 20 boards; its average placement can swing by 1-1.5 positions. Treat the tier as provisional.", ai_over:"—", metric_avg:"Avg. Place", metric_trend:"Trend", ai_model:"AI evaluation",
     nav_player:"Player", nav_comps:"Comps", nav_ai:"AI Comps", nav_set:"Set Guide",
-    nav_items:"Items", nav_augments:"Augments", nav_bilgi:"TFT Info",
+    nav_items:"Items", nav_augments:"Augments", nav_bilgi:"Champion Pool",
     nav_roll:"Roll Calculator", nav_kurucu:"Team Builder", nav_blog:"Blog", nav_tools:"Tools ▾",
     nav_overlay:"Stream Overlay", overlay_promo_title:"Stream Overlay — for OBS", overlay_promo_desc:"Show your rank, LP and recent games on stream. No download, one-click OBS link.", overlay_promo_cta:"Create",
     home_cta_overlay:"Stream Overlay", home_f_overlay_h:"Stream Overlay", home_f_overlay_d:"Transparent rank card for OBS. Your rank, LP and recent games on stream — no download.",
@@ -3093,7 +3093,7 @@ const BLOG_ELLE = [
   <h3>Meka duvarı ve karşı oyunu</h3>
   <p>Meka ön safı tempoyu domine ediyor; birleşme animasyonu tamamlandığında sıradan fiziksel hasar duvara çarpıyor. Kırmanın yolu yüzde bazlı hasar ve Δ-pozitif mana eşyalarından geçiyor. Eşyaların birim-bazlı fark (Δ) değerlerini <button class="blink" data-goto="items">Eşyalar</button> sekmesinde her ikonun üzerine gelerek görebilirsiniz.</p>
   <h3>Ekonomi hâlâ kral</h3>
-  <p>Roll pencerelerini doğru seviyede açmak, komp seçiminden daha fazla LP kazandırır. Seviye başına dükkân olasılıkları ve 3★ matematiği için <button class="blink" data-goto="bilgi">TFT Bilgi</button> sayfamız güncel Set 17 tablosunu içerir.</p>
+  <p>Roll pencerelerini doğru seviyede açmak, komp seçiminden daha fazla LP kazandırır. Seviye başına dükkân olasılıkları ve 3★ matematiği için <button class="blink" data-goto="bilgi">Şampiyon Havuzu</button> sayfamız güncel Set 17 tablosunu içerir.</p>
   <p class="bkaynak">Resmî kaynaklar: <a href="https://teamfighttactics.leagueoflegends.com/tr-tr/" target="_blank" rel="noopener">TFT Türkiye</a> · <a href="https://developer.riotgames.com/" target="_blank" rel="noopener">Riot Developer Portal</a></p>`,
   govde_en:`<p>Patch 17.7 of Teamfight Tactics Set 17 settled the meta into a two-pole balance. The <b>thousands of real boards</b> TFTRadar collected across the six leagues of the TR1 server show three clear trends — all three more contextual than a plain tier list can convey.</p>
   <h3>The Space Groove reroll era</h3>
@@ -3103,7 +3103,7 @@ const BLOG_ELLE = [
   <h3>The Mecha wall and its counterplay</h3>
   <p>The Mecha front line dominates tempo; once the merge animation completes, ordinary physical damage hits a wall. The way to break it runs through percent-based damage and Δ-positive mana items. You can see the unit-based delta (Δ) of items by hovering each icon in the <button class="blink" data-goto="items">Items</button> tab.</p>
   <h3>Economy is still king</h3>
-  <p>Opening your roll windows at the right level wins more LP than comp choice. For shop odds per level and 3★ math, our <button class="blink" data-goto="bilgi">TFT Info</button> page holds the current Set 17 table.</p>
+  <p>Opening your roll windows at the right level wins more LP than comp choice. For shop odds per level and 3★ math, our <button class="blink" data-goto="bilgi">Champion Pool</button> page holds the current Set 17 table.</p>
   <p class="bkaynak">Official sources: <a href="https://teamfighttactics.leagueoflegends.com/en-us/" target="_blank" rel="noopener">TFT Official</a> · <a href="https://developer.riotgames.com/" target="_blank" rel="noopener">Riot Developer Portal</a></p>`},
  {slug:"tft-ekonomi-rehberi", tarih:"07.07.2026", renk:"var(--gold)", kapakN:["Nami","Blitzcrank","Gnar"],
   baslik:"TFT Ekonomi Rehberi: Faiz, Seri ve Roll Zamanlaması",
@@ -3114,7 +3114,7 @@ const BLOG_ELLE = [
   etiket_en:["economy","guide","beginner"],
   govde:`<p>TFT'de her altın iki şeyden biridir: <b>güç</b> ya da <b>gelecek güç</b>. Elmas ve üstünü Platin'den ayıran şey komp bilgisi değil, bu dönüşümün zamanlamasıdır — aynı kompu oynayan iki oyuncudan biri 4. olurken diğerinin 7. olmasının nedeni neredeyse her zaman ekonomidir.</p>
   <h3>Faiz eşikleri: bedava altının matematiği</h3>
-  <p>10/20/30/40/50 altın eşiklerinin her biri tur başına +1 altın getirir; 50'nin üstü harcama bölgesidir. Eşikler ve roll maliyeti <button class="blink" data-goto="bilgi">TFT Bilgi</button> sayfasında tablo hâlinde durur.</p>
+  <p>10/20/30/40/50 altın eşiklerinin her biri tur başına +1 altın getirir; 50'nin üstü harcama bölgesidir. Eşikler ve roll maliyeti <button class="blink" data-goto="bilgi">Şampiyon Havuzu</button> sayfasında tablo hâlinde durur.</p>
   <div class="callout">Basit kural: <b>Aşama 3 boyunca 50 altına dokunma.</b> O altın senin değil, Aşama 4'teki roll'unun parası.</div>
   <h3>Roll pencereleri</h3>
   <p>2 maliyet 3★ için Seviye 6'da, 3 maliyet için Seviye 7'de yavaş roll standarttır — nedenini seviye tablosundaki olasılık sıçramalarında görürsünüz. Hangi kompun hangi stille oynandığı <button class="blink" data-goto="comps">Komplar</button> sekmesindeki stil rozetlerinde yazar.</p>
@@ -3123,7 +3123,7 @@ const BLOG_ELLE = [
   <p class="bkaynak">Derinlemesine okuma: <a href="https://teamfighttactics.leagueoflegends.com/tr-tr/news/" target="_blank" rel="noopener">Resmî TFT haberleri</a></p>`,
   govde_en:`<p>In TFT every gold coin is one of two things: <b>power</b> or <b>future power</b>. What separates Diamond and above from Platinum isn't comp knowledge but the timing of that conversion — the reason one of two players on the same comp finishes 4th while the other finishes 7th is almost always economy.</p>
   <h3>Interest thresholds: the math of free gold</h3>
-  <p>Each of the 10/20/30/40/50 gold thresholds grants +1 gold per round; above 50 is the spending zone. The thresholds and roll cost sit in a table on the <button class="blink" data-goto="bilgi">TFT Info</button> page.</p>
+  <p>Each of the 10/20/30/40/50 gold thresholds grants +1 gold per round; above 50 is the spending zone. The thresholds and roll cost sit in a table on the <button class="blink" data-goto="bilgi">Champion Pool</button> page.</p>
   <div class="callout">Simple rule: <b>Don't touch 50 gold through Stage 3.</b> That gold isn't yours — it's your Stage 4 rolldown's money.</div>
   <h3>Roll windows</h3>
   <p>Slow rolling at Level 6 for a 2-cost 3★ and Level 7 for a 3-cost is standard — you'll see why in the probability jumps of the level table. Which comp is played in which style is written on the style badges in the <button class="blink" data-goto="comps">Comps</button> tab.</p>
@@ -3642,7 +3642,7 @@ const ROUTES = {
   items:    {path: "/esyalar",     ad: "Eşya Tier Listesi",        ad_en:"Item Tier List",          desc: "Set 17 eşya tier listesi: birleşik eşyalar, ışıltılılar, artefaktlar ve amblemler — tarif, etki ve birim-bazlı Δ performansı.", desc_en:"Set 17 item tier list: combined items, radiants, artifacts and emblems — recipe, effect and unit-based Δ performance."},
   augments: {path: "/augmentler",  ad: "Augment Tier Listesi",     ad_en:"Augment Tier List",       desc: "Set 17 augment tier listesi: Gümüş, Altın ve Prizmatik nadirlikte tüm augmentler, resmî Türkçe açıklamalarıyla.", desc_en:"Set 17 augment tier list: all Silver, Gold and Prismatic augments with official descriptions."},
   player:   {path: "/oyuncu",      ad: "Oyuncu Ara",               ad_en:"Player Search",           desc: "TR1 oyuncu istatistikleri: sıralama, son 20 maç, sıra dağılımı, en çok oynanan birimler ve 8 kişilik lobi detayları.", desc_en:"TR1 player stats: rank, last 20 matches, placement distribution, most played units and 8-player lobby details."},
-  bilgi:    {path: "/tft-bilgi",   ad: "TFT Bilgi — Dükkân Olasılıkları", ad_en:"TFT Info — Shop Odds", desc: "Set 17 dükkân olasılıkları, kopya havuzu boyutları, 3★ matematiği ve ekonomi rehberi — seviye seviye tablolar.", desc_en:"Set 17 shop odds, copy pool sizes, 3★ math and economy guide — level-by-level tables."},
+  bilgi:    {path: "/tft-bilgi",   ad: "Şampiyon Havuzu — Dükkân Olasılıkları", ad_en:"Champion Pool — Shop Odds", desc: "Set 17 dükkân olasılıkları, kopya havuzu boyutları, 3★ matematiği ve ekonomi rehberi — seviye seviye tablolar.", desc_en:"Set 17 shop odds, copy pool sizes, 3★ math and economy guide — level-by-level tables."},
   roll:     {path: "/roll-hesaplayici", ad: "Roll-Down Hesaplayıcı", ad_en:"Roll-Down Calculator",   desc: "TFT roll-down olasılık hesaplayıcı: seviyene, aradığın birime ve havuzdaki kopya sayısına göre yuvarlamada birimi bulma ihtimalini hesapla.", desc_en:"TFT roll-down probability calculator: compute your chance to hit a unit based on level, target and pool copies."},
   kurucu:   {path: "/takim-kurucu",  ad: "Takım Kurucu",           ad_en:"Team Builder",            desc: "TFT takım kurucu: şampiyon ekleyerek canlı sinerji eşiklerini gör, hangi özelliğin hangi birimle açılacağını planla — Set 17.", desc_en:"TFT team builder: add champions to see live synergy thresholds and plan which trait opens with which unit — Set 17."},
   blog:     {path: "/blog",        ad: "Blog",                     ad_en:"Blog",                    desc: "TFTRadar Blog: Set 17 meta rehberleri, ekonomi ipuçları ve veri analizleri.", desc_en:"TFTRadar Blog: Set 17 meta guides, economy tips and data analysis."},
