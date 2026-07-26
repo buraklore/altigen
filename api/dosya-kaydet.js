@@ -3,14 +3,46 @@
 // butonu bu dosyayı çağırır ve düzenlenen içeriği GitHub'a commit'ler.
 //
 // KURULUM: Bu dosyayı reponuza  api/dosya-kaydet.js  olarak ekleyin.
-// (Mevcut api/reklam-kaydet.js ile aynı klasör.)
 //
-// GÜVENLİK: Yalnızca IZINLI listesindeki dosyalar düzenlenebilir.
+// GÜVENLİK:
+// - Yalnızca IZINLI listesindeki dosyalar düzenlenebilir (path/whitelist).
+// - Şifre SUNUCU TARAFINDA SHA-256 + sabit zamanlı karşılaştırma (timingSafeEqual)
+//   ile doğrulanır — timing attack'a kapalı.
+// - IP başına hız sınırı ile kaba kuvvet (brute-force) yavaşlatılır.
+// - GitHub token YALNIZCA ortam değişkeninde (GITHUB_TOKEN) tutulur.
 // ============================================================
 
-export default async function handler(req, res) {
+const crypto = require("crypto");
+
+// Admin panelindeki ADMIN_HASH ile AYNI (index.html). Ortam değişkeniyle de geçilebilir.
+const VARSAYILAN_HASH = "fbe0895bc886090ef519ebc96a3f459e94b329c2cd3aa2f8eeb7351682052530";
+
+// IP başına hız sınırı — brute-force yavaşlatma
+const PENCERE_MS = 60_000, LIMIT = 10;
+const kova = new Map();
+function hizSiniriAsildi(ip){
+  const now = Date.now();
+  const dizi = (kova.get(ip) || []).filter(t => now - t < PENCERE_MS);
+  dizi.push(now); kova.set(ip, dizi);
+  if (kova.size > 5000) for (const [k, v] of kova) if (!v.length || now - v[v.length-1] > PENCERE_MS) kova.delete(k);
+  return dizi.length > LIMIT;
+}
+
+function sifreDogru(sifre){
+  const beklenen = process.env.ADMIN_HASH || VARSAYILAN_HASH;
+  const hash = crypto.createHash("sha256").update(String(sifre || ""), "utf8").digest("hex");
+  const a = Buffer.from(hash), b = Buffer.from(beklenen);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, hata: "Yalnızca POST" });
+  }
+
+  const ip = (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "bilinmiyor";
+  if (hizSiniriAsildi(ip)) {
+    return res.status(429).json({ ok: false, hata: "Çok fazla istek. Lütfen biraz bekleyin." });
   }
 
   let body = req.body;
@@ -19,9 +51,8 @@ export default async function handler(req, res) {
   }
   const { sifre, yol, icerik } = body || {};
 
-  // --- Şifre doğrulaması (reklam-kaydet.js ile AYNI env değişkenini kullanın) ---
-  const ADMIN = process.env.ADMIN_SIFRE || process.env.PANEL_SIFRE || process.env.ADMIN_PASSWORD;
-  if (!ADMIN || sifre !== ADMIN) {
+  // --- Şifre doğrulaması (sabit zamanlı, hash tabanlı) ---
+  if (!sifreDogru(sifre)) {
     return res.status(401).json({ ok: false, hata: "Yetkisiz" });
   }
 
@@ -39,7 +70,6 @@ export default async function handler(req, res) {
     return res.status(503).json({ ok: false, hata: "GITHUB_TOKEN eksik" });
   }
 
-  // === Kendi reponuza göre ayarlayın ===
   const OWNER = "buraklore";
   const REPO = "altigen";
   const BRANCH = "main";
@@ -53,7 +83,6 @@ export default async function handler(req, res) {
   };
 
   try {
-    // Mevcut dosyanın SHA'sını al (güncelleme için gerekli)
     let sha;
     const cur = await fetch(`${api}?ref=${BRANCH}`, { headers: ghHeaders });
     if (cur.ok) {
@@ -61,7 +90,6 @@ export default async function handler(req, res) {
       sha = cj.sha;
     }
 
-    // UTF-8 güvenli base64
     const b64 = Buffer.from(icerik, "utf8").toString("base64");
 
     const put = await fetch(api, {
@@ -70,7 +98,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         message: "guncelle.py: yönetim panelinden güncellendi",
         content: b64,
-        sha, // varsa günceller, yoksa yeni oluşturur
+        sha,
         branch: BRANCH,
       }),
     });
@@ -81,4 +109,4 @@ export default async function handler(req, res) {
   } catch (e) {
     return res.status(500).json({ ok: false, hata: String(e).slice(0, 200) });
   }
-}
+};
