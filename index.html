@@ -569,6 +569,23 @@ footer p{color:var(--muted);font-size:12px;line-height:1.6;max-width:820px}
   .hchamp{margin:0 -12px}
   .augrec-tiles{justify-content:flex-start}
 }
+.ilet-wrap{max-width:640px;margin:0 auto}
+.ilet-box{padding:26px 26px 24px}
+.ilet-h{font-family:var(--disp);font-size:25px;font-weight:800;margin:0 0 8px}
+.ilet-intro{color:var(--muted);font-size:14.5px;line-height:1.55;margin:0 0 22px}
+.ilet-label{display:block;font-size:13px;font-weight:600;color:var(--text);margin:14px 0 6px}
+.ilet-input{width:100%;box-sizing:border-box}
+.ilet-textarea{resize:vertical;min-height:120px;font-family:var(--body);line-height:1.5}
+.ilet-gonder{margin-top:20px;width:100%;padding:13px;font-size:15px;font-weight:700;border:none;border-radius:10px;background:linear-gradient(180deg,var(--gold),#e0a428);color:#161C33;cursor:pointer;transition:filter .15s ease,transform .1s ease}
+.ilet-gonder:hover:not(:disabled){filter:brightness(1.06)}
+.ilet-gonder:active:not(:disabled){transform:translateY(1px)}
+.ilet-gonder:disabled{opacity:.6;cursor:default}
+.ilet-durum{margin-top:14px;font-size:14px;line-height:1.5;padding:0;border-radius:8px;transition:all .2s ease}
+.ilet-durum.basari{padding:12px 14px;background:color-mix(in srgb,var(--c2) 16%,transparent);border:1px solid color-mix(in srgb,var(--c2) 45%,transparent);color:var(--c2)}
+.ilet-durum.hata{padding:12px 14px;background:rgba(224,86,91,.12);border:1px solid rgba(224,86,91,.4);color:#F08A8E}
+.ilet-mailalt{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+.ilet-mailalt a{color:var(--cyan);text-decoration:none}
+.ilet-mailalt a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -597,6 +614,7 @@ footer p{color:var(--muted);font-size:12px;line-height:1.6;max-width:820px}
     <button class="tab" role="tab" aria-selected="false" data-t="augments" data-i18n="nav_augments">Augmentler</button>
     <button class="tab" role="tab" aria-selected="false" data-t="set" data-i18n="nav_set">Set Rehberi</button>
     <button class="tab" role="tab" aria-selected="false" data-t="blog" data-i18n="nav_blog">Blog</button>
+    <button class="tab" role="tab" aria-selected="false" data-t="iletisim" data-i18n="nav_iletisim">İletişim</button>
   </nav>
 </header>
 <main>
@@ -753,6 +771,18 @@ const I18N = {
     nav_player:"Oyuncu", nav_comps:"Komplar", nav_ai:"AI Kompları", nav_set:"Set Rehberi",
     nav_items:"Eşyalar", nav_augments:"Augmentler", nav_bilgi:"Şampiyon Havuzu",
     nav_roll:"Roll Hesaplayıcı", nav_kurucu:"Takım Kurucu", nav_blog:"Blog", nav_tools:"Araçlar ▾",
+    nav_iletisim:"İletişim",
+    ilet_title:"İletişim", ilet_intro:"Görüş, öneri, hata bildirimi ya da iş birliği için bize yazabilirsin. Mesajın doğrudan ekibimize ulaşır, en kısa sürede döneriz.",
+    ilet_ad:"Adınız", ilet_ad_ph:"Adınızı yazın",
+    ilet_email:"E-posta adresiniz", ilet_email_ph:"ornek@eposta.com",
+    ilet_konu:"Konu", ilet_konu_ph:"Mesajınızın konusu",
+    ilet_mesaj:"Mesajınız", ilet_mesaj_ph:"Mesajınızı buraya yazın...",
+    ilet_gonder:"Gönder", ilet_gonderiliyor:"Gönderiliyor...",
+    ilet_basari:"Mesajınız iletildi! Teşekkür ederiz, en kısa sürede döneceğiz.",
+    ilet_hata:"Bir sorun oluştu. Lütfen tekrar deneyin ya da doğrudan info@tftradar.com adresine yazın.",
+    ilet_eksik:"Lütfen tüm alanları doldurun.",
+    ilet_email_gecersiz:"Lütfen geçerli bir e-posta adresi girin.",
+    ilet_mail_alt:"Dilersen doğrudan e-posta da atabilirsin:",
     nav_overlay:"Yayın Overlay'i", overlay_promo_title:"Yayın Overlay'i — OBS için", overlay_promo_desc:"Rankını, LP'ni ve son maçlarını yayınında göster. İndirme yok, tek tıkla OBS linki.", overlay_promo_cta:"Oluştur",
     home_cta_overlay:"Yayın Overlay'i", home_f_overlay_h:"Yayın Overlay'i", home_f_overlay_d:"OBS için şeffaf rank kartı. Rankın, LP'n ve son maçların yayında — indirme yok.",
     nav_about:"Hakkında", nav_privacy:"Gizlilik", nav_terms:"Kullanım Şartları",
@@ -894,6 +924,18 @@ const I18N = {
     nav_player:"Player", nav_comps:"Comps", nav_ai:"AI Comps", nav_set:"Set Guide",
     nav_items:"Items", nav_augments:"Augments", nav_bilgi:"Champion Pool",
     nav_roll:"Roll Calculator", nav_kurucu:"Team Builder", nav_blog:"Blog", nav_tools:"Tools ▾",
+    nav_iletisim:"Contact",
+    ilet_title:"Contact", ilet_intro:"Reach out for feedback, suggestions, bug reports or collaboration. Your message goes straight to our team and we'll get back to you soon.",
+    ilet_ad:"Your name", ilet_ad_ph:"Enter your name",
+    ilet_email:"Your email", ilet_email_ph:"example@email.com",
+    ilet_konu:"Subject", ilet_konu_ph:"Subject of your message",
+    ilet_mesaj:"Your message", ilet_mesaj_ph:"Write your message here...",
+    ilet_gonder:"Send", ilet_gonderiliyor:"Sending...",
+    ilet_basari:"Your message has been sent! Thank you, we'll get back to you soon.",
+    ilet_hata:"Something went wrong. Please try again or email us directly at info@tftradar.com.",
+    ilet_eksik:"Please fill in all fields.",
+    ilet_email_gecersiz:"Please enter a valid email address.",
+    ilet_mail_alt:"You can also email us directly:",
     nav_overlay:"Stream Overlay", overlay_promo_title:"Stream Overlay — for OBS", overlay_promo_desc:"Show your rank, LP and recent games on stream. No download, one-click OBS link.", overlay_promo_cta:"Create",
     home_cta_overlay:"Stream Overlay", home_f_overlay_h:"Stream Overlay", home_f_overlay_d:"Transparent rank card for OBS. Your rank, LP and recent games on stream — no download.",
     nav_about:"About", nav_privacy:"Privacy", nav_terms:"Terms of Use",
@@ -1258,6 +1300,20 @@ function adminPanelIcerik(kap){
       <a href="/" style="color:#9AA3C0;font-size:13px;text-decoration:none;border:1px solid #2A3352;padding:8px 14px">← Siteye dön</a>
     </div>
 
+    <div style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap">
+      <button id="admin-sekme-mesaj" style="background:linear-gradient(180deg,#F0E6D2,#C8AA6E);color:#091428;border:none;padding:10px 20px;font-family:'Exo 2',sans-serif;font-weight:800;font-size:13px;letter-spacing:.04em;cursor:pointer">💬 Mesajlar <span id="admin-mesaj-rozet" style="display:none;background:#E0565B;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px"></span></button>
+      <button id="admin-sekme-ayar" style="background:#1D2440;color:#9AA3C0;border:1px solid #2A3352;padding:10px 20px;font-family:'Exo 2',sans-serif;font-weight:800;font-size:13px;letter-spacing:.04em;cursor:pointer">⚙️ Reklam &amp; SEO</button>
+    </div>
+
+    <div id="admin-bolum-mesaj" style="display:none">
+      <div ${kart}>
+        <div ${h2}>💬 Gelen Mesajlar</div>
+        <p style="color:#9AA3C0;font-size:12.5px;line-height:1.6;margin:6px 0 14px">İletişim formundan gelen mesajlar. Okundu olarak işaretleyebilir ya da silebilirsin.</p>
+        <div id="admin-mesaj-liste" style="margin-top:8px"><p style="color:#9AA3C0;font-size:13px">Yükleniyor…</p></div>
+      </div>
+    </div>
+
+    <div id="admin-bolum-ayar">
     <div ${kart}>
       <div ${h2}>📡 Veri Güncelleme</div>
       <p style="color:#9AA3C0;font-size:12.5px;line-height:1.6;margin:6px 0 14px">
@@ -1416,7 +1472,75 @@ function adminPanelIcerik(kap){
         <button id="a-indir" style="background:transparent;color:#9AA3C0;border:1px solid #2A3352;padding:9px 16px;font-family:inherit;font-size:12px;cursor:pointer;margin-top:6px">reklam-ayar.json indir</button>
       </details>
     </div>
+    </div>
   `;
+
+  // ---- Sekme geçişi (Mesajlar / Ayarlar) ----
+  const sekmeMesajBtn = document.getElementById("admin-sekme-mesaj");
+  const sekmeAyarBtn = document.getElementById("admin-sekme-ayar");
+  const bolumMesaj = document.getElementById("admin-bolum-mesaj");
+  const bolumAyar = document.getElementById("admin-bolum-ayar");
+  function sekmeSec(hangi){
+    const aktif = "linear-gradient(180deg,#F0E6D2,#C8AA6E)", aktifRenk = "#091428";
+    const pasif = "#1D2440", pasifRenk = "#9AA3C0";
+    if(hangi === "mesaj"){
+      bolumMesaj.style.display = "block"; bolumAyar.style.display = "none";
+      sekmeMesajBtn.style.background = aktif; sekmeMesajBtn.style.color = aktifRenk; sekmeMesajBtn.style.border = "none";
+      sekmeAyarBtn.style.background = pasif; sekmeAyarBtn.style.color = pasifRenk; sekmeAyarBtn.style.border = "1px solid #2A3352";
+    } else {
+      bolumMesaj.style.display = "none"; bolumAyar.style.display = "block";
+      sekmeAyarBtn.style.background = aktif; sekmeAyarBtn.style.color = aktifRenk; sekmeAyarBtn.style.border = "none";
+      sekmeMesajBtn.style.background = pasif; sekmeMesajBtn.style.color = pasifRenk; sekmeMesajBtn.style.border = "1px solid #2A3352";
+    }
+  }
+  sekmeMesajBtn.addEventListener("click", () => sekmeSec("mesaj"));
+  sekmeAyarBtn.addEventListener("click", () => sekmeSec("ayar"));
+
+  // ---- Mesajları yükle ve göster ----
+  const mesajListe = document.getElementById("admin-mesaj-liste");
+  const mesajRozet = document.getElementById("admin-mesaj-rozet");
+  function escM(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+  function tarihFmt(t){ try { return new Date(t).toLocaleString("tr-TR", {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}); } catch(e){ return t; } }
+  async function mesajApi(islem, id){
+    const r = await fetch("/api/mesaj", { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ sifre: adminSifre, islem: islem, id: id }) });
+    return r.json().catch(() => ({}));
+  }
+  async function mesajlariYukle(){
+    mesajListe.innerHTML = `<p style="color:#9AA3C0;font-size:13px">Yükleniyor…</p>`;
+    let j;
+    try { j = await mesajApi("listele"); } catch(e){ j = {}; }
+    if(!j || !j.ok){ mesajListe.innerHTML = `<p style="color:#E0565B;font-size:13px">Mesajlar yüklenemedi. Veritabanı bağlı mı, kontrol et.</p>`; mesajRozet.style.display = "none"; return; }
+    const msgs = j.mesajlar || [];
+    const okunmamis = msgs.filter(m => !m.okundu).length;
+    if(okunmamis > 0){ mesajRozet.textContent = okunmamis; mesajRozet.style.display = "inline-block"; }
+    else mesajRozet.style.display = "none";
+    if(!msgs.length){ mesajListe.innerHTML = `<p style="color:#9AA3C0;font-size:13px">Henüz mesaj yok.</p>`; return; }
+    mesajListe.innerHTML = msgs.map(m => `
+      <div style="background:#0F2136;border:1px solid ${m.okundu ? "#2A3352" : "rgba(200,170,110,.4)"};border-radius:6px;padding:14px 16px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:700;color:#F0E6D2;font-size:14px">${escM(m.ad)} ${m.okundu ? "" : '<span style=\"color:#C8AA6E;font-size:11px;font-weight:800\">● YENİ</span>'}</div>
+            <a href="mailto:${escM(m.email)}" style="color:#19E3D0;font-size:12.5px;text-decoration:none">${escM(m.email)}</a>
+          </div>
+          <div style="color:#9AA3C0;font-size:11.5px;white-space:nowrap">${tarihFmt(m.olusturma)}</div>
+        </div>
+        <div style="color:#C8AA6E;font-size:13px;font-weight:600;margin:10px 0 4px">${escM(m.konu)}</div>
+        <div style="color:#E9ECF8;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word">${escM(m.mesaj)}</div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          ${m.okundu ? "" : `<button data-okundu="${m.id}" style="background:transparent;color:#2ED67C;border:1px solid #2ED67C;padding:6px 12px;font-size:12px;font-family:inherit;cursor:pointer;border-radius:4px">✓ Okundu işaretle</button>`}
+          <button data-sil="${m.id}" style="background:transparent;color:#E0565B;border:1px solid #E0565B;padding:6px 12px;font-size:12px;font-family:inherit;cursor:pointer;border-radius:4px">🗑 Sil</button>
+        </div>
+      </div>`).join("");
+    mesajListe.querySelectorAll("[data-okundu]").forEach(b => b.addEventListener("click", async () => {
+      b.disabled = true; await mesajApi("okundu", parseInt(b.dataset.okundu, 10)); mesajlariYukle();
+    }));
+    mesajListe.querySelectorAll("[data-sil]").forEach(b => b.addEventListener("click", async () => {
+      if(!confirm("Bu mesajı silmek istediğine emin misin?")) return;
+      b.disabled = true; await mesajApi("sil", parseInt(b.dataset.sil, 10)); mesajlariYukle();
+    }));
+  }
+  mesajlariYukle();
 
   // ---- Toplama fonksiyonu ----
   function topla(){
@@ -3489,6 +3613,30 @@ function render(){
     : tab === "augments" ? t("ph_augments")
     : t("search");
 
+  if(tab === "iletisim"){
+    html = `<div class="ilet-wrap">
+      <div class="box ilet-box">
+        <h2 class="ilet-h">${t("ilet_title")}</h2>
+        <p class="ilet-intro">${esc(t("ilet_intro"))}</p>
+        <div id="ilet-form">
+          <label class="ilet-label" for="ilet-ad">${t("ilet_ad")}</label>
+          <input class="pinput ilet-input" id="ilet-ad" type="text" maxlength="80" placeholder="${esc(t("ilet_ad_ph"))}" autocomplete="name">
+          <label class="ilet-label" for="ilet-email">${t("ilet_email")}</label>
+          <input class="pinput ilet-input" id="ilet-email" type="email" maxlength="120" placeholder="${esc(t("ilet_email_ph"))}" autocomplete="email">
+          <label class="ilet-label" for="ilet-konu">${t("ilet_konu")}</label>
+          <input class="pinput ilet-input" id="ilet-konu" type="text" maxlength="120" placeholder="${esc(t("ilet_konu_ph"))}">
+          <label class="ilet-label" for="ilet-mesaj">${t("ilet_mesaj")}</label>
+          <textarea class="pinput ilet-input ilet-textarea" id="ilet-mesaj" maxlength="3000" rows="6" placeholder="${esc(t("ilet_mesaj_ph"))}"></textarea>
+          <button class="gobtn ilet-gonder" id="ilet-gonder" type="button">${t("ilet_gonder")}</button>
+          <div class="ilet-durum" id="ilet-durum" role="status" aria-live="polite"></div>
+        </div>
+        <div class="ilet-mailalt">${t("ilet_mail_alt")} <a href="mailto:info@tftradar.com">info@tftradar.com</a></div>
+      </div>
+    </div>`;
+    view.innerHTML = html;
+    iletisimFormBagla();
+    return;
+  }
   if(tab === "set"){
     html = `<div class="pbar"><a class="pbtn" href="#sec-champs">${t("champions")}</a><a class="pbtn" href="#sec-traits">${t("traits")}</a><a class="pbtn" href="#sec-sinerji">${t("synergy_grid")}</a></div>`;
     let shown = 0;
@@ -3645,6 +3793,7 @@ const ROUTES = {
   augments: {path: "/augmentler",  ad: "Augment Tier Listesi",     ad_en:"Augment Tier List",       desc: "Set 17 augment tier listesi: Gümüş, Altın ve Prizmatik nadirlikte tüm augmentler, resmî Türkçe açıklamalarıyla.", desc_en:"Set 17 augment tier list: all Silver, Gold and Prismatic augments with official descriptions."},
   player:   {path: "/oyuncu",      ad: "Oyuncu Ara",               ad_en:"Player Search",           desc: "TR1 oyuncu istatistikleri: sıralama, son 20 maç, sıra dağılımı, en çok oynanan birimler ve 8 kişilik lobi detayları.", desc_en:"TR1 player stats: rank, last 20 matches, placement distribution, most played units and 8-player lobby details."},
   bilgi:    {path: "/tft-bilgi",   ad: "Şampiyon Havuzu — Dükkân Olasılıkları", ad_en:"Champion Pool — Shop Odds", desc: "Set 17 dükkân olasılıkları, kopya havuzu boyutları, 3★ matematiği ve ekonomi rehberi — seviye seviye tablolar.", desc_en:"Set 17 shop odds, copy pool sizes, 3★ math and economy guide — level-by-level tables."},
+  iletisim: {path: "/iletisim",    ad: "İletişim", ad_en:"Contact", desc: "TFTRadar ekibiyle iletişime geç: görüş, öneri, hata bildirimi ve iş birliği için bize yaz.", desc_en:"Get in touch with the TFTRadar team: feedback, suggestions, bug reports and collaboration."},
   roll:     {path: "/roll-hesaplayici", ad: "Roll-Down Hesaplayıcı", ad_en:"Roll-Down Calculator",   desc: "TFT roll-down olasılık hesaplayıcı: seviyene, aradığın birime ve havuzdaki kopya sayısına göre yuvarlamada birimi bulma ihtimalini hesapla.", desc_en:"TFT roll-down probability calculator: compute your chance to hit a unit based on level, target and pool copies."},
   kurucu:   {path: "/takim-kurucu",  ad: "Takım Kurucu",           ad_en:"Team Builder",            desc: "TFT takım kurucu: şampiyon ekleyerek canlı sinerji eşiklerini gör, hangi özelliğin hangi birimle açılacağını planla — Set 17.", desc_en:"TFT team builder: add champions to see live synergy thresholds and plan which trait opens with which unit — Set 17."},
   blog:     {path: "/blog",        ad: "Blog",                     ad_en:"Blog",                    desc: "TFTRadar Blog: Set 17 meta rehberleri, ekonomi ipuçları ve veri analizleri.", desc_en:"TFTRadar Blog: Set 17 meta guides, economy tips and data analysis."},
@@ -3774,6 +3923,48 @@ function applyRoute(push){
     } catch(e){ /* sandbox/srcdoc gibi ortamlarda pushState engellenebilir — yok say */ }
   }
 }
+function iletisimFormBagla(){
+  const btn = document.getElementById("ilet-gonder");
+  const durum = document.getElementById("ilet-durum");
+  if(!btn || btn.dataset.bagli) return;
+  btn.dataset.bagli = "1";
+  const gecerliEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+  btn.addEventListener("click", async () => {
+    const ad = (document.getElementById("ilet-ad").value || "").trim();
+    const email = (document.getElementById("ilet-email").value || "").trim();
+    const konu = (document.getElementById("ilet-konu").value || "").trim();
+    const mesaj = (document.getElementById("ilet-mesaj").value || "").trim();
+    durum.className = "ilet-durum";
+    if(!ad || !email || !konu || !mesaj){ durum.textContent = t("ilet_eksik"); durum.classList.add("hata"); return; }
+    if(!gecerliEmail(email)){ durum.textContent = t("ilet_email_gecersiz"); durum.classList.add("hata"); return; }
+    btn.disabled = true;
+    const eskiMetin = btn.textContent;
+    btn.textContent = t("ilet_gonderiliyor");
+    durum.textContent = "";
+    try {
+      const r = await fetch("/api/mesaj", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ name: ad, email: email, konu: konu, mesaj: mesaj })
+      });
+      const j = await r.json().catch(() => ({}));
+      if(r.ok && j.ok){
+        durum.textContent = t("ilet_basari"); durum.classList.add("basari");
+        document.getElementById("ilet-ad").value = "";
+        document.getElementById("ilet-email").value = "";
+        document.getElementById("ilet-konu").value = "";
+        document.getElementById("ilet-mesaj").value = "";
+      } else {
+        durum.textContent = t("ilet_hata"); durum.classList.add("hata");
+      }
+    } catch(e){
+      durum.textContent = t("ilet_hata"); durum.classList.add("hata");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = eskiMetin;
+    }
+  });
+}
 function goTab(t, opts){
   opts = opts || {};
   tab = t;
@@ -3787,13 +3978,11 @@ function goTab(t, opts){
   scrollTo(0, 0);
 }
 // Gizli admin paneli rotası — tahmin edilemez URL, hiçbir yerden linklenmez
-const ADMIN_YOL = "/y-kontrol-9f3a2b";
+const ADMIN_YOL = "/yonetim";
 function routeFromURL(push){
   const parts = location.pathname.split("/").filter(Boolean);
-  // Gizli admin paneli VEYA normal giriş sayfası (/giris, /admin)
-  if(location.pathname === ADMIN_YOL || location.pathname === ADMIN_YOL + "/" ||
-     location.pathname === "/giris" || location.pathname === "/giris/" ||
-     location.pathname === "/admin" || location.pathname === "/admin/"){
+  // Yönetim paneli — tek giriş: /yonetim
+  if(location.pathname === ADMIN_YOL || location.pathname === ADMIN_YOL + "/"){
     adminPaneliAc();
     return;
   }
