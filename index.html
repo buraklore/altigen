@@ -154,7 +154,8 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;ba
 /* Sabit banner reklam (görsel) */
 .adbanner-img{display:block;max-width:100%;height:auto;border:1px solid rgba(200,170,110,.3)}
 /* Yan raylar yalnızca yeterince geniş ekranda görünür */
-@media(max-width:1279px){.pagegrid.rails-2,.pagegrid.rails-L,.pagegrid.rails-R{max-width:1280px;grid-template-columns:minmax(0,1fr)}.adrail{display:none}}
+@media(max-width:1599px){.pagegrid.rails-2{max-width:1080px;grid-template-columns:minmax(0,1fr)}.pagegrid.rails-2 .adrail{display:none}}
+@media(max-width:1359px){.pagegrid.rails-L,.pagegrid.rails-R{max-width:1080px;grid-template-columns:minmax(0,1fr)}.adrail{display:none}}
 @media(max-width:640px){.ad-lb{height:60px}.ad-inline{height:auto}}
 
 
@@ -190,7 +191,7 @@ nav{max-width:1280px;margin:0 auto;padding:0 20px 12px;display:flex;gap:6px;flex
 .tooldd:hover .tooldd-menu, .tooldd:focus-within .tooldd-menu{display:flex}
 .tooldd-menu .tab{width:100%;text-align:left;clip-path:none;border-radius:8px}
 .tab:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-main{max-width:1280px;margin:0 auto;padding:26px 20px 60px}
+main{max-width:1820px;margin:0 auto;padding:26px 20px 60px}
 .searchrow{display:flex;gap:12px;align-items:center;margin-bottom:26px;flex-wrap:wrap}
 #q{flex:1;min-width:220px;background:var(--surface);border:1px solid var(--line);border-radius:10px;color:var(--text);font-family:var(--body);font-size:15px;padding:11px 16px}
 #q::placeholder{color:var(--muted)}
