@@ -146,11 +146,11 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;ba
 .addemo-body{text-align:center;padding:8px;color:var(--muted)}
 .addemo-body b{display:block;font-family:var(--disp);color:var(--hextech-gold-bright);font-size:14px;margin-bottom:2px}
 .addemo-body span{font-size:11px}
-.ad-lb{width:100%;max-width:1120px;height:90px}          /* üst leaderboard — içerik genişliğinde */
+.ad-lb{width:100%;max-width:1120px;min-height:90px;height:auto}          /* üst leaderboard — içerik genişliğinde */
 .ad-sky{width:100%;max-width:300px;min-height:600px;height:auto}                        /* geniş gökdelen 160×600 (sol/sağ dikey) */
 .ad-rect{width:300px;height:250px}
-.ad-mobile{width:320px;max-width:100%;height:50px}
-.ad-inline{width:100%;max-width:1120px;height:90px;margin:20px auto}
+.ad-mobile{width:320px;max-width:100%;min-height:50px;height:auto}
+.ad-inline{width:100%;max-width:1120px;min-height:90px;height:auto;margin:20px auto}
 /* Sabit banner reklam (görsel) */
 .adbanner-img{display:block;max-width:100%;height:auto;border:1px solid rgba(200,170,110,.3)}
 /* Yan raylar yalnızca yeterince geniş ekranda görünür */
@@ -1123,7 +1123,7 @@ function reklamYukle(){
 function demoReklam(tip, boyutClass){
   // Yer-tutucu (demo) reklam: alanın nerede olduğunu ve boyutunu gösterir.
   // Gerçek banner veya AdSense ayarlanınca demo yerine o görünür.
-  const etiket = {ust:"Reklam Alanı — 970×90", sol:"Reklam Alanı — 160-300×600", yan:"Reklam Alanı — 160-300×600", ici:"Reklam Alanı — 970×90", mobil:"Reklam"}[tip] || "Reklam";
+  const etiket = {ust:"Üst Banner — 728×90 / 970×90 / 970×250", sol:"Sol Dikey — 160×600 / 300×600", yan:"Sağ Dikey — 160×600 / 300×600", ici:"İçerik-arası — 728×90 / 300×250", mobil:"Mobil — 320×50 / 320×100"}[tip] || "Reklam";
   return `<div class="addemo ${boyutClass}"><span class="addemo-label">reklam</span><div class="addemo-body">${etiket}</div></div>`;
 }
 function bannerReklam(cfg, boyutClass){
