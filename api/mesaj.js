@@ -1,6 +1,6 @@
-// TFTRadar — İletişim mesajları API'si (Vercel Serverless, /api/mesaj)
+// TFTRadar — İletişim mesajları API'si (Vercel Serverless, /api/mesaj) — SUPABASE
 //
-// İki tür istek:
+// İstek türleri:
 //   POST { name, email, konu, mesaj }        → yeni mesaj kaydet (HERKESE AÇIK, hız sınırlı)
 //   POST { sifre, islem:"listele" }          → tüm mesajları getir (ŞİFRE KORUMALI)
 //   POST { sifre, islem:"okundu", id }        → mesajı okundu işaretle (ŞİFRE KORUMALI)
@@ -8,19 +8,24 @@
 //
 // GÜVENLİK:
 // - Yönetim işlemleri (listele/okundu/sil) şifreyi SUNUCU TARAFINDA SHA-256 ile doğrular.
-// - Mesaj gönderme herkese açık ama IP başına hız sınırı ile spam yavaşlatılır + alan uzunlukları sınırlı.
-// - Veritabanı bağlantısı yalnızca Vercel ortam değişkeninde (DATABASE_URL) tutulur.
-// - SQL enjeksiyonu imkânsız: tüm değerler parametreli sorgu (sql tagged template) ile geçer.
+// - Mesaj gönderme herkese açık ama IP başına hız sınırı ile spam yavaşlatılır + alanlar sınırlı.
+// - Supabase service_role anahtarı YALNIZCA sunucu tarafında (env: SUPABASE_SERVICE_KEY) kullanılır;
+//   asla tarayıcıya/koda gömülmez. RLS açık olsa bile service_role tam erişime sahiptir.
 //
-// NOT: Neon'un kendi sürücüsü (@neondatabase/serverless) kullanılır — Vercel'in Neon
-// entegrasyonunun eklediği DATABASE_URL'i (channel_binding parametresi dahil) sorunsuz kullanır.
+// GEREKLİ ORTAM DEĞİŞKENLERİ (Vercel → Settings → Environment Variables):
+//   SUPABASE_URL          = https://xxxx.supabase.co
+//   SUPABASE_SERVICE_KEY  = (service_role secret anahtarı)
 
 const crypto = require("crypto");
-const { neon } = require("@neondatabase/serverless");
+const { createClient } = require("@supabase/supabase-js");
 
-// Bağlantı dizesi: Vercel Neon entegrasyonu bunlardan birini ekler
-const BAGLANTI = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL;
-const sql = neon(BAGLANTI);
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const TABLO = "iletisim_mesajlari";
+
+const db = (SUPABASE_URL && SUPABASE_KEY)
+  ? createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } })
+  : null;
 
 // Şifre hash'i (admin paneliyle aynı; ortam değişkeniyle de geçilebilir)
 const VARSAYILAN_HASH = "751b056252d721a4b502803373ade9228e97d28d3daae14ea5a44a5ba25976cf";
@@ -44,28 +49,10 @@ function sifreDogru(govde){
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-// Tablo yoksa oluştur (ilk çağrıda otomatik kurulur)
-let tabloHazir = false;
-async function tabloyuHazirla(){
-  if (tabloHazir) return;
-  await sql`
-    CREATE TABLE IF NOT EXISTS iletisim_mesajlari (
-      id BIGSERIAL PRIMARY KEY,
-      ad TEXT NOT NULL,
-      email TEXT NOT NULL,
-      konu TEXT NOT NULL,
-      mesaj TEXT NOT NULL,
-      okundu BOOLEAN NOT NULL DEFAULT FALSE,
-      olusturma TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )`;
-  tabloHazir = true;
-}
-
 module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   if (req.method !== "POST") return res.status(405).send(JSON.stringify({ hata: "Yalnızca POST" }));
-
-  if (!BAGLANTI) return res.status(500).send(JSON.stringify({ hata: "Veritabanı bağlantı dizesi bulunamadı (DATABASE_URL yok)" }));
+  if (!db) return res.status(500).send(JSON.stringify({ hata: "Supabase yapılandırılmamış (SUPABASE_URL / SUPABASE_SERVICE_KEY env eksik)" }));
 
   let govde = req.body;
   if (typeof govde === "string") { try { govde = JSON.parse(govde); } catch(e){ govde = {}; } }
@@ -74,8 +61,6 @@ module.exports = async (req, res) => {
   const ip = (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "bilinmiyor";
 
   try {
-    await tabloyuHazirla();
-
     const islem = String(govde.islem || "");
 
     // ── YÖNETİM İŞLEMLERİ (şifre korumalı) ──
@@ -83,21 +68,26 @@ module.exports = async (req, res) => {
       if (!sifreDogru(govde)) return res.status(401).send(JSON.stringify({ hata: "Yetkisiz" }));
 
       if (islem === "listele") {
-        const rows = await sql`
-          SELECT id, ad, email, konu, mesaj, okundu, olusturma
-          FROM iletisim_mesajlari ORDER BY olusturma DESC LIMIT 500`;
-        return res.status(200).send(JSON.stringify({ ok: true, mesajlar: rows }));
+        const { data, error } = await db
+          .from(TABLO)
+          .select("id, ad, email, konu, mesaj, okundu, olusturma")
+          .order("olusturma", { ascending: false })
+          .limit(500);
+        if (error) throw error;
+        return res.status(200).send(JSON.stringify({ ok: true, mesajlar: data || [] }));
       }
 
       const id = parseInt(govde.id, 10);
       if (!id || id < 1) return res.status(400).send(JSON.stringify({ hata: "Geçersiz id" }));
 
       if (islem === "okundu") {
-        await sql`UPDATE iletisim_mesajlari SET okundu = TRUE WHERE id = ${id}`;
+        const { error } = await db.from(TABLO).update({ okundu: true }).eq("id", id);
+        if (error) throw error;
         return res.status(200).send(JSON.stringify({ ok: true }));
       }
       if (islem === "sil") {
-        await sql`DELETE FROM iletisim_mesajlari WHERE id = ${id}`;
+        const { error } = await db.from(TABLO).delete().eq("id", id);
+        if (error) throw error;
         return res.status(200).send(JSON.stringify({ ok: true }));
       }
     }
@@ -114,9 +104,8 @@ module.exports = async (req, res) => {
     if (!ad || !email || !konu || !mesaj) return res.status(400).send(JSON.stringify({ hata: "Tüm alanlar zorunlu" }));
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).send(JSON.stringify({ hata: "Geçersiz e-posta" }));
 
-    await sql`
-      INSERT INTO iletisim_mesajlari (ad, email, konu, mesaj)
-      VALUES (${ad}, ${email}, ${konu}, ${mesaj})`;
+    const { error } = await db.from(TABLO).insert({ ad, email, konu, mesaj });
+    if (error) throw error;
 
     return res.status(200).send(JSON.stringify({ ok: true, success: true }));
   } catch (e) {
