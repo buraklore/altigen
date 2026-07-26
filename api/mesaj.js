@@ -9,11 +9,18 @@
 // GÜVENLİK:
 // - Yönetim işlemleri (listele/okundu/sil) şifreyi SUNUCU TARAFINDA SHA-256 ile doğrular.
 // - Mesaj gönderme herkese açık ama IP başına hız sınırı ile spam yavaşlatılır + alan uzunlukları sınırlı.
-// - Veritabanı bağlantısı yalnızca Vercel ortam değişkeninde (POSTGRES_URL) tutulur.
+// - Veritabanı bağlantısı yalnızca Vercel ortam değişkeninde (DATABASE_URL) tutulur.
 // - SQL enjeksiyonu imkânsız: tüm değerler parametreli sorgu (sql tagged template) ile geçer.
+//
+// NOT: Neon'un kendi sürücüsü (@neondatabase/serverless) kullanılır — Vercel'in Neon
+// entegrasyonunun eklediği DATABASE_URL'i (channel_binding parametresi dahil) sorunsuz kullanır.
 
 const crypto = require("crypto");
-const { sql } = require("@vercel/postgres");
+const { neon } = require("@neondatabase/serverless");
+
+// Bağlantı dizesi: Vercel Neon entegrasyonu bunlardan birini ekler
+const BAGLANTI = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL;
+const sql = neon(BAGLANTI);
 
 // Şifre hash'i (admin paneliyle aynı; ortam değişkeniyle de geçilebilir)
 const VARSAYILAN_HASH = "751b056252d721a4b502803373ade9228e97d28d3daae14ea5a44a5ba25976cf";
@@ -58,6 +65,8 @@ module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   if (req.method !== "POST") return res.status(405).send(JSON.stringify({ hata: "Yalnızca POST" }));
 
+  if (!BAGLANTI) return res.status(500).send(JSON.stringify({ hata: "Veritabanı bağlantı dizesi bulunamadı (DATABASE_URL yok)" }));
+
   let govde = req.body;
   if (typeof govde === "string") { try { govde = JSON.parse(govde); } catch(e){ govde = {}; } }
   govde = govde || {};
@@ -74,7 +83,7 @@ module.exports = async (req, res) => {
       if (!sifreDogru(govde)) return res.status(401).send(JSON.stringify({ hata: "Yetkisiz" }));
 
       if (islem === "listele") {
-        const { rows } = await sql`
+        const rows = await sql`
           SELECT id, ad, email, konu, mesaj, okundu, olusturma
           FROM iletisim_mesajlari ORDER BY olusturma DESC LIMIT 500`;
         return res.status(200).send(JSON.stringify({ ok: true, mesajlar: rows }));
