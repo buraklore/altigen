@@ -26,11 +26,26 @@ async function riot(host, path, key) {
   return r.json();
 }
 
+// IP başına hız sınırı — Riot API kotasını kötüye kullanıma karşı korur.
+// Her istek birden çok Riot çağrısı yaptığı için sınır düşük tutulur.
+const RL_PENCERE_MS = 60_000, RL_LIMIT = 20;
+const rlKova = new Map();
+function rlAsildi(ip){
+  const now = Date.now();
+  const dizi = (rlKova.get(ip) || []).filter(t => now - t < RL_PENCERE_MS);
+  dizi.push(now); rlKova.set(ip, dizi);
+  if (rlKova.size > 5000) for (const [k, v] of rlKova) if (!v.length || now - v[v.length-1] > RL_PENCERE_MS) rlKova.delete(k);
+  return dizi.length > RL_LIMIT;
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Cache-Control', 's-maxage=45, stale-while-revalidate=90');
   if (req.method === 'OPTIONS') return res.status(204).end();
+
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'bilinmiyor';
+  if (rlAsildi(ip)) return res.status(429).json({ hata: 'Çok fazla istek. Lütfen biraz bekleyin.' });
 
   const key = process.env.RIOT_API_KEY;
   if (!key) return res.status(500).json({ hata: 'RIOT_API_KEY tanimli degil (Vercel ortam degiskeni).' });
