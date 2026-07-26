@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.4"
+    "@supabase/supabase-js": "^2.45.0"
   }
 }
