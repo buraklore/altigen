@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /y-
+Disallow: /yonetim
 Sitemap: https://tftradar.com/sitemap.xml
