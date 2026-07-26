@@ -3846,13 +3846,14 @@ function uygulaSeoEk(){
       const m = document.querySelector(sel); if(m) m.setAttribute("content", s.ogGorsel);
     });
   }
-  if(s.gaId && !gaYuklendi && /^G-[A-Z0-9]+$/i.test(s.gaId)){
+  const gaKimlik = (s.gaId && String(s.gaId).trim()) || (REKLAM_VARSAYILAN.seo && REKLAM_VARSAYILAN.seo.gaId) || "";
+  if(gaKimlik && !gaYuklendi && /^G-[A-Z0-9]+$/i.test(gaKimlik)){
     gaYuklendi = true;
     const g1 = document.createElement("script");
-    g1.async = true; g1.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(s.gaId);
+    g1.async = true; g1.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(gaKimlik);
     document.head.appendChild(g1);
     const g2 = document.createElement("script");
-    g2.textContent = "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','" + s.gaId.replace(/[^A-Za-z0-9-]/g,"") + "');";
+    g2.textContent = "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','" + gaKimlik.replace(/[^A-Za-z0-9-]/g,"") + "');";
     document.head.appendChild(g2);
   }
   if(s.gscKod && !gscYuklendi){
