@@ -15,7 +15,7 @@
 const crypto = require("crypto");
 
 // Şifre hash'i (istemcidekiyle aynı; ortam değişkeniyle da geçilebilir)
-const VARSAYILAN_HASH = "751b056252d721a4b502803373ade9228e97d28d3daae14ea5a44a5ba25976cf";
+const VARSAYILAN_HASH = "fbe0895bc886090ef519ebc96a3f459e94b329c2cd3aa2f8eeb7351682052530";
 
 // Basit bellek-içi hız sınırı
 const PENCERE_MS = 60_000, LIMIT = 15;
