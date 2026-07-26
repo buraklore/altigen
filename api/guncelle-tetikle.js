@@ -3,40 +3,63 @@
 // butonuna basılınca veri toplayıcıyı (GitHub Actions) tetikler.
 //
 // KURULUM: Bu dosyayı reponuza  api/guncelle-tetikle.js  olarak ekleyin.
-// (Mevcut api/reklam-kaydet.js ile aynı klasör.)
+//
+// GÜVENLİK:
+// - Şifre SUNUCU TARAFINDA SHA-256 + sabit zamanlı karşılaştırma ile doğrulanır.
+// - IP başına hız sınırı ile kaba kuvvet yavaşlatılır.
+// - GitHub token yalnızca ortam değişkeninde tutulur.
 // ============================================================
 
-export default async function handler(req, res) {
+const crypto = require("crypto");
+
+// Admin panelindeki ADMIN_HASH ile AYNI (index.html). Ortam değişkeniyle de geçilebilir.
+const VARSAYILAN_HASH = "fbe0895bc886090ef519ebc96a3f459e94b329c2cd3aa2f8eeb7351682052530";
+
+const PENCERE_MS = 60_000, LIMIT = 10;
+const kova = new Map();
+function hizSiniriAsildi(ip){
+  const now = Date.now();
+  const dizi = (kova.get(ip) || []).filter(t => now - t < PENCERE_MS);
+  dizi.push(now); kova.set(ip, dizi);
+  if (kova.size > 5000) for (const [k, v] of kova) if (!v.length || now - v[v.length-1] > PENCERE_MS) kova.delete(k);
+  return dizi.length > LIMIT;
+}
+
+function sifreDogru(sifre){
+  const beklenen = process.env.ADMIN_HASH || VARSAYILAN_HASH;
+  const hash = crypto.createHash("sha256").update(String(sifre || ""), "utf8").digest("hex");
+  const a = Buffer.from(hash), b = Buffer.from(beklenen);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, hata: "Yalnızca POST" });
   }
 
-  // Gövdeyi oku
+  const ip = (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "bilinmiyor";
+  if (hizSiniriAsildi(ip)) {
+    return res.status(429).json({ ok: false, hata: "Çok fazla istek. Lütfen biraz bekleyin." });
+  }
+
   let body = req.body;
   if (typeof body === "string") {
     try { body = JSON.parse(body); } catch { body = {}; }
   }
   const sifre = body && body.sifre;
 
-  // --- Şifre doğrulaması ---
-  // ÖNEMLİ: Burada, mevcut api/reklam-kaydet.js dosyanızın kullandığı
-  // ŞİFRE ortam değişkeninin AYNISINI kullanın. (Genelde ADMIN_SIFRE.)
-  // reklam-kaydet.js'i açıp hangi env adını okuduğuna bakın ve buraya yazın.
-  const ADMIN = process.env.ADMIN_SIFRE || process.env.PANEL_SIFRE || process.env.ADMIN_PASSWORD;
-  if (!ADMIN || sifre !== ADMIN) {
+  if (!sifreDogru(sifre)) {
     return res.status(401).json({ ok: false, hata: "Yetkisiz" });
   }
 
-  // --- GitHub token ---
   const token = process.env.GITHUB_TOKEN;
   if (!token) {
     return res.status(503).json({ ok: false, hata: "GITHUB_TOKEN eksik" });
   }
 
-  // === Kendi reponuza göre ayarlayın ===
-  const OWNER = "buraklore";        // GitHub kullanıcı adınız
-  const REPO = "altigen";           // repo adı
-  const WORKFLOW = "guncelle.yml";  // .github/workflows/ içindeki dosya adı
+  const OWNER = "buraklore";
+  const REPO = "altigen";
+  const WORKFLOW = "guncelle.yml";
   const BRANCH = "main";
 
   try {
@@ -55,7 +78,6 @@ export default async function handler(req, res) {
       }
     );
 
-    // GitHub başarılı tetiklemede 204 döndürür
     if (gh.status === 204) {
       return res.status(200).json({ ok: true });
     }
@@ -64,4 +86,4 @@ export default async function handler(req, res) {
   } catch (e) {
     return res.status(500).json({ ok: false, hata: String(e).slice(0, 200) });
   }
-}
+};
