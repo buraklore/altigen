@@ -146,11 +146,11 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;ba
 .addemo-body{text-align:center;padding:8px;color:var(--muted)}
 .addemo-body b{display:block;font-family:var(--disp);color:var(--hextech-gold-bright);font-size:14px;margin-bottom:2px}
 .addemo-body span{font-size:11px}
-.ad-lb{width:100%;max-width:970px;height:90px}          /* üst leaderboard — içerik genişliğinde */
+.ad-lb{width:100%;max-width:1120px;height:90px}          /* üst leaderboard — içerik genişliğinde */
 .ad-sky{width:160px;height:600px}                        /* geniş gökdelen 160×600 (sol/sağ dikey) */
 .ad-rect{width:300px;height:250px}
 .ad-mobile{width:320px;max-width:100%;height:50px}
-.ad-inline{width:100%;max-width:970px;height:90px;margin:20px auto}
+.ad-inline{width:100%;max-width:1120px;height:90px;margin:20px auto}
 /* Sabit banner reklam (görsel) */
 .adbanner-img{display:block;max-width:100%;height:auto;border:1px solid rgba(200,170,110,.3)}
 /* Yan raylar yalnızca yeterince geniş ekranda görünür */
@@ -1121,9 +1121,10 @@ function reklamYukle(){
 }
 
 function demoReklam(tip, boyutClass){
-  // Canlı sitede demo/yer-tutucu reklam GÖSTERİLMEZ (UI'ı bozuyordu). Yalnızca gerçek
-  // banner veya AdSense reklamı ayarlandığında reklam görünür; aksi hâlde alan gizli kalır.
-  return "";
+  // Yer-tutucu (demo) reklam: alanın nerede olduğunu ve boyutunu gösterir.
+  // Gerçek banner veya AdSense ayarlanınca demo yerine o görünür.
+  const etiket = {ust:"Reklam Alanı — 970×90", sol:"Reklam", yan:"Reklam", ici:"Reklam Alanı — 970×90", mobil:"Reklam"}[tip] || "Reklam";
+  return `<div class="addemo ${boyutClass}"><span class="addemo-label">reklam</span><div class="addemo-body">${etiket}</div></div>`;
 }
 function bannerReklam(cfg, boyutClass){
   if(!cfg || !cfg.gorsel) return "";
@@ -2341,7 +2342,7 @@ let openComp = -1, styleFilter = "Tümü", leagueSel = "CHALLENGER";
 let azVeriGoster = false;   // varsayilan: az orneklemli komplar gizli (tactics.tools gibi)
 let compSort = "avg";      // avg | play | top4 | win
 let itemCat = "craft", augRar = "Gümüş", openAI = -1, openPost = -1;
-const LGL = {CHALLENGER:"Challenger", GRANDMASTER:"Grandmaster", MASTER:"Master",
+const LGL = {CHALLENGER:"Şampiyon", GRANDMASTER:"Büyük Usta", MASTER:"Usta",
              DIAMOND:"Elmas", EMERALD:"Zümrüt", PLATINUM:"Platin"};
 function compMatches(c, f){
   const names = [c.name, c.style,
